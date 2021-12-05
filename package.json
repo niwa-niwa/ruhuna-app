@@ -2,11 +2,18 @@
   "name": "ruhuna-app",
   "private": true,
   "scripts": {
+    "start": "npx dotenv -e .env -- node dist/server.js",
+    "build": "npm run build:next && npm run build:server",
     "dev": "ts-node --project tsconfig.server.json server.ts",
-    "build": "next build && tsc --project tsconfig.server.json",
     "build:next": "next build",
     "build:server": "tsc --project tsconfig.server.json",
-    "start": "NODE_ENV=production node dist/server.js"
+    "test": "npm run reset@test && npx dotenv -e .env.test -e .env.dev -- jest --runInBand --watch",
+    "reset@dev": "npx dotenv -e .env.dev -- prisma migrate reset",
+    "reset@test": "npx dotenv -e .env.test -- prisma migrate reset --force --skip-seed",
+    "migrate@dev": "npx dotenv -e .env.dev -- npx prisma migrate dev",
+    "migrate@test": "npx dotenv -e .env.test -- npx prisma migrate dev ",
+    "migration@dev": "npx dotenv -e .env.dev -- prisma migrate dev --create-only",
+    "migration@test": "npx dotenv -e .env.test -- prisma migrate dev --create-only"
   },
   "dependencies": {
     "@prisma/client": "^3.4.2",
