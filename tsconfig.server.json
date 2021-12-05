@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./api",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "noEmit": false
+  },
+  "include": ["./server.ts", "./api/**/*.ts", "./api/**/*.js"]
+}
