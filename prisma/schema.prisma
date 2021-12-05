@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @unique @default(uuid())
+  firebaseId  String    @unique
+  isAdmin     Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  isAnonymous Boolean   @default(false)
+  username    String    @unique @db.VarChar(64)
+  messages    Message[]
+  villages    Village[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  @@index([id, firebaseId, username])
+}
+
+model Village {
+  id          String    @id @unique @default(uuid())
+  name        String    @unique @db.VarChar(64)
+  description String    @db.VarChar(255)
+  users       User[]
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  @@index([id])
+}
+
+model Message {
+  id          String    @id @unique @default(uuid())
+  content     String
+  villageId   String
+  userId      String
+  village     Village   @relation(fields: [villageId], references:[id])
+  user        User      @relation(fields: [userId], references:[id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  @@index([id, villageId, userId])
+}
