@@ -4,7 +4,7 @@
     "baseUrl": "./api",
     "module": "commonjs",
     "outDir": "./dist",
-    "noEmit": false
+    "sourceMap": true
   },
   "include": ["./server.ts", "./api/**/*.ts", "./api/**/*.js"]
 }
