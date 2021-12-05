@@ -1,6 +1,8 @@
-import { prismaClient } from "../../src/lib/Prisma";
+import { prismaClient } from "../../api/lib/Prisma";
 
-export default async () => {
+async function teardown() {
   await prismaClient.$disconnect();
   console.log("TEST END");
-};
+}
+
+export default teardown;

@@ -1,7 +1,7 @@
-import { prismaClient } from "../../src/lib/Prisma";
+import { prismaClient } from "../../api/lib/Prisma";
 import { firebase_user, auth_user } from "./testData";
-import { generateErrorObj } from "../../src/lib/generateErrorObj";
-import { users, villages } from "../../Prisma/seeds/users";
+import { generateErrorObj } from "../../api/lib/generateErrorObj";
+import { users, villages } from "../../prisma/seeds/users";
 import { tokens } from "./testData";
 
 beforeEach(async () => {
@@ -18,7 +18,7 @@ afterEach(async () => {
   await prismaClient.$disconnect();
 });
 
-jest.mock("../../src/lib/FirebaseAdmin", () => ({
+jest.mock("../../api/lib/FirebaseAdmin", () => ({
   verifyToken: (token: string) => {
     if (token == tokens.auth_user) {
       return auth_user;
