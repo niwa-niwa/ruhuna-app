@@ -1,8 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./api",
-    "module": "commonjs",
     "outDir": "./dist",
     "sourceMap": true
   },
