@@ -1,9 +1,10 @@
-import "dotenv/config";
+require("dotenv").config();
+
 import express, { Request, Response } from "express";
-import { apiRouter } from "./api/routers/";
+import { apiRouter } from "./api/routers";
 import next from "next";
 
-const dev = process.env.NODE_ENV !== "production";
+const dev = process.env.NODE_ENV !== "development";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 const port = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ async function main() {
     server.listen(port, (err?: any) => {
       if (err) throw err;
       console.log(
-        `> Ready on http://localhost:${port} - env ${process.env.NODE_ENV}`
+        `> Start on http://localhost:${port} - env ${process.env.NODE_ENV}`
       );
     });
   } catch (e) {

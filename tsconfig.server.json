@@ -4,5 +4,5 @@
     "outDir": "./dist",
     "sourceMap": true
   },
-  "include": ["./server.ts", "./api/**/*.ts", "./api/**/*.js"]
+  "include": ["./server.ts", "./api/**/*.ts"]
 }
