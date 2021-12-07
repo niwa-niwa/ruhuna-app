@@ -1,43 +1,22 @@
-import firebase from "firebase/compat/app";
-import { FirebaseApp, initializeApp } from "firebase/app";
+import "../../lib/firebaseApp";
 import {
   Auth,
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-} from "firebase/auth";
-import "firebase/compat/auth";
-import {
+  onAuthStateChanged,
   GoogleAuthProvider,
   User,
   UserCredential,
   signInWithPopup,
+  signInAnonymously,
+  signOut,
 } from "firebase/auth";
-import {
-  FirebaseAuth,
-  FirebaseAdmin,
-  firebaseApp,
-} from "../../api/lib/FirebaseAdmin";
 
-const firebaseConfig: object = {
-  // apiKey: process.env.REACT_APP_API_KEY,
-  // authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-  // projectId: process.env.REACT_APP_PROJECT_ID,
-  // storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-  // messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-  // appId: process.env.REACT_APP_APP_ID,
-  apiKey: "AIzaSyBrNDhrkQQSdmDwwVLEj0r_qNPOtEmS5fM",
-  authDomain: "ruhuna-dev.firebaseapp.com",
-  projectId: "ruhuna-dev",
-  storageBucket: "ruhuna-dev.appspot.com",
-  messagingSenderId: "223450110392",
-  appId: "1:223450110392:web:32cfe5e3de951758fb174d",
-  measurementId: "G-KZ9WW7EM6Y",
-};
-// const app = initializeApp(firebaseConfig);
-const app = FirebaseAdmin.app();
-const auth = getAuth(firebaseApp);
-// TODO firebase auth doesn't work
+const auth: Auth = getAuth();
+onAuthStateChanged(auth, (user) => {
+  console.log(user);
+});
 
 const email_login_info = {
   email: "pass_mail39-fake@yahoo.co.jp",
@@ -62,7 +41,7 @@ export default function TestAuth() {
                 console.log("credential is null");
               }
               // The signed-in user info.
-              const user = result.user;
+              const user: User = result.user;
               console.log("user = ", user);
               // ...
             })
@@ -74,7 +53,6 @@ export default function TestAuth() {
               const email = error.email;
               // The AuthCredential type that was used.
               const credential = GoogleAuthProvider.credentialFromError(error);
-              // ...
               console.error(errorCode, errorMessage, email);
             });
         }}
@@ -86,7 +64,17 @@ export default function TestAuth() {
       {/* anonymously */}
       <button
         onClick={() => {
-          firebase.auth().signInAnonymously();
+          signInAnonymously(auth)
+            .then(() => {
+              onAuthStateChanged(auth, (user: User | null) => {
+                console.log(user);
+              });
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.error(errorCode, errorMessage);
+            });
         }}
       >
         Sign In Anonymously
@@ -98,14 +86,19 @@ export default function TestAuth() {
       {/* E-Mail Sign up */}
       <button
         onClick={async () => {
-          const auth: any = getAuth();
           createUserWithEmailAndPassword(
             auth,
-            email_login_info.email || "",
-            email_login_info.password || ""
-          ).then((userCredential) => {
-            console.log(userCredential);
-          });
+            email_login_info.email,
+            email_login_info.password
+          )
+            .then((userCredential: UserCredential) => {
+              console.log(userCredential);
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.error(errorCode, errorMessage);
+            });
         }}
       >
         Sign In with Mail
@@ -115,12 +108,19 @@ export default function TestAuth() {
       {/* E-Mail Sign in */}
       <button
         onClick={() => {
-          const auth: any = getAuth();
           signInWithEmailAndPassword(
             auth,
-            email_login_info.email || "",
-            email_login_info.password || ""
-          );
+            email_login_info.email,
+            email_login_info.password
+          )
+            .then((userCredential: UserCredential) => {
+              console.log(userCredential);
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.error(errorCode, errorMessage);
+            });
         }}
       >
         Log In with Mail
@@ -132,7 +132,7 @@ export default function TestAuth() {
       {/* Sign out */}
       <button
         onClick={() => {
-          firebase.auth().signOut();
+          signOut(auth);
         }}
       >
         Sign Out

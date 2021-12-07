@@ -18,7 +18,7 @@ afterEach(async () => {
   await prismaClient.$disconnect();
 });
 
-jest.mock("../../api/lib/FirebaseAdmin", () => ({
+jest.mock("../../api/lib/firebaseAdmin", () => ({
   verifyToken: (token: string) => {
     if (token == tokens.auth_user) {
       return auth_user;

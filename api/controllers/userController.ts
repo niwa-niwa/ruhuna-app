@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { verifyToken } from "../lib/FirebaseAdmin";
+import { verifyToken } from "../lib/firebaseAdmin";
 import { Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../lib/Prisma";
