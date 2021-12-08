@@ -1,9 +1,9 @@
 import request from "supertest";
-import server from "../../test_config/server";
+import { api } from "../../../api";
 
 describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {
-    const res = await request(server)
+    const res = await request(api)
       .get("/api/v1/auth")
       .set("Authorization", "Bearer token_auth_user");
 
@@ -20,7 +20,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   });
 
   test("it should be fail by firebase API", async () => {
-    const res = await request(server).get("/api/v1/auth");
+    const res = await request(api).get("/api/v1/auth");
 
     expect(res.status).toBe(400);
     expect(res.body.errorObj.errorCode).toBe(400);
@@ -28,7 +28,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   });
 
   test("it should be fail by Prisma API", async () => {
-    const res = await request(server)
+    const res = await request(api)
       .get("/api/v1/auth")
       .set("Authorization", "Bearer 123450");
 

@@ -1,13 +1,13 @@
 require("dotenv").config();
 
-import express, { Request, Response } from "express";
-import { apiRouter } from "./api/routers";
 import next from "next";
+import express, { Request, Response } from "express";
+import { api } from "./api";
 
 const dev = process.env.NODE_ENV !== "production";
+const port = process.env.PORT || 3000;
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const port = process.env.PORT || 3000;
 
 async function main() {
   try {
@@ -15,7 +15,7 @@ async function main() {
 
     const server = express();
 
-    server.use("/api", apiRouter);
+    server.use(api);
 
     server.all("*", (req: Request, res: Response) => {
       return handle(req, res);

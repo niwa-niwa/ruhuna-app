@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { Prisma, Village } from "@prisma/client";
-import { prismaClient } from "../lib/Prisma";
+import { prismaClient } from "../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../lib/generateErrorObj";
 

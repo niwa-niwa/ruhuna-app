@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { verifyToken } from "../lib/firebaseAdmin";
 import { Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { prismaClient } from "../lib/Prisma";
+import { prismaClient } from "../lib/prismaClient";
 import { generateErrorObj } from "../lib/generateErrorObj";
 import { ErrorObj } from "../types/ErrorObj";
 

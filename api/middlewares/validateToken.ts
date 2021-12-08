@@ -1,6 +1,6 @@
 import { CustomRequest } from "../types/CustomRequest";
 import { Response, NextFunction } from "express";
-import { prismaClient } from "../lib/Prisma";
+import { prismaClient } from "../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User } from "@prisma/client";
 import { ErrorObj } from "../types/ErrorObj";

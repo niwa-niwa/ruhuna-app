@@ -1,12 +1,12 @@
 import request from "supertest";
-import server from "../../test_config/server";
+import { api } from "../../../api";
 import { tokens } from "../../test_config/testData";
 
 export const PREFIX_VILLAGES = "/api/v1/villages";
 
 describe("/api/v1/villages TEST villageController ", () => {
   test("GET /api/v1/villages/ get villages", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .get(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
@@ -21,11 +21,11 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("GET /api/v1/villages/:villageId getVillageDetail", async () => {
-    const res = await request(server)
+    const res = await request(api)
       .get(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .get(PREFIX_VILLAGES + "/" + res.body.villages[0].id)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
@@ -39,7 +39,7 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("GET /api/v1/villages/:villageId getVillageDetail error handling that the village is not found", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .get(PREFIX_VILLAGES + "/" + "aaa")
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
@@ -52,7 +52,7 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("POST /api/v1/villages/create Create a village", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .post(PREFIX_VILLAGES + "/create")
       .set("Authorization", `Bearer ${tokens.auth_user}`)
       .send({ name: "HellO", description: "村の説明" });
@@ -67,7 +67,7 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("POST /api/v1/villages/create Create a village error handling bad request", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .post(PREFIX_VILLAGES + "/create")
       .set("Authorization", `Bearer ${tokens.auth_user}`)
       .send({ description: "村の説明2" });
@@ -81,15 +81,15 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("edit a village data", async () => {
-    const res_users = await request(server)
+    const res_users = await request(api)
       .get("/api/v1/users")
       .set("Authorization", `Bearer ${tokens.firebase_user}`);
 
-    const res = await request(server)
+    const res = await request(api)
       .get(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .put(PREFIX_VILLAGES + "/edit/" + res.body.villages[0].id)
       .set("Authorization", `Bearer ${tokens.auth_user}`)
       .send({
@@ -108,7 +108,7 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("edit a village data error handling ", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .put(PREFIX_VILLAGES + "/edit/" + "aaaaa")
       .set("Authorization", `Bearer ${tokens.auth_user}`)
       .send({
@@ -126,15 +126,15 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("delete a village", async () => {
-    const res = await request(server)
+    const res = await request(api)
       .get(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .delete(PREFIX_VILLAGES + "/delete/" + res.body.villages[0].id)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
-    const after_res = await request(server)
+    const after_res = await request(api)
       .get(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
@@ -144,7 +144,7 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("delete a village : Error handling", async () => {
-    const { status, body } = await request(server)
+    const { status, body } = await request(api)
       .delete(PREFIX_VILLAGES + "/delete/" + "aaaa")
       .set("Authorization", `Bearer ${tokens.auth_user}`);
 
