@@ -9,6 +9,7 @@ const v1: Router = express.Router();
 
 v1.use("/auth", validateToken, express.Router().get("/", authController.auth));
 
+// TODO insert validateToken after implementing test case
 v1.use(
   "/users",
   express

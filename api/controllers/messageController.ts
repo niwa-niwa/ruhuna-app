@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { Prisma, Village } from "@prisma/client";
+import { Message, prisma, Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../lib/generateErrorObj";
@@ -13,7 +13,19 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
 };
 
 export const createMessage = async (req: CustomRequest, res: Response) => {
-  res.status(200).json("from createMessage");
+  const { content, userId, villageId }: Prisma.MessageCreateManyInput =
+    req.body;
+
+  try {
+    const message: Message = await prismaClient.message.create({
+      data: { content, userId, villageId },
+      include: { user: true, village: true },
+    });
+
+    res.status(200).json({ message });
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 export const editMessage = async (req: CustomRequest, res: Response) => {
