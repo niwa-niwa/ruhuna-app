@@ -8,6 +8,7 @@
     "build:next": "next build",
     "build:server": "tsc --project tsconfig.server.json",
     "test": "npm run reset@test && dotenv -e .env.test -e .env -- jest --runInBand --watch",
+    "test@clear": "dotenv -e .env.test -e .env -- jest --clearCache",
     "reset@dev": "dotenv -e .env -- npx prisma migrate reset",
     "reset@test": "dotenv -e .env.test -- npx prisma migrate reset --force --skip-seed",
     "migrate@dev": "dotenv -e .env -- npx prisma migrate dev",
