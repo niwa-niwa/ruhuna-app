@@ -1,7 +1,7 @@
 import { prismaClient } from "../../api/lib/prismaClient";
 import { firebase_user, auth_user } from "./testData";
 import { generateErrorObj } from "../../api/lib/generateErrorObj";
-import { users, villages } from "../../prisma/seeds/users";
+import { users, villages } from "../../prisma/seeds";
 import { tokens } from "./testData";
 
 beforeEach(async () => {
