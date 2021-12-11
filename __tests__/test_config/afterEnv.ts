@@ -3,10 +3,12 @@ import { firebase_user, auth_user } from "./testData";
 import { generateErrorObj } from "../../api/lib/generateErrorObj";
 import { users, villages } from "../../prisma/seeds";
 import { tokens } from "./testData";
+import { seedMessages } from "./testSeeds";
 
 beforeEach(async () => {
   await prismaClient.user.createMany({ data: users });
   await prismaClient.village.createMany({ data: villages });
+  await seedMessages();
   await prismaClient.$disconnect();
 });
 
