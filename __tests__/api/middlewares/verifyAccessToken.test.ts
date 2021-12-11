@@ -5,7 +5,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {
     const res = await request(api)
       .get("/api/v1/auth")
-      .set("Authorization", "Bearer token_auth_user");
+      .set("Authorization", "Bearer token_admin_user");
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("currentUser");

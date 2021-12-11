@@ -2,18 +2,22 @@ export const users = [
   {
     firebaseId: "firebaseId_A",
     username: "User_A",
+    isAdmin: true,
   },
   {
     firebaseId: "firebaseId_B",
     username: "User_B",
+    isAdmin: false,
   },
   {
     firebaseId: "firebaseId_C",
     username: "User_C",
+    isAnonymous: true,
   },
   {
     firebaseId: "firebaseId_D",
     username: "User_D",
+    isActive: false,
   },
   {
     firebaseId: "firebaseId_E",
@@ -23,23 +27,23 @@ export const users = [
 
 export const villages = [
   {
-    name: "village_test_A",
-    description: "desc_village_test_A",
+    name: "village_A",
+    description: "desc_village_A",
   },
   {
-    name: "village_test_B",
-    description: "desc_village_test_B",
+    name: "village_B",
+    description: "desc_village_B",
   },
   {
-    name: "village_test_C",
-    description: "desc_village_test_C",
+    name: "village_C",
+    description: "desc_village_C",
   },
   {
-    name: "village_test_D",
-    description: "desc_village_test_D",
+    name: "village_D",
+    description: "desc_village_D",
   },
   {
-    name: "village_test_E",
-    description: "desc_village_test_E",
+    name: "village_E",
+    description: "desc_village_E",
   },
 ];
