@@ -22,13 +22,13 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  @@index([id, firebaseId, username])
+  @@index([id, firebaseId])
 }
 
 model Village {
   id          String    @id @unique @default(uuid())
   name        String    @unique @db.VarChar(64)
-  description String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
   users       User[]
   messages    Message[]
   createdAt   DateTime  @default(now())
