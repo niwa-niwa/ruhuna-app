@@ -8,22 +8,6 @@ import { tokens } from "./../../test_config/testData";
 const PREFIX_MESSAGES = "/api/v1/messages";
 
 describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
-  test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {
-    const { status, body } = await request(api)
-      .get(PREFIX_MESSAGES)
-      .set("Authorization", `Bearer ${tokens.auth_user}`);
-
-    expect(status).toBe(200);
-  });
-
-  test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail`, async () => {
-    const { status, body } = await request(api)
-      .get(PREFIX_MESSAGES + "/" + "mesID")
-      .set("Authorization", `Bearer ${tokens.auth_user}`);
-
-    expect(status).toBe(200);
-  });
-
   test(`POST ${PREFIX_MESSAGES}/create createMessage`, async () => {
     const users: User[] = await prismaClient.user.findMany();
     const user: User = users[0];
@@ -64,6 +48,27 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(body.message.content).toBe(the_content);
     expect(body.message.villageId).toBe(village.id);
     expect(body.message.userId).toBe(user.id);
+  });
+
+  test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {
+    const { status, body } = await request(api)
+      .get(PREFIX_MESSAGES)
+      .set("Authorization", `Bearer ${tokens.auth_user}`);
+
+    expect(status).toBe(200);
+    expect(body).toHaveProperty("messages");
+    expect(body.messages[0]).toHaveProperty("id");
+    expect(body.messages[0]).toHaveProperty("content");
+    expect(body.messages[0]).toHaveProperty("user");
+    expect(body.messages[0]).toHaveProperty("village");
+  });
+
+  test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail`, async () => {
+    const { status, body } = await request(api)
+      .get(PREFIX_MESSAGES + "/" + "mesID")
+      .set("Authorization", `Bearer ${tokens.auth_user}`);
+
+    expect(status).toBe(200);
   });
 
   test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage`, async () => {

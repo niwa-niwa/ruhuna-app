@@ -5,7 +5,11 @@ import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../lib/generateErrorObj";
 
 export const getMessages = async (req: CustomRequest, res: Response) => {
-  res.status(200).json("from getMessage");
+  const messages: Message[] = await prismaClient.message.findMany({
+    include: { user: true, village: true },
+  });
+  console.log(messages);
+  res.status(200).json({ messages });
 };
 
 export const getMessageDetail = async (req: CustomRequest, res: Response) => {
