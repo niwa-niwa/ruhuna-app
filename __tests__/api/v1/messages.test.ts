@@ -46,12 +46,24 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       },
       include: { user: true, village: true },
     });
+
+    /**
+     * compare between db data and response data
+     */
     if (the_message) {
       expect(body.message.id).toBe(the_message.id);
+      expect(body.message.content).toBe(the_message.content);
+      expect(body.message.villageId).toBe(the_message.villageId);
+      expect(body.message.userId).toBe(the_message.userId);
     } else {
       expect(body.message).not.toBeNull();
     }
-    // TODO implemented test cases that compare res data and db data and then input data
+    /**
+     * compare between res data and input data
+     */
+    expect(body.message.content).toBe(the_content);
+    expect(body.message.villageId).toBe(village.id);
+    expect(body.message.userId).toBe(user.id);
   });
 
   test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage`, async () => {
