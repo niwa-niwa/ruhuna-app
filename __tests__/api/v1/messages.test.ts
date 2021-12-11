@@ -3,7 +3,7 @@ import { prismaClient } from "./../../../api/lib/prismaClient";
 import { User } from "@prisma/client";
 import request from "supertest";
 import { api } from "../../../api";
-import { tokens } from "./../../test_config/testData";
+import { testTokens } from "./../../test_config/testData";
 
 const PREFIX_MESSAGES = "/api/v1/messages";
 
@@ -18,7 +18,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     const the_content = "story content 1";
     const { status, body } = await request(api)
       .post(PREFIX_MESSAGES + "/create")
-      .set("Authorization", `Bearer ${tokens.admin_user}`)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: the_content, userId: user.id, villageId: village.id });
 
     expect(status).toBe(200);
@@ -53,7 +53,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
   test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {
     const { status, body } = await request(api)
       .get(PREFIX_MESSAGES)
-      .set("Authorization", `Bearer ${tokens.admin_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
     expect(body).toHaveProperty("messages");
@@ -66,7 +66,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
   test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail`, async () => {
     const { status, body } = await request(api)
       .get(PREFIX_MESSAGES + "/" + "mesID")
-      .set("Authorization", `Bearer ${tokens.admin_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
   });
@@ -74,7 +74,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
   test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage`, async () => {
     const { status, body } = await request(api)
       .put(PREFIX_MESSAGES + "/edit/" + "messId")
-      .set("Authorization", `Bearer ${tokens.admin_user}`)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: "story2" });
 
     expect(status).toBe(200);
@@ -83,7 +83,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
   test(`Delete ${PREFIX_MESSAGES}/delete/:messageId deleteMessage`, async () => {
     const { status, body } = await request(api)
       .delete(PREFIX_MESSAGES + "/delete/" + "messId")
-      .set("Authorization", `Bearer ${tokens.admin_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
   });

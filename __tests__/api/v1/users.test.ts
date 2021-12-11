@@ -1,7 +1,7 @@
 import request from "supertest";
 import { api } from "../../../api";
 import { firebase_user } from "../../test_config/testData";
-import { tokens } from "../../test_config/testData";
+import { testTokens } from "../../test_config/testData";
 
 export const PREFIX_USERS = "/api/v1/users";
 
@@ -9,7 +9,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/ TEST :getUsers has count 5", async () => {
     const response = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(response.status).toBe(200);
     // expect(response.body.users.length).not.toBe(3);
@@ -19,7 +19,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/ TEST : getUsers has properties", async () => {
     const { status, body } = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(status).toBe(200);
     expect(body.users[0]).toHaveProperty("id");
@@ -37,12 +37,12 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/:userId TEST : getUser has properties", async () => {
     const res = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
     const user = res.body.users[0];
 
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/" + user.id)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
     expect(status).toBe(200);
     expect(body.user).toHaveProperty("id");
     expect(body.user).toHaveProperty("firebaseId");
@@ -59,12 +59,12 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/:userId TEST : getUserDetail has values", async () => {
     const res = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
     const user = res.body.users[0];
 
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/" + user.id)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(status).toBe(200);
     expect(user).toMatchObject(body.user);
@@ -74,7 +74,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/:userId TEST : it should receive error", async () => {
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/aaaaaaa")
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(status).toBe(404);
     expect(body.user).toBeNull();
@@ -110,7 +110,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("PUT /api/v1/users/:userId TEST : edit user by edit_data successfully", async () => {
     const res = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     const userId = res.body.users[0].id;
 
@@ -123,7 +123,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
     const { status, body } = await request(api)
       .put(PREFIX_USERS + "/edit/" + userId)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`)
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`)
       .send({ ...edit_data });
 
     expect(status).toBe(200);
@@ -146,7 +146,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
     const { status, body } = await request(api)
       .put(PREFIX_USERS + "/edit/asdf")
-      .set("Authorization", `Bearer ${tokens.firebase_user}`)
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`)
       .send({ ...edit_data });
 
     expect(status).toBe(404);
@@ -158,7 +158,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("DELETE /api/v1/users/:userId TEST it should receive error", async () => {
     const { status, body } = await request(api)
       .delete(PREFIX_USERS + "/delete/aaaaaa")
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(status).toBe(404);
     expect(body.user).toBeNull();
@@ -170,17 +170,17 @@ describe("/api/v1/users/ TEST : userController ", () => {
   test("DELETE /api/v1/users/:userId TEST the user by userId should be deleted", async () => {
     const res = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     const userId = res.body.users[0].id;
 
     const { status, body } = await request(api)
       .delete(PREFIX_USERS + "/delete/" + userId)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     const res2 = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${tokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
 
     expect(status).toBe(200);
     expect(body.user.id).toBe(userId);

@@ -1,7 +1,7 @@
 import { prismaClient } from "../../api/lib/prismaClient";
 import { users, villages } from "../../prisma/seeds";
 
-export async function seeds() {
+export async function testSeeds() {
   const user_a = await prismaClient.user.create({ data: users[0] });
   const user_b = await prismaClient.user.create({ data: users[1] });
   const user_c = await prismaClient.user.create({ data: users[2] });

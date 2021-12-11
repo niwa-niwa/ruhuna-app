@@ -1,7 +1,7 @@
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { users } from "../../prisma/seeds";
 
-export const tokens: {
+export const testTokens: {
   firebase_user: string;
   admin_user: string;
   general_user: string;
