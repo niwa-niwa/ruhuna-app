@@ -5,11 +5,12 @@ import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
 
-export const PREFIX_USERS = "/api/v1/users";
+const PREFIX_USERS = "/api/v1/users";
 
 describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/ getUsers : TEST it should be status 200 and properties  ", async () => {
     const dbUsers: User[] = await prismaClient.user.findMany();
+
     const { status, body } = await request(api)
       .get(PREFIX_USERS)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
@@ -28,6 +29,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should has properties", async () => {
     const dbUsers: User[] = await prismaClient.user.findMany();
+
     const dbUser = dbUsers[0];
 
     const { status, body } = await request(api)
@@ -78,6 +80,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     });
 
     expect(dbUser).not.toBeNull();
+
     if (!dbUser) return;
 
     expect(body.user.username).toEqual(firebase_user.name);
@@ -124,6 +127,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     });
 
     expect(dbUser).not.toBeNull();
+
     if (!dbUser) return;
 
     expect(status).toBe(200);
@@ -157,6 +161,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     const dbUser = await prismaClient.user.findUnique({
       where: { id: wrong_id },
     });
+
     expect(dbUser).toBeNull();
 
     expect(status).toBe(404);
@@ -171,6 +176,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     const dbUser = await prismaClient.user.findUnique({
       where: { id: wrong_id },
     });
+
     expect(dbUser).toBeNull();
 
     const { status, body } = await request(api)
