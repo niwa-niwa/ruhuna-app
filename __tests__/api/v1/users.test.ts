@@ -1,80 +1,64 @@
 import request from "supertest";
 import { api } from "../../../api";
+import { prismaClient } from "./../../../api/lib/prismaClient";
+import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
 
 export const PREFIX_USERS = "/api/v1/users";
 
 describe("/api/v1/users/ TEST : userController ", () => {
-  test("GET /api/v1/users/ TEST :getUsers has count 5", async () => {
-    const response = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
-
-    expect(response.status).toBe(200);
-    // expect(response.body.users.length).not.toBe(3);
-    // expect(response.body.users.length).toBe(5);
-  });
-
-  test("GET /api/v1/users/ TEST : getUsers has properties", async () => {
+  test("GET /api/v1/users/ getUsers : TEST it should be status 200 and properties  ", async () => {
+    const dbUsers: User[] = await prismaClient.user.findMany();
     const { status, body } = await request(api)
       .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
+    expect(body.users.length).toBe(dbUsers.length);
     expect(body.users[0]).toHaveProperty("id");
     expect(body.users[0]).toHaveProperty("firebaseId");
-    expect(body.users[0]).toHaveProperty("isAdmin");
     expect(body.users[0]).toHaveProperty("isActive");
+    expect(body.users[0]).toHaveProperty("isAdmin");
     expect(body.users[0]).toHaveProperty("isAnonymous");
-    expect(body.users[0]).toHaveProperty("username");
     expect(body.users[0]).toHaveProperty("createdAt");
     expect(body.users[0]).toHaveProperty("updatedAt");
-    expect(body.users[0]).not.toHaveProperty("uid");
     expect(body.users[0]).not.toHaveProperty("password");
   });
 
-  test("GET /api/v1/users/:userId TEST : getUser has properties", async () => {
-    const res = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
-    const user = res.body.users[0];
+  test("GET /api/v1/users/:userId getUserDetail TEST : it should has properties", async () => {
+    const dbUsers: User[] = await prismaClient.user.findMany();
+    const dbUser = dbUsers[0];
 
     const { status, body } = await request(api)
-      .get(PREFIX_USERS + "/" + user.id)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+      .get(PREFIX_USERS + "/" + dbUser.id)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
     expect(status).toBe(200);
-    expect(body.user).toHaveProperty("id");
-    expect(body.user).toHaveProperty("firebaseId");
-    expect(body.user).toHaveProperty("isAdmin");
-    expect(body.user).toHaveProperty("isActive");
-    expect(body.user).toHaveProperty("isAnonymous");
-    expect(body.user).toHaveProperty("username");
+    expect(body.user).toHaveProperty("id", dbUser.id);
+    expect(body.user).toHaveProperty("firebaseId", dbUser.firebaseId);
+    expect(body.user).toHaveProperty("isAdmin", dbUser.isAdmin);
+    expect(body.user).toHaveProperty("isActive", dbUser.isActive);
+    expect(body.user).toHaveProperty("isAnonymous", dbUser.isAnonymous);
+    expect(body.user).toHaveProperty("username", dbUser.username);
     expect(body.user).toHaveProperty("createdAt");
     expect(body.user).toHaveProperty("updatedAt");
     expect(body.user).not.toHaveProperty("uid");
     expect(body.user).not.toHaveProperty("password");
   });
 
-  test("GET /api/v1/users/:userId TEST : getUserDetail has values", async () => {
-    const res = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
-    const user = res.body.users[0];
+  test("GET /api/v1/users/:userId getUserDetail TEST : it should receive error by wrong uid", async () => {
+    const wrong_uid: string = "aaaaaaa";
 
-    const { status, body } = await request(api)
-      .get(PREFIX_USERS + "/" + user.id)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+    const dbUser: User | null = await prismaClient.user.findUnique({
+      where: { id: wrong_uid },
+    });
 
-    expect(status).toBe(200);
-    expect(user).toMatchObject(body.user);
-    expect(res.body.users[1]).not.toMatchObject(body.user);
-  });
+    expect(dbUser).toBeNull();
 
-  test("GET /api/v1/users/:userId TEST : it should receive error", async () => {
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/aaaaaaa")
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
     expect(body.user).toBeNull();
@@ -82,14 +66,25 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
-  test("POST /api/v1/users/create TEST : http status should be 200 and create a user ", async () => {
+  test("POST /api/v1/users/create createUser TEST : http status should be 200 and create a user ", async () => {
     const { status, body } = await request(api)
       .post(PREFIX_USERS + "/create")
       .send({ firebaseToken: "token_firebase_user" });
 
     expect(status).toBe(200);
+
+    const dbUser: User | null = await prismaClient.user.findUnique({
+      where: { id: body.user.id },
+    });
+
+    expect(dbUser).not.toBeNull();
+    if (!dbUser) return;
+
     expect(body.user.username).toEqual(firebase_user.name);
+    expect(dbUser.username).toEqual(firebase_user.name);
     expect(body.user.firebaseId).toEqual(firebase_user.uid);
+    expect(dbUser.firebaseId).toEqual(firebase_user.uid);
+
     expect(body.user).toHaveProperty("id");
     expect(body.user).toHaveProperty("isAdmin");
     expect(body.user).toHaveProperty("isActive");
@@ -98,7 +93,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.user).not.toHaveProperty("errorObj");
   });
 
-  test("POST /api/v1/users/create TEST : should receive error", async () => {
+  test("POST /api/v1/users/create creteUser TEST : should receive error", async () => {
     const { status, body } = await request(api).post(PREFIX_USERS + "/create");
 
     expect(status).toBe(400);
@@ -107,12 +102,10 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
-  test("PUT /api/v1/users/:userId TEST : edit user by edit_data successfully", async () => {
-    const res = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+  test("PUT /api/v1/users/:userId editUser TEST : edit user by edit_data successfully", async () => {
+    const dbUsers: User[] = await prismaClient.user.findMany();
 
-    const userId = res.body.users[0].id;
+    const userId = dbUsers[0].id;
 
     const edit_data = {
       username: "hello world",
@@ -123,20 +116,32 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
     const { status, body } = await request(api)
       .put(PREFIX_USERS + "/edit/" + userId)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ ...edit_data });
+
+    const dbUser: User | null = await prismaClient.user.findUnique({
+      where: { id: userId },
+    });
+
+    expect(dbUser).not.toBeNull();
+    if (!dbUser) return;
 
     expect(status).toBe(200);
     expect(body.user.id).toEqual(userId);
+    expect(dbUser.id).toEqual(userId);
     expect(body.user.username).toEqual(edit_data.username);
+    expect(dbUser.username).toEqual(edit_data.username);
     expect(body.user.isAdmin).toEqual(edit_data.isAdmin);
+    expect(dbUser.isAdmin).toEqual(edit_data.isAdmin);
     expect(body.user.isActive).toEqual(edit_data.isActive);
     expect(body.user.isAnonymous).toEqual(edit_data.isAnonymous);
+    expect(dbUser.isAnonymous).toEqual(edit_data.isAnonymous);
     expect(body.user).not.toHaveProperty("password");
     expect(body.user).not.toHaveProperty("errorObj");
   });
 
-  test("PUT /api/v1/users/:userId TEST should receive errorObj because the user not found", async () => {
+  test("PUT /api/v1/users/:userId editUser TEST should receive errorObj because the user not found by wrong uid", async () => {
+    const wrong_id = "asdf";
     const edit_data = {
       username: "hello world",
       isAdmin: true,
@@ -145,9 +150,14 @@ describe("/api/v1/users/ TEST : userController ", () => {
     };
 
     const { status, body } = await request(api)
-      .put(PREFIX_USERS + "/edit/asdf")
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`)
+      .put(PREFIX_USERS + "/edit/" + wrong_id)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ ...edit_data });
+
+    const dbUser = await prismaClient.user.findUnique({
+      where: { id: wrong_id },
+    });
+    expect(dbUser).toBeNull();
 
     expect(status).toBe(404);
     expect(body.user).toBeNull();
@@ -155,10 +165,17 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
-  test("DELETE /api/v1/users/:userId TEST it should receive error", async () => {
+  test("DELETE /api/v1/users/:userId deleteUser TEST it should receive error", async () => {
+    const wrong_id = "aaaaaa";
+
+    const dbUser = await prismaClient.user.findUnique({
+      where: { id: wrong_id },
+    });
+    expect(dbUser).toBeNull();
+
     const { status, body } = await request(api)
-      .delete(PREFIX_USERS + "/delete/aaaaaa")
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+      .delete(PREFIX_USERS + "/delete/" + wrong_id)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
     expect(body.user).toBeNull();
@@ -167,24 +184,19 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.user).not.toBe("id");
   });
 
-  test("DELETE /api/v1/users/:userId TEST the user by userId should be deleted", async () => {
-    const res = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
-
-    const userId = res.body.users[0].id;
+  test("DELETE /api/v1/users/:userId deleteUser TEST the user by userId should be deleted", async () => {
+    const dbUsers = await prismaClient.user.findMany();
+    const userId = dbUsers[0].id;
 
     const { status, body } = await request(api)
       .delete(PREFIX_USERS + "/delete/" + userId)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    const res2 = await request(api)
-      .get(PREFIX_USERS)
-      .set("Authorization", `Bearer ${testTokens.firebase_user}`);
+    const usersCount = await prismaClient.user.count();
 
     expect(status).toBe(200);
     expect(body.user.id).toBe(userId);
-    // expect(res.body.users.length).toBe(5);
-    // expect(res2.body.users.length).toBe(4);
+    expect(dbUsers.length).not.toBe(usersCount);
+    expect(dbUsers.length).toBe(usersCount + 1);
   });
 });
