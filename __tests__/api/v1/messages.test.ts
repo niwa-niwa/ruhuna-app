@@ -16,6 +16,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     const village: Village = villages[0];
 
     const the_content = "story content 1";
+
     const { status, body } = await request(api)
       .post(PREFIX_MESSAGES + "/create")
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
@@ -31,23 +32,28 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       include: { user: true, village: true },
     });
 
-    /**
-     * compare between db data and response data
-     */
-    if (the_message) {
-      expect(body.message.id).toBe(the_message.id);
-      expect(body.message.content).toBe(the_message.content);
-      expect(body.message.villageId).toBe(the_message.villageId);
-      expect(body.message.userId).toBe(the_message.userId);
-    } else {
-      expect(body.message).not.toBeNull();
-    }
-    /**
-     * compare between res data and input data
-     */
+    expect(body.message).not.toBeNull();
+
+    expect(body.message.id).toBe(the_message?.id);
     expect(body.message.content).toBe(the_content);
     expect(body.message.villageId).toBe(village.id);
     expect(body.message.userId).toBe(user.id);
+
+    expect(the_message?.content).toBe(the_content);
+    expect(the_message?.villageId).toBe(village.id);
+    expect(the_message?.userId).toBe(user.id);
+  });
+
+  test(`POST ${PREFIX_MESSAGES}/create createMessage TEST : handling error`, async () => {
+    const { status, body } = await request(api)
+      .post(PREFIX_MESSAGES + "/create")
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({ content: "" });
+
+    expect(status).toBe(400);
+    expect(body.message).toBeNull();
+    expect(body.errorObj).toHaveProperty("errorCode");
+    expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
   test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {
@@ -61,23 +67,66 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(body.messages[0]).toHaveProperty("content");
     expect(body.messages[0]).toHaveProperty("user");
     expect(body.messages[0]).toHaveProperty("village");
+
+    const countMessage: number = await prismaClient.message.count();
+
+    expect(body.messages.length).toBe(countMessage);
   });
 
   test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail`, async () => {
+    const dbMessages: Message[] = await prismaClient.message.findMany();
+    const dbMessage: Message | null = await prismaClient.message.findUnique({
+      where: { id: dbMessages[0].id },
+    });
+
+    expect(dbMessage).not.toBeNull();
+
     const { status, body } = await request(api)
-      .get(PREFIX_MESSAGES + "/" + "mesID")
+      .get(PREFIX_MESSAGES + "/" + dbMessage?.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
+    expect(body.message.id).toBe(dbMessage?.id);
+    expect(body.message.content).toBe(dbMessage?.content);
+    expect(body.message.villageId).toBe(dbMessage?.villageId);
+    expect(body.message.userId).toBe(dbMessage?.userId);
+    expect(body.message).toHaveProperty("village");
+    expect(body.message).toHaveProperty("user");
+  });
+
+  test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail : TEST handling error cause wrong message id`, async () => {
+    const wrong_id: string = "aaaa";
+    const { status, body } = await request(api)
+      .get(PREFIX_MESSAGES + "/" + wrong_id)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+    expect(status).toBe(404);
+    expect(body.message).toBeNull();
+    expect(body).toHaveProperty("errorObj");
+    expect(body.errorObj).toHaveProperty("errorCode");
+    expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
   test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage`, async () => {
+    const dbMessages: Message[] = await prismaClient.message.findMany();
+    const dbMessage: Message | null = await prismaClient.message.findUnique({
+      where: { id: dbMessages[0].id },
+    });
+
+    expect(dbMessage).not.toBeNull();
+
+    const the_content = "story 2";
     const { status, body } = await request(api)
-      .put(PREFIX_MESSAGES + "/edit/" + "messId")
+      .put(PREFIX_MESSAGES + "/edit/" + dbMessage?.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
-      .send({ content: "story2" });
+      .send({ content: the_content });
 
     expect(status).toBe(200);
+    expect(body.message.id).toBe(dbMessage?.id);
+    expect(body.message.content).not.toBe(dbMessage?.content);
+    expect(body.message.content).toBe(the_content);
+    expect(body.message.userId).toBe(dbMessage?.userId);
+    expect(body.message.villageId).toBe(dbMessage?.villageId);
   });
 
   test(`Delete ${PREFIX_MESSAGES}/delete/:messageId deleteMessage`, async () => {
