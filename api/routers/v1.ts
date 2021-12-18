@@ -9,16 +9,15 @@ const v1: Router = express.Router();
 
 v1.use("/auth", validateToken, express.Router().get("/", authController.auth));
 
-// TODO insert validateToken after implementing test case
 v1.use(
   "/users",
   express
     .Router()
-    .get("/", userController.getUsers)
-    .get("/:userId", userController.getUserDetail)
+    .get("/", validateToken, userController.getUsers)
+    .get("/:userId", validateToken, userController.getUserDetail)
     .post("/create", userController.createUser)
-    .put("/edit/:userId", userController.editUser)
-    .delete("/delete/:userId", userController.deleteUser)
+    .put("/edit/:userId", validateToken, userController.editUser)
+    .delete("/delete/:userId", validateToken, userController.deleteUser)
 );
 
 v1.use(
