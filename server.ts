@@ -1,31 +1,26 @@
 require("dotenv").config();
 
-import next from "next";
-import express, { Request, Response } from "express";
-import { api } from "./api";
-
-const dev = process.env.NODE_ENV !== "production";
-const port = process.env.PORT || 3000;
-const frontApp = next({ dev });
-const handle = frontApp.getRequestHandler();
-
 import http from "http";
-import { Server } from "socket.io";
+import next from "next";
+import express, { Express, Request, Response } from "express";
+import { api } from "./api";
+import { io } from "./sockets";
+import { NextServer, RequestHandler } from "next/dist/server/next";
+
+const dev: boolean = process.env.NODE_ENV !== "production";
+const port: string = process.env.PORT || "3000";
+const frontApp: NextServer = next({ dev });
+const handle: RequestHandler = frontApp.getRequestHandler();
+const app: Express = express();
+const server: http.Server = http.createServer(app);
 
 async function main() {
   try {
     await frontApp.prepare();
 
-    const app = express();
-    const server = http.createServer(app);
+    io.attach(server);
 
     app.use(api);
-
-    const io = new Server(server);
-
-    io.on("connection", (socket) => {
-      console.log("a user connected");
-    });
 
     app.all("*", (req: Request, res: Response) => {
       return handle(req, res);
@@ -37,7 +32,7 @@ async function main() {
         `> Start on http://localhost:${port} - env ${process.env.NODE_ENV}`
       );
     });
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
 
     process.exit(1);
