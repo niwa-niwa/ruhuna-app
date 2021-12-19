@@ -6,18 +6,28 @@ import { api } from "./api";
 
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 3000;
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const frontApp = next({ dev });
+const handle = frontApp.getRequestHandler();
+
+import http from "http";
+import { Server } from "socket.io";
 
 async function main() {
   try {
-    await app.prepare();
+    await frontApp.prepare();
 
-    const server = express();
+    const app = express();
+    const server = http.createServer(app);
 
-    server.use(api);
+    app.use(api);
 
-    server.all("*", (req: Request, res: Response) => {
+    const io = new Server(server);
+
+    io.on("connection", (socket) => {
+      console.log("a user connected");
+    });
+
+    app.all("*", (req: Request, res: Response) => {
       return handle(req, res);
     });
 
