@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 
+// TODO create const file to implement paths
 const io: Server = new Server({
   path: "/sockets",
   serveClient: false,
