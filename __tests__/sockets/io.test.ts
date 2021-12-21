@@ -48,11 +48,13 @@ describe("TEST Web Socket io", () => {
     });
   });
 
-  test("Emit message", () => {
-    serverSocket.on("room_1", (data: any) => {
-      console.log("room_1 = ", data);
+  test("join room", (done) => {
+    clientSocket_A.on("result_join", (data: any) => {
+      expect(data.room).toBe("room_a");
+      expect(data.status).toBe(true);
+      done();
     });
 
-    clientSocket_A.emit("room_1", "message from niwa");
+    clientSocket_A.emit("join", { room: "room_a", id: "my_id" });
   });
 });
