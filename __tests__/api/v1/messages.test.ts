@@ -1,5 +1,5 @@
 import { Message, Village } from "@prisma/client";
-import { prismaClient } from "./../../../api/lib/prismaClient";
+import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import request from "supertest";
 import { api } from "../../../api";

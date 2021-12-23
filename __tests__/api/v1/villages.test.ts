@@ -1,4 +1,4 @@
-import { prismaClient } from "./../../../api/lib/prismaClient";
+import { prismaClient } from "../../../lib/prismaClient";
 import request from "supertest";
 import { api } from "../../../api";
 import { testTokens } from "../../test_config/testData";

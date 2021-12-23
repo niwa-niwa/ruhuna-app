@@ -1,8 +1,8 @@
 import { Response } from "express";
 import { Prisma, Village } from "@prisma/client";
-import { prismaClient } from "../lib/prismaClient";
+import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
-import { generateErrorObj } from "../lib/generateErrorObj";
+import { generateErrorObj } from "../../lib/generateErrorObj";
 
 export const getVillages = async (req: CustomRequest, res: Response) => {
   const villages: Village[] = await prismaClient.village.findMany({

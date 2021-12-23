@@ -1,8 +1,8 @@
 import { Response } from "express";
 import { Message, Prisma } from "@prisma/client";
-import { prismaClient } from "../lib/prismaClient";
+import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
-import { generateErrorObj } from "../lib/generateErrorObj";
+import { generateErrorObj } from "../../lib/generateErrorObj";
 
 export const getMessages = async (req: CustomRequest, res: Response) => {
   const messages: Message[] = await prismaClient.message.findMany({

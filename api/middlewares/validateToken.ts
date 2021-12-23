@@ -1,11 +1,11 @@
 import { CustomRequest } from "../types/CustomRequest";
 import { Response, NextFunction } from "express";
-import { prismaClient } from "../lib/prismaClient";
+import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User } from "@prisma/client";
 import { ErrorObj } from "../types/ErrorObj";
-import { generateErrorObj } from "../lib/generateErrorObj";
-import { verifyToken } from "../lib/firebaseAdmin";
+import { generateErrorObj } from "../../lib/generateErrorObj";
+import { verifyToken } from "../../lib/firebaseAdmin";
 
 export const validateToken = async (
   req: CustomRequest,
