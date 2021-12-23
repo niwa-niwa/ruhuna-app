@@ -13,12 +13,17 @@ const io: Server = new Server({
 });
 
 io.use((socket: Socket, next) => {
-  console.log("message from middleware");
   // TODO verify firebase token
+  console.log("message from middleware");
   const token = socket.handshake.query.token;
+
   if (!token) {
-    return next(new Error("authentication error"));
+    console.log("middleware error");
+    const err: any = new Error("not authorized");
+    err.data = { content: "Please retry later" }; // additional details
+    next(new Error("Unauthorized"));
   }
+
   next();
 });
 
