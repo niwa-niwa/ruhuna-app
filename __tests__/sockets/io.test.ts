@@ -7,6 +7,13 @@ describe("TEST Web Socket io", () => {
 
   const clientSocket_A: Socket = client(`http://localhost:${port}`, {
     path: "/sockets",
+    query: {
+      token: "aaa_token",
+    },
+  });
+
+  const clientSocket_B: Socket = client(`http://localhost:${port}`, {
+    path: "/sockets",
   });
 
   let serverSocket: any;
@@ -55,6 +62,23 @@ describe("TEST Web Socket io", () => {
       done();
     });
 
-    clientSocket_A.emit("join", { room: "room_a", id: "my_id" });
+    clientSocket_A.emit("join", {
+      token: "a_token",
+      room: "room_a",
+      id: "my_id",
+    });
+  });
+
+  test("not token user should be rejected", (done) => {
+    clientSocket_B.on("result_join", (data: any, err) => {
+      console.log(err);
+      done();
+    });
+
+    clientSocket_B.emit("join", {
+      token: "a_token",
+      room: "room_a",
+      id: "my_id",
+    });
   });
 });

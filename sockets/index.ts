@@ -1,3 +1,5 @@
+import { NextFunction } from "express";
+import { NextServer } from "next/dist/server/next";
 import { Server, Socket } from "socket.io";
 
 // TODO create const file to implement paths
@@ -13,6 +15,10 @@ const io: Server = new Server({
 io.use((socket: Socket, next) => {
   console.log("message from middleware");
   // TODO verify firebase token
+  const token = socket.handshake.query.token;
+  if (!token) {
+    return next(new Error("authentication error"));
+  }
   next();
 });
 
