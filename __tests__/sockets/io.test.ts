@@ -1,80 +1,35 @@
 import { createServer, Server } from "http";
 import { io as client, Socket } from "socket.io-client";
 import { io } from "../../sockets";
+import { testTokens } from "../test_config/testData";
 
 describe("TEST Web Socket io", () => {
-
   const port: string = process.env.PORT || "3000";
   const uri: string = `http://localhost:${port}`;
+  const path: string = "/chatSockets";
   let clientSocket: Socket;
-  let serverSocket: any;
 
   beforeAll(() => {
     const server: Server = createServer();
 
     io.attach(server);
 
-    server.listen(port, () => {
-      io.on("connection", (socket) => {
-        serverSocket = socket;
-      });
-      // clientSocket_A.on("connect", done);
-    });
+    server.listen(port);
   });
 
-  afterEach(()=>{
-    clientSocket.close()
-  })
+  afterEach(() => {
+    clientSocket.close();
+  });
 
   afterAll(() => {
     io.close();
   });
 
-
-  // test("should work", (done) => {
-  //   clientSocket = client(uri, {
-  //     path: "/sockets",
-  //     query: {
-  //       token: "aaa_token",
-  //     },
-  //   });
-
-  //   clientSocket.on("hello", (arg: any) => {
-  //     expect(arg).toBe("world");
-  //     done();
-  //   });
-
-  //   serverSocket.emit("hello", "world");
-
-  // });
-
-  // test("should work (with ack)", (done) => {
-
-  //   clientSocket = client(uri, {
-  //     path: "/sockets",
-  //     query: {
-  //       token: "aaa_token",
-  //     },
-  //   });
-
-  //   serverSocket.on("hi", (cb: any) => {
-  //     cb("hallo");
-  //   });
-
-  //   clientSocket.emit("hi", (arg: any) => {
-  //     expect(arg).toBe("hallo");
-  //     done();
-  //   });
-
-  // });
-
-
   test("join room", (done) => {
-
     clientSocket = client(uri, {
-      path: "/sockets",
+      path,
       query: {
-        token: "aaa_token",
+        token: testTokens.admin_user,
       },
     });
 
@@ -89,22 +44,18 @@ describe("TEST Web Socket io", () => {
       room: "room_a",
       id: "my_id",
     });
-
   });
 
-
   test("not token user should be rejected", (done) => {
-
     const clientSocket: Socket = client(`http://localhost:${port}`, {
-      path: "/sockets",
+      path,
     });
 
     clientSocket.on("connect_error", (err: any) => {
-      expect(err.message).toBe("Unauthorized");
+      expect(err.data).toHaveProperty("errorObj");
+      expect(err.data.errorObj).toHaveProperty("errorCode");
+      expect(err.data.errorObj).toHaveProperty("errorMessage");
       done();
     });
-
   });
-
-
 });
