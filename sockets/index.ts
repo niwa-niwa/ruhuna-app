@@ -10,9 +10,10 @@ type CustomSocket = Socket & {
   currentUser?: User;
 };
 
-// TODO create const file to implement paths
+const PATH_CHAT = "/chatSockets";
+
 const io: Server = new Server({
-  path: "/chatSockets",
+  path: PATH_CHAT,
   serveClient: false,
   // below are engine.IO options
   pingInterval: 10000,
@@ -65,23 +66,60 @@ io.use(async (socket: CustomSocket, next) => {
 
   socket.currentUser = currentUser;
 
+  console.log("verify a user", currentUser.id);
   next();
 });
 
-io.on("connection", async (socket: CustomSocket) => {
-  // TODO create an type of the variable for member of a room {socketId, firebaseToken}
-  let currentMembers: object;
+io.on("connection", (socket: CustomSocket) => {
+  // join the room
+  socket.on("subscribe", async (data) => {
+    if(socket.currentUser === undefined)return
 
-  // TODO join the room
-  socket.on("join", (data) => {
-    // TODO notify users who are login
-    // TODO send status of whether the user can join at the room
-    io.emit("result_join", { room: data.room, status: true });
+    socket.join(data.villageId);
+    console.log("join to room = ", data.villageId);
+
+    // TODO confirm the user can join the village with DB
+    const village = await prismaClient.village.findFirst({
+      where:{
+        id:data.villageId,
+        users:{
+          some:{
+            id:{
+              in:[socket.currentUser.id]
+            }
+          }
+        }
+      }
+    })
+
+    if(!village){
+      // TODO implement response emit error
+      io.to(socket.id).emit("subscribe",{
+        errorObj: generateErrorObj(404, "The Village is not found") 
+      })
+    }else{
+      // TODO implement response emit success
+      io.to(socket.id).emit("subscribe",{village})
+    }
+
+
   });
 
   // TODO send a message
+  socket.on("send_message", (data) => {
+    console.log(data);
+    io.sockets.in(data.villageId).emit("messages", {
+      user: socket.currentUser,
+      villageId: data.villageId,
+      message: data.message,
+    });
+  });
 
   // TODO leave the room
+  socket.on("unsubscribe", (data) => {
+    socket.leave(data.room);
+    console.log("leave room = ", data.villageId);
+  });
 });
 
-export { io };
+export { io, PATH_CHAT };

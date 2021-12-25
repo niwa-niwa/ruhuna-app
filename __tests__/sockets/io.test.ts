@@ -1,7 +1,9 @@
 import { createServer, Server } from "http";
 import { io as client, Socket } from "socket.io-client";
 import { io } from "../../sockets";
-import { testTokens } from "../test_config/testData";
+import { testTokens, admin_user } from "../test_config/testData";
+import { prismaClient } from "../../lib/prismaClient";
+import { User } from "@prisma/client";
 
 describe("TEST Web Socket io", () => {
   const port: string = process.env.PORT || "3000";
@@ -25,7 +27,7 @@ describe("TEST Web Socket io", () => {
     io.close();
   });
 
-  test("join room", (done) => {
+  test("subscribe the village", async () => {
     clientSocket = client(uri, {
       path,
       query: {
@@ -33,17 +35,45 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("result_join", (data: any) => {
-      expect(data.room).toBe("room_a");
-      expect(data.status).toBe(true);
-      done();
+    const adminUser: User | null = await prismaClient.user.findUnique({
+      where: { firebaseId: admin_user.uid },
     });
 
-    clientSocket.emit("join", {
-      token: "a_token",
-      room: "room_a",
-      id: "my_id",
+    const chatVillage = await prismaClient.village.create({
+      data: {
+        name: "chat village A",
+        description: "chat village des",
+        users: { connect: { id: adminUser?.id } },
+      },
     });
+
+    clientSocket.on("subscribe", (data: any) => {
+      expect(data).not.toHaveProperty("errorObj");
+      expect(data).toHaveProperty("village");
+      expect(data.Village.id).toBe(chatVillage.id);
+    });
+
+    clientSocket.emit("subscribe", { villageId: chatVillage.id });
+  });
+
+  test("could not subscribe the village by not join", async () => {
+    clientSocket = client(uri, {
+      path,
+      query: {
+        token: testTokens.admin_user,
+      },
+    });
+
+    const chatVillage = await prismaClient.village.findFirst();
+
+    clientSocket.on("subscribe", (data: any) => {
+      expect(data).not.toHaveProperty("village");
+      expect(data).toHaveProperty("errorObj");
+      expect(data.errorObj).toHaveProperty("errorCode");
+      expect(data.errorObj).toHaveProperty("errorMessage");
+    });
+
+    clientSocket.emit("subscribe", { villageId: chatVillage?.id });
   });
 
   test("not token user should be rejected", (done) => {
