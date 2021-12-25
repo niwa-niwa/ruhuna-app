@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, Village } from "@prisma/client";
 import { prismaClient } from "../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { Server, Socket } from "socket.io";
@@ -6,7 +6,7 @@ import { verifyToken } from "../lib/firebaseAdmin";
 import { ErrorObj } from "../api/types/ErrorObj";
 import { generateErrorObj } from "../lib/generateErrorObj";
 
-type CustomSocket = Socket & {
+export type CustomSocket = Socket & {
   currentUser?: User;
 };
 
@@ -74,39 +74,61 @@ io.use(async (socket: CustomSocket, next) => {
 });
 
 io.on("connection", (socket: CustomSocket) => {
-  // join the room
+  // subscribe a village
   socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data) => {
-    if(socket.currentUser === undefined)return
+    // the error is impossible but it must implemented for typescript
+    if (socket.currentUser === undefined) {
+      const err: any = new Error();
+      err.data = { errorObj: generateErrorObj(414, "the user is not found") };
+      socket.emit("connect_error", { ...err });
+      return;
+    }
+
+    // confirm the user can join the village with DB
+    const village: (Village & { users: User[] }) | null =
+      await prismaClient.village.findFirst({
+        where: {
+          id: data.villageId,
+        },
+        include: { users: true },
+      });
+
+    if (!village) {
+      // village is null then response emit error
+      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
+        errorObj: generateErrorObj(404, "The Village is not found"),
+      });
+      return;
+    }
+
+    // is exist currentUser in the village
+    const isExist = village.users.find(
+      (user: User) => user.id === socket.currentUser?.id
+    );
+
+    if (!village.isPublic && !isExist) {
+      // village is private and currentUser is not invited
+      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
+        errorObj: generateErrorObj(404, "The Village is not found"),
+      });
+      return;
+    }
+
+    if (village.isPublic && !isExist) {
+      // if the village is public
+      await prismaClient.village.update({
+        where: { id: village.id },
+        data: { users: { connect: { id: socket.currentUser.id } } },
+      });
+    }
 
     socket.join(data.villageId);
 
-    // TODO confirm the user can join the village with DB
-    const village = await prismaClient.village.findFirst({
-      where:{
-        id:data.villageId,
-        users:{
-          some:{
-            id:{
-              in:[socket.currentUser.id]
-            }
-          }
-        }
-      }
-    })
-
-    if(!village){
-      // TODO implement response emit error
-      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE,{
-        errorObj: generateErrorObj(404, "The Village is not found") 
-      })
-    }else{
-      // TODO implement response emit success
-      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE,{village})
-    }
-
+    // currentUser can be join, response emit success
+    io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
   });
 
-  // send a message
+  // TODO the function that send a message implement messageController
   socket.on("send_message", (data) => {
     console.log(data);
     io.sockets.in(data.villageId).emit("messages", {
@@ -116,7 +138,7 @@ io.on("connection", (socket: CustomSocket) => {
     });
   });
 
-  // leave the room
+  // TODO the function that leave the room implement messageController
   socket.on("unsubscribe", (data) => {
     socket.leave(data.room);
     console.log("leave room = ", data.villageId);

@@ -10,9 +10,13 @@ describe("TEST Web Socket io", () => {
   const uri: string = `http://localhost:${port}`;
   const path: string = "/chatSockets";
   let clientSocket: Socket;
-  let chatVillage: Village;
+  let privateChatVillage: Village;
+  let publicChatVillage: Village;
 
   beforeAll(() => {
+    /**
+     * build server and attach chat socket
+     */
     const server: Server = createServer();
 
     io.attach(server);
@@ -21,15 +25,27 @@ describe("TEST Web Socket io", () => {
   });
 
   beforeEach(async () => {
+    /**
+     * create private and public villages
+     * the processes are not implemented in test-cases
+     */
     const adminUser: User | null = await prismaClient.user.findUnique({
       where: { firebaseId: admin_user.uid },
     });
 
-    chatVillage = await prismaClient.village.create({
+    privateChatVillage = await prismaClient.village.create({
       data: {
         name: "chat village A",
         description: "chat village des",
         users: { connect: { id: adminUser?.id } },
+      },
+    });
+
+    publicChatVillage = await prismaClient.village.create({
+      data: {
+        name: "chat village B",
+        description: "chat village des",
+        isPublic: true,
       },
     });
   });
@@ -42,7 +58,7 @@ describe("TEST Web Socket io", () => {
     io.close();
   });
 
-  test("subscribe the village", (done) => {
+  test("subscribe the village success", (done) => {
     clientSocket = client(uri, {
       path,
       query: {
@@ -54,14 +70,16 @@ describe("TEST Web Socket io", () => {
       expect.hasAssertions();
       expect(data).not.toHaveProperty("errorObj");
       expect(data).toHaveProperty("village");
-      expect(data.village.id).toBe(chatVillage.id);
+      expect(data.village.id).toBe(privateChatVillage.id);
       done();
     });
 
-    clientSocket.emit("subscribe_village", { villageId: chatVillage.id });
+    clientSocket.emit("subscribe_village", {
+      villageId: privateChatVillage.id,
+    });
   });
 
-  test("could not subscribe the village by not join", (done) => {
+  test("could not subscribe the village by not join handling error", (done) => {
     clientSocket = client(uri, {
       path,
       query: {
@@ -77,10 +95,41 @@ describe("TEST Web Socket io", () => {
       done();
     });
 
-    clientSocket.emit("subscribe_village", { villageId: chatVillage?.id });
+    clientSocket.emit("subscribe_village", {
+      villageId: privateChatVillage?.id,
+    });
   });
 
-  test("not token user should be rejected", (done) => {
+  test("subscribe the public village success", (done) => {
+    clientSocket = client(uri, {
+      path,
+      query: {
+        token: testTokens.general_user,
+      },
+    });
+
+    prismaClient.village
+      .findUnique({
+        where: { id: publicChatVillage?.id },
+        include: { users: true },
+      })
+      .then((village) => {
+        expect(village?.users).toHaveLength(0);
+
+        clientSocket.on("subscribe_village", (data: any) => {
+          expect(data).toHaveProperty("village");
+          expect(data).not.toHaveProperty("errorObj");
+          expect(data.village.id).toBe(publicChatVillage.id);
+          done();
+        });
+
+        clientSocket.emit("subscribe_village", {
+          villageId: publicChatVillage?.id,
+        });
+      });
+  });
+
+  test("not token user should be rejected handling error", (done) => {
     const clientSocket: Socket = client(`http://localhost:${port}`, {
       path,
     });
