@@ -10,10 +10,14 @@ type CustomSocket = Socket & {
   currentUser?: User;
 };
 
-const PATH_CHAT = "/chatSockets";
+const PATH_CHAT_SOCKET = "/chatSockets";
+
+const EV_CHAT_SOCKET = {
+  SUBSCRIBE: "subscribe_village",
+};
 
 const io: Server = new Server({
-  path: PATH_CHAT,
+  path: PATH_CHAT_SOCKET,
   serveClient: false,
   // below are engine.IO options
   pingInterval: 10000,
@@ -66,17 +70,15 @@ io.use(async (socket: CustomSocket, next) => {
 
   socket.currentUser = currentUser;
 
-  console.log("verify a user", currentUser.id);
   next();
 });
 
 io.on("connection", (socket: CustomSocket) => {
   // join the room
-  socket.on("subscribe", async (data) => {
+  socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data) => {
     if(socket.currentUser === undefined)return
 
     socket.join(data.villageId);
-    console.log("join to room = ", data.villageId);
 
     // TODO confirm the user can join the village with DB
     const village = await prismaClient.village.findFirst({
@@ -94,18 +96,17 @@ io.on("connection", (socket: CustomSocket) => {
 
     if(!village){
       // TODO implement response emit error
-      io.to(socket.id).emit("subscribe",{
+      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE,{
         errorObj: generateErrorObj(404, "The Village is not found") 
       })
     }else{
       // TODO implement response emit success
-      io.to(socket.id).emit("subscribe",{village})
+      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE,{village})
     }
-
 
   });
 
-  // TODO send a message
+  // send a message
   socket.on("send_message", (data) => {
     console.log(data);
     io.sockets.in(data.villageId).emit("messages", {
@@ -115,11 +116,11 @@ io.on("connection", (socket: CustomSocket) => {
     });
   });
 
-  // TODO leave the room
+  // leave the room
   socket.on("unsubscribe", (data) => {
     socket.leave(data.room);
     console.log("leave room = ", data.villageId);
   });
 });
 
-export { io, PATH_CHAT };
+export { io, PATH_CHAT_SOCKET, EV_CHAT_SOCKET };
