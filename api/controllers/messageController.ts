@@ -32,6 +32,7 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
 };
 
 export const createMessage = async (req: CustomRequest, res: Response) => {
+  // TODO confirm the user join the village
   try {
     const { content, userId, villageId }: Prisma.MessageCreateManyInput =
       req.body;
