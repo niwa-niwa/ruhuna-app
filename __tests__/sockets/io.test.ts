@@ -4,6 +4,8 @@ import { io } from "../../sockets";
 import { testTokens, admin_user } from "../test_config/testData";
 import { prismaClient } from "../../lib/prismaClient";
 import { User, Village } from "@prisma/client";
+import request from "supertest";
+import { api } from "../../api";
 
 describe("TEST Web Socket io", () => {
   const port: string = process.env.PORT || "3000";
@@ -12,6 +14,7 @@ describe("TEST Web Socket io", () => {
   let clientSocket: Socket;
   let privateChatVillage: Village;
   let publicChatVillage: Village;
+  let adminUser: User | null;
 
   beforeAll(() => {
     /**
@@ -29,7 +32,7 @@ describe("TEST Web Socket io", () => {
      * create private and public villages
      * the processes are not implemented in test-cases
      */
-    const adminUser: User | null = await prismaClient.user.findUnique({
+    adminUser = await prismaClient.user.findUnique({
       where: { firebaseId: admin_user.uid },
     });
 
@@ -141,4 +144,92 @@ describe("TEST Web Socket io", () => {
       done();
     });
   });
+
+  test("Send message with REST api and then receive the message with socket", (done) => {
+    async function sendMessage() {
+      const the_content = "this is the content";
+
+      const { status, body } = await request(api)
+        .post("/api/v1/messages" + "/create")
+        .set("Authorization", `Bearer ${testTokens.admin_user}`)
+        .send({
+          content: the_content,
+          userId: adminUser?.id,
+          villageId: privateChatVillage?.id,
+        });
+
+      expect(status).toBe(200);
+      expect(body).toHaveProperty("message");
+    }
+
+    clientSocket = client(uri, {
+      path,
+      query: {
+        token: testTokens.admin_user,
+      },
+    });
+
+    clientSocket.on("subscribe_village", (data: any) => {
+      expect(data).toHaveProperty("village");
+      expect(data.village.id).toBe(privateChatVillage.id);
+      // send message after join the room
+      sendMessage();
+    });
+
+    clientSocket.emit("subscribe_village", {
+      villageId: privateChatVillage.id,
+    });
+
+    clientSocket.on("message", (data: any) => {
+      expect(data).toHaveProperty("message");
+      expect(data.message.user.id).toBe(adminUser?.id);
+      expect(data.message.village.id).toBe(privateChatVillage.id);
+      done();
+    });
+  });
+
+  test("Send message with REST api and then confirm that the user who doesn't join can't receive the message", (done) => {
+    async function sendMessage() {
+      const the_content = "this is the content";
+
+      const { status, body } = await request(api)
+        .post("/api/v1/messages" + "/create")
+        .set("Authorization", `Bearer ${testTokens.admin_user}`)
+        .send({
+          content: the_content,
+          userId: adminUser?.id,
+          villageId: privateChatVillage?.id,
+        });
+
+      expect(status).toBe(200);
+      expect(body).toHaveProperty("message");
+      done()
+    }
+
+    clientSocket = client(uri, {
+      path,
+      query: {
+        token: testTokens.general_user,
+      },
+    });
+
+    clientSocket.on("subscribe_village", (data: any) => {
+      expect(data).toHaveProperty("village");
+      expect(data.village.id).toBe(publicChatVillage.id);
+      // send message after join the room
+      sendMessage();
+    });
+
+    clientSocket.emit("subscribe_village", {
+      villageId: publicChatVillage.id,
+    });
+
+    clientSocket.on("message", (data: any) => {
+      // if receive admin message from his room that general_user is not exist, it was fault
+      expect(data).toHaveProperty("message");
+      expect(data.message.user.id).not.toBe(adminUser?.id);
+      expect(data.message.village.id).not.toBe(privateChatVillage.id);
+    });
+  });
+
 });

@@ -128,16 +128,6 @@ io.on("connection", (socket: CustomSocket) => {
     io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
   });
 
-  // TODO the function that send a message implement messageController
-  socket.on("send_message", (data) => {
-    console.log(data);
-    io.sockets.in(data.villageId).emit("messages", {
-      user: socket.currentUser,
-      villageId: data.villageId,
-      message: data.message,
-    });
-  });
-
   // TODO the function that leave the room implement messageController
   socket.on("unsubscribe", (data) => {
     socket.leave(data.room);

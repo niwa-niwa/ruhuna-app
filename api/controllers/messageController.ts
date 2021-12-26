@@ -3,6 +3,7 @@ import { Message, Prisma } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
+import {io} from "../../sockets"
 
 export const getMessages = async (req: CustomRequest, res: Response) => {
   const messages: Message[] = await prismaClient.message.findMany({
@@ -39,6 +40,9 @@ export const createMessage = async (req: CustomRequest, res: Response) => {
       data: { content, userId, villageId },
       include: { user: true, village: true },
     });
+
+    // send message in the village as room
+    io.sockets.in(villageId).emit('message',{ message} );
 
     res.status(200).json({ message });
   } catch (e) {
