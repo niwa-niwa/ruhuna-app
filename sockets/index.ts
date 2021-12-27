@@ -102,11 +102,11 @@ io.on("connection", (socket: CustomSocket) => {
     }
 
     // is exist currentUser in the village
-    const isExist = village.users.find(
+    const isMember = village.users.find(
       (user: User) => user.id === socket.currentUser?.id
     );
 
-    if (!village.isPublic && !isExist) {
+    if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
         errorObj: generateErrorObj(404, "The Village is not found"),
@@ -114,7 +114,7 @@ io.on("connection", (socket: CustomSocket) => {
       return;
     }
 
-    if (village.isPublic && !isExist) {
+    if (village.isPublic && !isMember) {
       // if the village is public
       await prismaClient.village.update({
         where: { id: village.id },

@@ -1,6 +1,8 @@
 import { Request } from "express";
-import { User } from "@prisma/client";
+import { User, Village } from "@prisma/client";
 
-export interface CustomRequest extends Request {
-  currentUser?: User;
-}
+export type CustomRequest = Request & {
+  currentUser?: User & { 
+    villages: Village[] 
+  };
+};

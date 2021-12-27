@@ -1,9 +1,10 @@
+import { villages } from './../../prisma/seeds';
 import { Response } from "express";
-import { Message, Prisma } from "@prisma/client";
+import { Message, Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
-import {io} from "../../sockets"
+import { io } from "../../sockets";
 
 export const getMessages = async (req: CustomRequest, res: Response) => {
   const messages: Message[] = await prismaClient.message.findMany({
@@ -32,20 +33,32 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
 };
 
 export const createMessage = async (req: CustomRequest, res: Response) => {
-  // TODO confirm the user join the village
   try {
-    const { content, userId, villageId }: Prisma.MessageCreateManyInput =
-      req.body;
+    // get data from request body
+    const { content, villageId }: Prisma.MessageCreateManyInput = req.body;
 
+    // confirm the user join the village
+    const isMember = req.currentUser?.villages.find(
+      (village: Village) => village.id === villageId
+    );
+
+    // throw error if the currentUser is not a member
+    if (!isMember)
+      throw new Error("the currentUser is not a member of the village");
+
+    // insert the message to DB
     const message: Message = await prismaClient.message.create({
-      data: { content, userId, villageId },
+      data: { content, userId: req.currentUser?.id, villageId },
       include: { user: true, village: true },
     });
 
     // send message in the village as room
-    io.sockets.in(villageId).emit('message',{ message} );
+    io.sockets.in(villageId).emit("message", { message });
 
+    // response created the message
     res.status(200).json({ message });
+
+    return;
   } catch (e) {
     console.error(e);
 
