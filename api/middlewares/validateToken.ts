@@ -2,7 +2,7 @@ import { CustomRequest } from "../types/CustomRequest";
 import { Response, NextFunction } from "express";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { User, Village } from "@prisma/client";
+import { Message, User, Village } from "@prisma/client";
 import { ErrorObj } from "../types/ErrorObj";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { verifyToken } from "../../lib/firebaseAdmin";
@@ -44,10 +44,10 @@ export const validateToken = async (
   }
 
   // get User model based on firebase id
-  const currentUser: (User & { villages: Village[] }) | null =
+  const currentUser: (User & { villages: Village[], messages:Message[] }) | null =
     await prismaClient.user.findUnique({
       where: { firebaseId: firebaseUser.uid },
-      include: { villages: true },
+      include: { villages: true, messages:true },
     });
 
   // throw an error if currentUser is nothing and end

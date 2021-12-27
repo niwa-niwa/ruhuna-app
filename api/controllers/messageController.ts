@@ -1,4 +1,3 @@
-import { villages } from './../../prisma/seeds';
 import { Response } from "express";
 import { Message, Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
@@ -6,6 +5,11 @@ import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { io } from "../../sockets";
 
+/**
+ * Get all messages
+ * @param req
+ * @param res
+ */
 export const getMessages = async (req: CustomRequest, res: Response) => {
   const messages: Message[] = await prismaClient.message.findMany({
     include: { user: true, village: true },
@@ -14,14 +18,23 @@ export const getMessages = async (req: CustomRequest, res: Response) => {
   res.status(200).json({ messages });
 };
 
+/**
+ * Get a message detail
+ * @param req
+ * @param res
+ * @returns
+ */
 export const getMessageDetail = async (req: CustomRequest, res: Response) => {
+  // get message id from params
   const id: string = req.params.messageId;
 
+  // get model of message from DB
   const message: Message | null = await prismaClient.message.findUnique({
     where: { id },
     include: { user: true, village: true },
   });
 
+  // throw an error if the message is null
   if (message === null) {
     res.status(404).json({
       message: null,
@@ -29,9 +42,19 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
     });
     return;
   }
+
+  // response the message
   res.status(200).json({ message });
+
+  return;
 };
 
+/**
+ * Create a message
+ * @param req
+ * @param res
+ * @returns
+ */
 export const createMessage = async (req: CustomRequest, res: Response) => {
   try {
     // get data from request body
@@ -69,18 +92,38 @@ export const createMessage = async (req: CustomRequest, res: Response) => {
   }
 };
 
+/**
+ * Edit a message
+ * @param req
+ * @param res
+ */
 export const editMessage = async (req: CustomRequest, res: Response) => {
   try {
+    // get message id from params
     const id: string = req.params.messageId;
+
+    // confirm the user has the message id
+    const isOwner = req.currentUser?.messages.find(
+      (message: Message) => message.id === id
+    );
+
+    // throw an error if the user has not message id
+    if (!isOwner) throw new Error("the user is not owner of the message");
+
+    // get a content from request body
     const { content } = req.body;
 
+    // get message model by the message id
     const message: Message = await prismaClient.message.update({
       where: { id },
       data: { content },
       include: { user: true, village: true },
     });
 
+    // response updated the message
     res.status(200).json({ message });
+
+    return;
   } catch (e) {
     console.error(e);
 
@@ -91,15 +134,33 @@ export const editMessage = async (req: CustomRequest, res: Response) => {
   }
 };
 
+/**
+ * Delete a message
+ * @param req
+ * @param res
+ */
 export const deleteMessage = async (req: CustomRequest, res: Response) => {
   try {
+    // get message id from params
     const id: string = req.params.messageId;
 
+    // confirm the user has the message id
+    const isOwner = req.currentUser?.messages.find(
+      (message: Message) => message.id === id
+    );
+
+    // throw an error if the user has not message id
+    if (!isOwner) throw new Error("the user is not owner of the message");
+
+    // delete the message
     const message: Message | null = await prismaClient.message.delete({
       where: { id },
     });
 
+    // response deleted the message
     res.status(200).json({ message });
+
+    return;
   } catch (e) {
     console.error(e);
 
