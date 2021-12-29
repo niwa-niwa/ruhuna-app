@@ -10,12 +10,15 @@ export type CustomSocket = Socket & {
   currentUser?: User;
 };
 
+// path for connecting chat socket
 const PATH_CHAT_SOCKET = "/chatSockets";
 
+// EVs for chat socket
 const EV_CHAT_SOCKET = {
   SUBSCRIBE: "subscribe_village",
 };
 
+// an instance for socket server
 const io: Server = new Server({
   path: PATH_CHAT_SOCKET,
   serveClient: false,
@@ -31,9 +34,11 @@ const io: Server = new Server({
 io.use(async (socket: CustomSocket, next) => {
   // verify firebase token
 
+  // get token data from request query
   const token_data: string | string[] | undefined =
     socket.handshake.query.token;
 
+  // throw an error if token undefined
   if (token_data === undefined) {
     const err: any = new Error();
     err.data = { errorObj: generateErrorObj(400, "token is nothing") };
@@ -41,10 +46,13 @@ io.use(async (socket: CustomSocket, next) => {
     return;
   }
 
+  // get token
   const token = Array.isArray(token_data) ? token_data[0] : token_data;
 
+  // verify token with firebase api
   const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(token);
 
+  // throw an error if firebaseUser is errorObj
   if ("errorCode" in firebaseUser) {
     const err: any = new Error();
     err.data = {
@@ -57,10 +65,12 @@ io.use(async (socket: CustomSocket, next) => {
     return;
   }
 
+  // get a model current user
   const currentUser: User | null = await prismaClient.user.findUnique({
     where: { firebaseId: firebaseUser.uid },
   });
 
+  // throw an error if currentUser is null
   if (!currentUser) {
     const err: any = new Error();
     err.data = { errorObj: generateErrorObj(404, "the user is not found") };
@@ -68,11 +78,13 @@ io.use(async (socket: CustomSocket, next) => {
     return;
   }
 
+  // insert currentUser to socket
   socket.currentUser = currentUser;
 
   next();
 });
 
+// chat Socket connection
 io.on("connection", (socket: CustomSocket) => {
   // subscribe a village
   socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data) => {
@@ -93,6 +105,7 @@ io.on("connection", (socket: CustomSocket) => {
         include: { users: true },
       });
 
+    // Throw an error if village is null
     if (!village) {
       // village is null then response emit error
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
@@ -101,11 +114,12 @@ io.on("connection", (socket: CustomSocket) => {
       return;
     }
 
-    // is exist currentUser in the village
+    // confirm if exist is currentUser in the village
     const isMember = village.users.find(
       (user: User) => user.id === socket.currentUser?.id
     );
 
+    // Throw an error if currentUser can not join
     if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
@@ -114,6 +128,7 @@ io.on("connection", (socket: CustomSocket) => {
       return;
     }
 
+    // insert data that currentUser join the village to db
     if (village.isPublic && !isMember) {
       // if the village is public
       await prismaClient.village.update({
@@ -122,6 +137,7 @@ io.on("connection", (socket: CustomSocket) => {
       });
     }
 
+    // join the village
     socket.join(data.villageId);
 
     // currentUser can be join, response emit success
