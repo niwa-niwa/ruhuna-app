@@ -102,6 +102,9 @@ export const deleteVillage = async (req: CustomRequest, res: Response) => {
   }
 };
 
+// TODO Leave a village to reject relation of a user between a village
+
+
 const villageController = {
   getVillages,
   getVillageDetail,
