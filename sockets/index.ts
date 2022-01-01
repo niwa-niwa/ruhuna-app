@@ -109,7 +109,7 @@ io.on("connection", (socket: CustomSocket) => {
     if (!village) {
       // village is null then response emit error
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(404, "The Village is not found"),
+        errorObj: generateErrorObj(404, `The Village is not found : ${data.villageId}`),
       });
       return;
     }
@@ -123,7 +123,7 @@ io.on("connection", (socket: CustomSocket) => {
     if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(404, "The Village is not found"),
+        errorObj: generateErrorObj(404, `The Village is not found : ${data.villageId}`),
       });
       return;
     }
@@ -144,11 +144,6 @@ io.on("connection", (socket: CustomSocket) => {
     io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
   });
 
-  // TODO the function that leave the room implement messageController
-  socket.on("unsubscribe", (data) => {
-    socket.leave(data.room);
-    console.log("leave room = ", data.villageId);
-  });
 });
 
 export { io, PATH_CHAT_SOCKET, EV_CHAT_SOCKET };

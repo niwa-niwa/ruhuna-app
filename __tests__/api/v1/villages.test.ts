@@ -1,4 +1,3 @@
-import { villages, users } from './../../../prisma/seeds';
 import { prismaClient } from "../../../lib/prismaClient";
 import request from "supertest";
 import { api } from "../../../api";

@@ -203,7 +203,7 @@ describe("TEST Web Socket io", () => {
 
       expect(status).toBe(200);
       expect(body).toHaveProperty("message");
-      done()
+      done();
     }
 
     clientSocket = client(uri, {
@@ -232,4 +232,48 @@ describe("TEST Web Socket io", () => {
     });
   });
 
+  test("leave a village and then receive an error it would join the village", (done) => {
+    let _admin_user, _village: any;
+
+    const clientSocket = client(uri, {
+      path,
+      query: {
+        token: testTokens.admin_user,
+      },
+    });
+
+    clientSocket.on("subscribe_village", (data: any) => {
+      expect(data).not.toHaveProperty("village");
+      expect(data).toHaveProperty("errorObj");
+      expect(data.errorObj.errorMessage).toMatch(_village.id)
+      done();
+    });
+
+    async function emit() {
+      _admin_user = await prismaClient.user.findUnique({
+        where: { firebaseId: admin_user.uid },
+      });
+
+      _village = await prismaClient.village.findFirst();
+
+      const edited_village = await prismaClient.village.update({
+        where: { id: _village?.id },
+        data: { isPublic: false, users: { connect: { id: _admin_user?.id } } },
+        include: { users: true },
+      });
+
+      expect(_admin_user?.id).toBe(edited_village?.users[0].id);
+
+      const leave_village = await prismaClient.village.update({
+        where:{id:_village.id},
+        data: { users:{disconnect:{id:_admin_user?.id}}},
+        include:{users:true}
+      })
+
+      clientSocket.emit("subscribe_village", {
+        villageId: _village.id,
+      });
+    }
+    emit();
+  });
 });
