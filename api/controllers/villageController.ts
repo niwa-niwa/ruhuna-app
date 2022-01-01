@@ -8,7 +8,6 @@ export const getVillages = async (req: CustomRequest, res: Response) => {
   const villages: Village[] = await prismaClient.village.findMany({
     include: { users: true, messages: true },
   });
-
   res.status(200).json({ villages });
 };
 
@@ -102,8 +101,42 @@ export const deleteVillage = async (req: CustomRequest, res: Response) => {
   }
 };
 
-// TODO Leave a village to reject relation of a user between a village
+/**
+ * Leave a village to reject relation of a user between a village
+ * 
+ * @param req 
+ * @param res 
+ */
+async function leaveVillage(req: CustomRequest, res: Response){
+  // get village id from params
+  const villageId : string = req.params.villageId;
 
+  // leave village 
+  const village: Village = await prismaClient.village.update({
+    where:{
+      id:villageId
+    },
+    data:{
+      users:{disconnect:{id:req.currentUser?.id}}
+    },
+    include:{
+      users:true,
+      messages:true
+    }
+  })
+
+  // Throw an error village is null that's why not found the village
+  if(!village){
+    res.status(404).json({
+      village: null,
+      errorObj: generateErrorObj(404, "the village is not found"),
+    })
+  }
+
+  // response the village model
+  res.status(200).json({ village })
+
+}
 
 const villageController = {
   getVillages,
@@ -111,6 +144,7 @@ const villageController = {
   createVillage,
   editVillage,
   deleteVillage,
+  leaveVillage,
 };
 
 export default villageController;

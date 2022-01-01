@@ -29,6 +29,7 @@ v1.use(
     .get("/:villageId", villageController.getVillageDetail)
     .post("/create", villageController.createVillage)
     .put("/edit/:villageId", villageController.editVillage)
+    .put("/leave/:villageId", villageController.leaveVillage)
     .delete("/delete/:villageId", villageController.deleteVillage)
 );
 
