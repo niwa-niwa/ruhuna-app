@@ -1,11 +1,11 @@
+import { Server, Socket } from "socket.io";
+import { ExtendedError } from "socket.io/dist/namespace";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User, Village } from "@prisma/client";
 import { prismaClient } from "../lib/prismaClient";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { Server, Socket } from "socket.io";
 import { verifyToken } from "../lib/firebaseAdmin";
 import { ErrorObj } from "../api/types/ErrorObj";
 import { generateErrorObj } from "../lib/generateErrorObj";
-import { ExtendedError } from "socket.io/dist/namespace";
 
 /**
  * Custom socket object for io socket
@@ -18,21 +18,23 @@ export type CustomSocket = Socket & { currentUser?: User };
 export type CustomError = Error & { data?: object };
 
 // path for connecting chat socket
-const PATH_CHAT_SOCKET: string = "/chatSockets";
+const PATH_CHAT_SOCKET: string = "/chatSocket";
 
 // EVs for chat socket
 const EV_CHAT_SOCKET: {
   SUBSCRIBE: string;
   CONNECTION: string;
   CONNECT_ERROR: string;
+  MESSAGE: string;
 } = {
   SUBSCRIBE: "subscribe_village",
   CONNECTION: "connection",
   CONNECT_ERROR: "connect_error",
+  MESSAGE:"message",
 };
 
 // an instance for socket server
-const io: Server = new Server({
+const ioChatSocket: Server = new Server({
   path: PATH_CHAT_SOCKET,
   serveClient: false,
   // below are engine.IO options
@@ -44,7 +46,7 @@ const io: Server = new Server({
 /**
  * Middleware for authentication
  */
-io.use(
+ioChatSocket.use(
   async (
     socket: CustomSocket,
     next: (err?: ExtendedError | undefined) => void
@@ -105,7 +107,7 @@ io.use(
 );
 
 // chat Socket connection
-io.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
+ioChatSocket.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
   // subscribe a village
   socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data: any) => {
     // throw an error if socket doesn't have currentUser
@@ -128,7 +130,7 @@ io.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     // Throw an error if village is null
     if (!village) {
       // village is null then response emit error
-      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
+      ioChatSocket.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
         errorObj: generateErrorObj(
           404,
           `The Village is not found : ${data.villageId}`
@@ -145,7 +147,7 @@ io.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     // Throw an error if currentUser can not join
     if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
-      io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
+      ioChatSocket.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
         errorObj: generateErrorObj(
           404,
           `The Village is not found : ${data.villageId}`
@@ -167,8 +169,8 @@ io.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     socket.join(data.villageId);
 
     // currentUser can be join, response emit success
-    io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
+    ioChatSocket.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
   });
 });
 
-export { io, PATH_CHAT_SOCKET, EV_CHAT_SOCKET };
+export { ioChatSocket, PATH_CHAT_SOCKET, EV_CHAT_SOCKET };

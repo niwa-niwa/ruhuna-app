@@ -3,7 +3,7 @@ import { Message, Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
-import { io } from "../../sockets";
+import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 
 /**
  * Get all messages
@@ -76,7 +76,7 @@ export const createMessage = async (req: CustomRequest, res: Response) => {
     });
 
     // send message in the village as room
-    io.sockets.in(villageId).emit("message", { message });
+    ioChatSocket.sockets.in(villageId).emit(EV_CHAT_SOCKET.MESSAGE, { message });
 
     // response created the message
     res.status(200).json({ message });

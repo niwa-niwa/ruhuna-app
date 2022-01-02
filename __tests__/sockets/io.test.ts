@@ -1,6 +1,6 @@
 import { createServer, Server } from "http";
 import { io as client, Socket } from "socket.io-client";
-import { io } from "../../sockets";
+import { ioChatSocket, EV_CHAT_SOCKET, PATH_CHAT_SOCKET } from "../../sockets/chatSocket";
 import { testTokens, admin_user } from "../test_config/testData";
 import { prismaClient } from "../../lib/prismaClient";
 import { User, Village } from "@prisma/client";
@@ -10,7 +10,7 @@ import { api } from "../../api";
 describe("TEST Web Socket io", () => {
   const port: string = process.env.PORT || "3000";
   const uri: string = `http://localhost:${port}`;
-  const path: string = "/chatSockets";
+  const path: string = PATH_CHAT_SOCKET;
   let clientSocket: Socket;
   let privateChatVillage: Village;
   let publicChatVillage: Village;
@@ -22,7 +22,7 @@ describe("TEST Web Socket io", () => {
      */
     const server: Server = createServer();
 
-    io.attach(server);
+    ioChatSocket.attach(server);
 
     server.listen(port);
   });
@@ -58,7 +58,7 @@ describe("TEST Web Socket io", () => {
   });
 
   afterAll(() => {
-    io.close();
+    ioChatSocket.close();
   });
 
   test("subscribe the village success", (done) => {
@@ -69,7 +69,7 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("subscribe_village", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
       expect.hasAssertions();
       expect(data).not.toHaveProperty("errorObj");
       expect(data).toHaveProperty("village");
@@ -77,7 +77,7 @@ describe("TEST Web Socket io", () => {
       done();
     });
 
-    clientSocket.emit("subscribe_village", {
+    clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
       villageId: privateChatVillage.id,
     });
   });
@@ -90,7 +90,7 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("subscribe_village", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
       expect(data).not.toHaveProperty("village");
       expect(data).toHaveProperty("errorObj");
       expect(data.errorObj).toHaveProperty("errorCode");
@@ -98,7 +98,7 @@ describe("TEST Web Socket io", () => {
       done();
     });
 
-    clientSocket.emit("subscribe_village", {
+    clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
       villageId: privateChatVillage?.id,
     });
   });
@@ -119,14 +119,14 @@ describe("TEST Web Socket io", () => {
       .then((village) => {
         expect(village?.users).toHaveLength(0);
 
-        clientSocket.on("subscribe_village", (data: any) => {
+        clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
           expect(data).toHaveProperty("village");
           expect(data).not.toHaveProperty("errorObj");
           expect(data.village.id).toBe(publicChatVillage.id);
           done();
         });
 
-        clientSocket.emit("subscribe_village", {
+        clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
           villageId: publicChatVillage?.id,
         });
       });
@@ -137,7 +137,7 @@ describe("TEST Web Socket io", () => {
       path,
     });
 
-    clientSocket.on("connect_error", (err: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.CONNECT_ERROR, (err: any) => {
       expect(err.data).toHaveProperty("errorObj");
       expect(err.data.errorObj).toHaveProperty("errorCode");
       expect(err.data.errorObj).toHaveProperty("errorMessage");
@@ -169,18 +169,18 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("subscribe_village", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
       expect(data).toHaveProperty("village");
       expect(data.village.id).toBe(privateChatVillage.id);
       // send message after join the room
       sendMessage();
     });
 
-    clientSocket.emit("subscribe_village", {
+    clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
       villageId: privateChatVillage.id,
     });
 
-    clientSocket.on("message", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.MESSAGE, (data: any) => {
       expect(data).toHaveProperty("message");
       expect(data.message.user.id).toBe(adminUser?.id);
       expect(data.message.village.id).toBe(privateChatVillage.id);
@@ -213,18 +213,18 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("subscribe_village", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
       expect(data).toHaveProperty("village");
       expect(data.village.id).toBe(publicChatVillage.id);
       // send message after join the room
       sendMessage();
     });
 
-    clientSocket.emit("subscribe_village", {
+    clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
       villageId: publicChatVillage.id,
     });
 
-    clientSocket.on("message", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.MESSAGE, (data: any) => {
       // if receive admin message from his room that general_user is not exist, it was fault
       expect(data).toHaveProperty("message");
       expect(data.message.user.id).not.toBe(adminUser?.id);
@@ -242,7 +242,7 @@ describe("TEST Web Socket io", () => {
       },
     });
 
-    clientSocket.on("subscribe_village", (data: any) => {
+    clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
       expect(data).not.toHaveProperty("village");
       expect(data).toHaveProperty("errorObj");
       expect(data.errorObj.errorMessage).toMatch(_village.id)
@@ -270,7 +270,7 @@ describe("TEST Web Socket io", () => {
         include:{users:true}
       })
 
-      clientSocket.emit("subscribe_village", {
+      clientSocket.emit(EV_CHAT_SOCKET.SUBSCRIBE, {
         villageId: _village.id,
       });
     }

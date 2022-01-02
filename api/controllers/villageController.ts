@@ -3,7 +3,7 @@ import { Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
-import { io } from "../../sockets";
+import { ioChatSocket } from "../../sockets/chatSocket";
 
 export const getVillages = async (req: CustomRequest, res: Response) => {
   const villages: Village[] = await prismaClient.village.findMany({
@@ -135,7 +135,7 @@ async function leaveVillage(req: CustomRequest, res: Response){
   }
 
   // leave the village socket
-  io.sockets.socketsLeave(villageId)
+  ioChatSocket.sockets.socketsLeave(villageId)
 
   // response the village model
   res.status(200).json({ village })

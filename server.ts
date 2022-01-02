@@ -4,7 +4,7 @@ import http from "http";
 import next from "next";
 import express, { Express, Request, Response } from "express";
 import { api } from "./api";
-import { io } from "./sockets";
+import { ioChatSocket } from "./sockets/chatSocket";
 import { NextServer, RequestHandler } from "next/dist/server/next";
 import helmet from "helmet"
 
@@ -19,7 +19,7 @@ async function main() {
   try {
     await frontApp.prepare();
 
-    io.attach(server);
+    ioChatSocket.attach(server);
 
     app.use(helmet())
     app.use(api);
