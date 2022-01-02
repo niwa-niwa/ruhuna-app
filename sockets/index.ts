@@ -5,17 +5,30 @@ import { Server, Socket } from "socket.io";
 import { verifyToken } from "../lib/firebaseAdmin";
 import { ErrorObj } from "../api/types/ErrorObj";
 import { generateErrorObj } from "../lib/generateErrorObj";
+import { ExtendedError } from "socket.io/dist/namespace";
 
-export type CustomSocket = Socket & {
-  currentUser?: User;
-};
+/**
+ * Custom socket object for io socket
+ */
+export type CustomSocket = Socket & { currentUser?: User };
+
+/**
+ * Custom error object for io socket
+ */
+export type CustomError = Error & { data?: object };
 
 // path for connecting chat socket
-const PATH_CHAT_SOCKET = "/chatSockets";
+const PATH_CHAT_SOCKET: string = "/chatSockets";
 
 // EVs for chat socket
-const EV_CHAT_SOCKET = {
+const EV_CHAT_SOCKET: {
+  SUBSCRIBE: string;
+  CONNECTION: string;
+  CONNECT_ERROR: string;
+} = {
   SUBSCRIBE: "subscribe_village",
+  CONNECTION: "connection",
+  CONNECT_ERROR: "connect_error",
 };
 
 // an instance for socket server
@@ -31,68 +44,75 @@ const io: Server = new Server({
 /**
  * Middleware for authentication
  */
-io.use(async (socket: CustomSocket, next) => {
-  // verify firebase token
+io.use(
+  async (
+    socket: CustomSocket,
+    next: (err?: ExtendedError | undefined) => void
+  ) => {
+    // verify firebase token
 
-  // get token data from request query
-  const token_data: string | string[] | undefined =
-    socket.handshake.query.token;
+    // get token data from request query
+    const token_data: string | string[] | undefined =
+      socket.handshake.query.token;
 
-  // throw an error if token undefined
-  if (token_data === undefined) {
-    const err: any = new Error();
-    err.data = { errorObj: generateErrorObj(400, "token is nothing") };
-    next(err);
-    return;
+    // throw an error if token undefined
+    if (token_data === undefined) {
+      const err: CustomError = new Error();
+      err.data = { errorObj: generateErrorObj(400, "token is nothing") };
+      next(err);
+      return;
+    }
+
+    // get token
+    const token: string = Array.isArray(token_data)
+      ? token_data[0]
+      : token_data;
+
+    // verify token with firebase api
+    const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(token);
+
+    // throw an error if firebaseUser is errorObj
+    if ("errorCode" in firebaseUser) {
+      const err: CustomError = new Error();
+      err.data = {
+        errorObj: generateErrorObj(
+          404,
+          "token is expired or firebase user is not found"
+        ),
+      };
+      next(err);
+      return;
+    }
+
+    // get a model current user
+    const currentUser: User | null = await prismaClient.user.findUnique({
+      where: { firebaseId: firebaseUser.uid },
+    });
+
+    // throw an error if currentUser is null
+    if (!currentUser) {
+      const err: CustomError = new Error();
+      err.data = { errorObj: generateErrorObj(404, "the user is not found") };
+      next(err);
+      return;
+    }
+
+    // insert currentUser to socket
+    socket.currentUser = currentUser;
+
+    next();
   }
-
-  // get token
-  const token = Array.isArray(token_data) ? token_data[0] : token_data;
-
-  // verify token with firebase api
-  const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(token);
-
-  // throw an error if firebaseUser is errorObj
-  if ("errorCode" in firebaseUser) {
-    const err: any = new Error();
-    err.data = {
-      errorObj: generateErrorObj(
-        404,
-        "token is expired or firebase user is not found"
-      ),
-    };
-    next(err);
-    return;
-  }
-
-  // get a model current user
-  const currentUser: User | null = await prismaClient.user.findUnique({
-    where: { firebaseId: firebaseUser.uid },
-  });
-
-  // throw an error if currentUser is null
-  if (!currentUser) {
-    const err: any = new Error();
-    err.data = { errorObj: generateErrorObj(404, "the user is not found") };
-    next(err);
-    return;
-  }
-
-  // insert currentUser to socket
-  socket.currentUser = currentUser;
-
-  next();
-});
+);
 
 // chat Socket connection
-io.on("connection", (socket: CustomSocket) => {
+io.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
   // subscribe a village
-  socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data) => {
-    // the error is impossible but it must implemented for typescript
+  socket.on(EV_CHAT_SOCKET.SUBSCRIBE, async (data: any) => {
+    // throw an error if socket doesn't have currentUser
     if (socket.currentUser === undefined) {
-      const err: any = new Error();
+      const err: CustomError = new Error();
       err.data = { errorObj: generateErrorObj(414, "the user is not found") };
-      socket.emit("connect_error", { ...err });
+      socket.emit(EV_CHAT_SOCKET.CONNECT_ERROR, { ...err });
       return;
     }
 
@@ -109,13 +129,16 @@ io.on("connection", (socket: CustomSocket) => {
     if (!village) {
       // village is null then response emit error
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(404, `The Village is not found : ${data.villageId}`),
+        errorObj: generateErrorObj(
+          404,
+          `The Village is not found : ${data.villageId}`
+        ),
       });
       return;
     }
 
     // confirm if exist is currentUser in the village
-    const isMember = village.users.find(
+    const isMember: User | undefined = village.users.find(
       (user: User) => user.id === socket.currentUser?.id
     );
 
@@ -123,7 +146,10 @@ io.on("connection", (socket: CustomSocket) => {
     if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
       io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(404, `The Village is not found : ${data.villageId}`),
+        errorObj: generateErrorObj(
+          404,
+          `The Village is not found : ${data.villageId}`
+        ),
       });
       return;
     }
@@ -143,7 +169,6 @@ io.on("connection", (socket: CustomSocket) => {
     // currentUser can be join, response emit success
     io.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, { village });
   });
-
 });
 
 export { io, PATH_CHAT_SOCKET, EV_CHAT_SOCKET };
