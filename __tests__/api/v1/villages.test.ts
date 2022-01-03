@@ -1,7 +1,7 @@
-import { prismaClient } from "./../../../api/lib/prismaClient";
+import { prismaClient } from "../../../lib/prismaClient";
 import request from "supertest";
 import { api } from "../../../api";
-import { testTokens } from "../../test_config/testData";
+import { testTokens, admin_user } from "../../test_config/testData";
 
 const PREFIX_VILLAGES = "/api/v1/villages";
 
@@ -196,4 +196,30 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(body.errorObj).toHaveProperty("errorCode");
     expect(body.errorObj).toHaveProperty("errorMessage");
   });
+
+  test("PUT /api/v1/villages/leave/:villageId leaveVillage TEST : a user leave a village", async () => {
+    const _village = await prismaClient.village.findFirst({include:{users:true}});
+
+    const _admin_user = await prismaClient.user.findUnique({
+      where: { firebaseId: admin_user.uid },
+    });
+
+    const _edited_village = await prismaClient.village.update({
+      where: { id: _village?.id },
+      data: { users: { connect: { id: _admin_user?.id } } },
+      include: { users: true },
+    });
+
+    expect(_edited_village.users).toEqual(
+      expect.arrayContaining([_admin_user])
+    );
+
+    const {status, body} = await request(api).put(PREFIX_VILLAGES + "/leave/"+_edited_village.id).set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+    expect(status).toBe(200)
+    expect(body).toHaveProperty("village")
+    expect(body.village.users.length).toBe(_edited_village?.users.length-1)
+
+  });
+
 });

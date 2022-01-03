@@ -1,4 +1,4 @@
-import { ErrorObj } from "../types/ErrorObj";
+import { ErrorObj } from "../api/types/ErrorObj";
 
 export function generateErrorObj(
   errorCode: number,

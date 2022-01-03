@@ -1,23 +1,30 @@
 require("dotenv").config();
 
+import http from "http";
 import next from "next";
-import express, { Request, Response } from "express";
+import express, { Express, Request, Response } from "express";
 import { api } from "./api";
+import { ioChatSocket } from "./sockets/chatSocket";
+import { NextServer, RequestHandler } from "next/dist/server/next";
+import helmet from "helmet"
 
-const dev = process.env.NODE_ENV !== "production";
-const port = process.env.PORT || 3000;
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const dev: boolean = process.env.NODE_ENV !== "production";
+const port: string = process.env.PORT || "3000";
+const frontApp: NextServer = next({ dev });
+const handle: RequestHandler = frontApp.getRequestHandler();
+const app: Express = express();
+const server: http.Server = http.createServer(app);
 
 async function main() {
   try {
-    await app.prepare();
+    await frontApp.prepare();
 
-    const server = express();
+    ioChatSocket.attach(server);
 
-    server.use(api);
+    app.use(helmet())
+    app.use(api);
 
-    server.all("*", (req: Request, res: Response) => {
+    app.all("*", (req: Request, res: Response) => {
       return handle(req, res);
     });
 
@@ -27,7 +34,7 @@ async function main() {
         `> Start on http://localhost:${port} - env ${process.env.NODE_ENV}`
       );
     });
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
 
     process.exit(1);

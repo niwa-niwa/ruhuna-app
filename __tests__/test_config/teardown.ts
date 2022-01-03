@@ -1,4 +1,4 @@
-import { prismaClient } from "../../api/lib/prismaClient";
+import { prismaClient } from "../../lib/prismaClient";
 
 async function teardown() {
   await prismaClient.$disconnect();

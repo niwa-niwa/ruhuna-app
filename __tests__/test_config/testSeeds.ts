@@ -1,4 +1,4 @@
-import { prismaClient } from "../../api/lib/prismaClient";
+import { prismaClient } from "../../lib/prismaClient";
 import { users, villages } from "../../prisma/seeds";
 
 export async function testSeeds() {

@@ -29,6 +29,7 @@ model Village {
   id          String    @id @unique @default(uuid())
   name        String    @unique @db.VarChar(64)
   description String?   @db.VarChar(255)
+  isPublic    Boolean   @default(false)
   users       User[]
   messages    Message[]
   createdAt   DateTime  @default(now())
