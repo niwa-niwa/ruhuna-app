@@ -7,18 +7,21 @@ import { ioChatSocket } from "../../sockets/chatSocket";
 
 /**
  * get all villages
- * @param req 
- * @param res 
+ * @param req
+ * @param res
  */
-async function getVillages(req: CustomRequest, res: Response): Promise<void>{
+async function getVillages(req: CustomRequest, res: Response): Promise<void> {
   const villages: Village[] = await prismaClient.village.findMany({
     include: { users: true, messages: true },
   });
   res.status(200).json({ villages });
   return;
-};
+}
 
-async function getVillageDetail(req: CustomRequest, res: Response): Promise<void>{
+async function getVillageDetail(
+  req: CustomRequest,
+  res: Response
+): Promise<void> {
   const id: string = req.params.villageId;
 
   const village: Village | null = await prismaClient.village.findUnique({
@@ -37,16 +40,15 @@ async function getVillageDetail(req: CustomRequest, res: Response): Promise<void
 
   res.status(200).json({ village });
   return;
-};
+}
 
 /**
  * create a village
- * @param req 
- * @param res 
+ * @param req
+ * @param res
  */
-async function createVillage(req: CustomRequest, res: Response): Promise<void>{
-
-  const userId : string | undefined = req.currentUser?.id;
+async function createVillage(req: CustomRequest, res: Response): Promise<void> {
+  const userId: string | undefined = req.currentUser?.id;
 
   const { name, description }: Prisma.VillageCreateWithoutUsersInput = req.body;
 
@@ -74,14 +76,14 @@ async function createVillage(req: CustomRequest, res: Response): Promise<void>{
       errorObj: generateErrorObj(400, "couldn't create a village"),
     });
   }
-};
+}
 
 /**
  * edit a village
- * @param req 
- * @param res 
+ * @param req
+ * @param res
  */
-async function editVillage(req: CustomRequest, res: Response): Promise<void>{
+async function editVillage(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.villageId;
   const data: Prisma.VillageUpdateInput = req.body;
 
@@ -95,7 +97,6 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void>{
     res.status(200).json({ village });
 
     return;
-    
   } catch (e) {
     console.error(e);
 
@@ -104,14 +105,14 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void>{
       errorObj: generateErrorObj(400, "couldn't edit a village"),
     });
   }
-};
+}
 
 /**
  * delete a village
- * @param req 
- * @param res 
+ * @param req
+ * @param res
  */
-async function deleteVillage(req: CustomRequest, res: Response): Promise<void>{
+async function deleteVillage(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.villageId;
 
   try {
@@ -128,55 +129,54 @@ async function deleteVillage(req: CustomRequest, res: Response): Promise<void>{
       errorObj: generateErrorObj(400, "couldn't delete a village"),
     });
   }
-};
+}
 
 /**
  * Leave a village to reject relation of a user between a village
- * 
- * @param req 
- * @param res 
+ *
+ * @param req
+ * @param res
  */
-async function leaveVillage(req: CustomRequest, res: Response){
+async function leaveVillage(req: CustomRequest, res: Response) {
   // get village id from params
-  const villageId : string = req.params.villageId;
+  const villageId: string = req.params.villageId;
 
-  // leave village 
+  // leave village
   const village: Village = await prismaClient.village.update({
-    where:{
-      id:villageId
+    where: {
+      id: villageId,
     },
-    data:{
-      users:{disconnect:{id:req.currentUser?.id}}
+    data: {
+      users: { disconnect: { id: req.currentUser?.id } },
     },
-    include:{
-      users:true,
-      messages:true
-    }
-  })
+    include: {
+      users: true,
+      messages: true,
+    },
+  });
 
   // Throw an error village is null that's why not found the village
-  if(!village){
+  if (!village) {
     res.status(404).json({
       village: null,
       errorObj: generateErrorObj(404, "the village is not found"),
-    })
+    });
   }
 
   // leave the village socket
-  ioChatSocket.sockets.socketsLeave(villageId)
+  ioChatSocket.sockets.socketsLeave(villageId);
 
   // response the village model
-  res.status(200).json({ village })
-
+  res.status(200).json({ village });
 }
 
-const villageController:{
-  getVillages:any,
-  getVillageDetail:any,
-  createVillage:any,
-  editVillage:any,
-  deleteVillage:any,
-  leaveVillage:any,
+const villageController: {
+  getVillages: any;
+  getVillageDetail: any;
+  createVillage: any;
+  editVillage: any;
+  deleteVillage: any;
+  leaveVillage: any;
 } = {
   getVillages,
   getVillageDetail,

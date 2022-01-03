@@ -9,16 +9,16 @@ import { verifyToken } from "../../lib/firebaseAdmin";
 
 /**
  * validate firebase token
- * @param req 
- * @param res 
- * @param next 
- * @returns 
+ * @param req
+ * @param res
+ * @param next
+ * @returns
  */
 export async function validateToken(
   req: CustomRequest,
   res: Response,
   next: NextFunction
-) : Promise<void> {
+): Promise<void> {
   // get token from request header
   const idToken: string | undefined = req.header("Authorization");
 
@@ -44,11 +44,12 @@ export async function validateToken(
   }
 
   // get User model based on firebase id
-  const currentUser: (User & { villages: Village[], messages:Message[] }) | null =
-    await prismaClient.user.findUnique({
-      where: { firebaseId: firebaseUser.uid },
-      include: { villages: true, messages:true },
-    });
+  const currentUser:
+    | (User & { villages: Village[]; messages: Message[] })
+    | null = await prismaClient.user.findUnique({
+    where: { firebaseId: firebaseUser.uid },
+    include: { villages: true, messages: true },
+  });
 
   // throw an error if currentUser is nothing and end
   if (!currentUser) {
@@ -64,4 +65,4 @@ export async function validateToken(
   req.currentUser = currentUser;
 
   return next();
-};
+}

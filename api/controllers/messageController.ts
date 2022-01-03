@@ -115,7 +115,8 @@ async function editMessage(req: CustomRequest, res: Response): Promise<void> {
     );
 
     // throw an error if the user has not message id
-    if (!req.currentUser?.isAdmin && !isOwner) throw new Error("the user is not owner of the message");
+    if (!req.currentUser?.isAdmin && !isOwner)
+      throw new Error("the user is not owner of the message");
 
     // get a content from request body
     const { content } = req.body;
@@ -157,7 +158,8 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
     );
 
     // throw an error if the user has not message id
-    if (!req.currentUser?.isAdmin && !isOwner) throw new Error("the user is not owner of the message");
+    if (!req.currentUser?.isAdmin && !isOwner)
+      throw new Error("the user is not owner of the message");
 
     // delete the message
     const message: Message | null = await prismaClient.message.delete({
@@ -178,12 +180,12 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-const messageController : {
-  getMessages : any,
-  getMessageDetail : any,
-  createMessage : any,
-  editMessage : any,
-  deleteMessage : any,
+const messageController: {
+  getMessages: any;
+  getMessageDetail: any;
+  createMessage: any;
+  editMessage: any;
+  deleteMessage: any;
 } = {
   getMessages,
   getMessageDetail,
