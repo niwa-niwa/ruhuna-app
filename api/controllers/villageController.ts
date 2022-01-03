@@ -5,14 +5,20 @@ import { CustomRequest } from "../types/CustomRequest";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket } from "../../sockets/chatSocket";
 
-export const getVillages = async (req: CustomRequest, res: Response) => {
+/**
+ * get all villages
+ * @param req 
+ * @param res 
+ */
+async function getVillages(req: CustomRequest, res: Response): Promise<void>{
   const villages: Village[] = await prismaClient.village.findMany({
     include: { users: true, messages: true },
   });
   res.status(200).json({ villages });
+  return;
 };
 
-export const getVillageDetail = async (req: CustomRequest, res: Response) => {
+async function getVillageDetail(req: CustomRequest, res: Response): Promise<void>{
   const id: string = req.params.villageId;
 
   const village: Village | null = await prismaClient.village.findUnique({
@@ -30,10 +36,17 @@ export const getVillageDetail = async (req: CustomRequest, res: Response) => {
   }
 
   res.status(200).json({ village });
+  return;
 };
 
-export const createVillage = async (req: CustomRequest, res: Response) => {
-  const userId = req.currentUser?.id || "";
+/**
+ * create a village
+ * @param req 
+ * @param res 
+ */
+async function createVillage(req: CustomRequest, res: Response): Promise<void>{
+
+  const userId : string | undefined = req.currentUser?.id;
 
   const { name, description }: Prisma.VillageCreateWithoutUsersInput = req.body;
 
@@ -51,6 +64,8 @@ export const createVillage = async (req: CustomRequest, res: Response) => {
     });
 
     res.status(200).json({ village: createdVillage });
+
+    return;
   } catch (e) {
     console.error(e);
 
@@ -61,7 +76,12 @@ export const createVillage = async (req: CustomRequest, res: Response) => {
   }
 };
 
-export const editVillage = async (req: CustomRequest, res: Response) => {
+/**
+ * edit a village
+ * @param req 
+ * @param res 
+ */
+async function editVillage(req: CustomRequest, res: Response): Promise<void>{
   const id: string = req.params.villageId;
   const data: Prisma.VillageUpdateInput = req.body;
 
@@ -73,6 +93,9 @@ export const editVillage = async (req: CustomRequest, res: Response) => {
     });
 
     res.status(200).json({ village });
+
+    return;
+    
   } catch (e) {
     console.error(e);
 
@@ -83,7 +106,12 @@ export const editVillage = async (req: CustomRequest, res: Response) => {
   }
 };
 
-export const deleteVillage = async (req: CustomRequest, res: Response) => {
+/**
+ * delete a village
+ * @param req 
+ * @param res 
+ */
+async function deleteVillage(req: CustomRequest, res: Response): Promise<void>{
   const id: string = req.params.villageId;
 
   try {
@@ -142,7 +170,14 @@ async function leaveVillage(req: CustomRequest, res: Response){
 
 }
 
-const villageController = {
+const villageController:{
+  getVillages:any,
+  getVillageDetail:any,
+  createVillage:any,
+  editVillage:any,
+  deleteVillage:any,
+  leaveVillage:any,
+} = {
   getVillages,
   getVillageDetail,
   createVillage,
