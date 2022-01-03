@@ -14,11 +14,11 @@ import { verifyToken } from "../../lib/firebaseAdmin";
  * @param next 
  * @returns 
  */
-export const validateToken = async (
+export async function validateToken(
   req: CustomRequest,
   res: Response,
   next: NextFunction
-) => {
+) : Promise<void> {
   // get token from request header
   const idToken: string | undefined = req.header("Authorization");
 
