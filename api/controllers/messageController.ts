@@ -10,13 +10,15 @@ import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
  * @param req
  * @param res
  */
-export const getMessages = async (req: CustomRequest, res: Response) => {
+async function getMessages(req: CustomRequest, res: Response): Promise<void> {
   const messages: Message[] = await prismaClient.message.findMany({
     include: { user: true, village: true },
   });
 
   res.status(200).json({ messages });
-};
+
+  return;
+}
 
 /**
  * Get a message detail
@@ -24,7 +26,10 @@ export const getMessages = async (req: CustomRequest, res: Response) => {
  * @param res
  * @returns
  */
-export const getMessageDetail = async (req: CustomRequest, res: Response) => {
+async function getMessageDetail(
+  req: CustomRequest,
+  res: Response
+): Promise<void> {
   // get message id from params
   const id: string = req.params.messageId;
 
@@ -47,7 +52,7 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
   res.status(200).json({ message });
 
   return;
-};
+}
 
 /**
  * Create a message
@@ -55,7 +60,7 @@ export const getMessageDetail = async (req: CustomRequest, res: Response) => {
  * @param res
  * @returns
  */
-export const createMessage = async (req: CustomRequest, res: Response) => {
+async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get data from request body
     const { content, villageId }: Prisma.MessageCreateManyInput = req.body;
@@ -76,7 +81,9 @@ export const createMessage = async (req: CustomRequest, res: Response) => {
     });
 
     // send message in the village as room
-    ioChatSocket.sockets.in(villageId).emit(EV_CHAT_SOCKET.MESSAGE, { message });
+    ioChatSocket.sockets
+      .in(villageId)
+      .emit(EV_CHAT_SOCKET.MESSAGE, { message });
 
     // response created the message
     res.status(200).json({ message });
@@ -90,14 +97,14 @@ export const createMessage = async (req: CustomRequest, res: Response) => {
       errorObj: generateErrorObj(400, "Couldn't create the message"),
     });
   }
-};
+}
 
 /**
  * Edit a message
  * @param req
  * @param res
  */
-export const editMessage = async (req: CustomRequest, res: Response) => {
+async function editMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get message id from params
     const id: string = req.params.messageId;
@@ -132,14 +139,14 @@ export const editMessage = async (req: CustomRequest, res: Response) => {
       errorObj: generateErrorObj(404, "Couldn't edit the message"),
     });
   }
-};
+}
 
 /**
  * Delete a message
  * @param req
  * @param res
  */
-export const deleteMessage = async (req: CustomRequest, res: Response) => {
+async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get message id from params
     const id: string = req.params.messageId;
@@ -169,9 +176,15 @@ export const deleteMessage = async (req: CustomRequest, res: Response) => {
       errorObj: generateErrorObj(404, "the message is not found"),
     });
   }
-};
+}
 
-const messageController = {
+const messageController : {
+  getMessages : any,
+  getMessageDetail : any,
+  createMessage : any,
+  editMessage : any,
+  deleteMessage : any,
+} = {
   getMessages,
   getMessageDetail,
   createMessage,
