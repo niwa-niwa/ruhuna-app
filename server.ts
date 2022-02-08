@@ -6,7 +6,6 @@ import express, { Express, Request, Response } from "express";
 import { api } from "./api";
 import { ioChatSocket } from "./sockets/chatSocket";
 import { NextServer, RequestHandler } from "next/dist/server/next";
-import helmet from "helmet"
 
 const dev: boolean = process.env.NODE_ENV !== "production";
 const port: string = process.env.PORT || "3000";
@@ -21,7 +20,6 @@ async function main() {
 
     ioChatSocket.attach(server);
 
-    app.use(helmet())
     app.use(api);
 
     app.all("*", (req: Request, res: Response) => {
