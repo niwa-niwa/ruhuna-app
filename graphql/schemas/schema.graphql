@@ -2,19 +2,6 @@ type Query  {
   connect:String
 }
 
-type User {
-  id:ID!
-  firebaseId:String!
-  isAdmin:Boolean!
-  isActive:Boolean!
-  isAnonymous:Boolean!
-  username:String!
-  messages:[Message!]
-  villages:[Village!]
-  createdAt:DateTime!
-  updatedAt:DateTime
-}
-
 type Village {
   id:ID!
   name:String!
@@ -22,8 +9,8 @@ type Village {
   isPublic:Boolean!
   users:[User!]
   messages:[Message!]
-  createdAt:DateTime!
-  updatedAt:DateTime
+  createdAt:String!
+  updatedAt:String
 }
 
 type Message {
@@ -31,8 +18,6 @@ type Message {
   content:String!
   village:Village!
   user:User
-  createdAt:DateTime!
-  updatedAt:DateTime
+  createdAt:String!
+  updatedAt:String
 }
-
-# TODO implement DateTime in Scalar

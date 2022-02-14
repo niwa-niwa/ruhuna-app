@@ -1,0 +1,23 @@
+type User {
+  id:ID!
+  firebaseId:String!
+  isAdmin:Boolean!
+  isActive:Boolean!
+  isAnonymous:Boolean!
+  username:String!
+  messages:[Message!]
+  villages:[Village!]
+  createdAt:String!
+  updatedAt:String
+}
+
+type Query  {
+  getUserDetail(id:ID!):User
+  getUsers:[User!]
+}
+
+type Mutation {
+  createUser(firebaseId:ID!):User
+  editUser(id:ID!, isAdmin:Boolean, isActive:Boolean, isAnonymous:Boolean, username:String):User
+  deleteUser(id:ID!):User
+}
