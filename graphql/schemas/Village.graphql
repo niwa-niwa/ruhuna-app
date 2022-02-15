@@ -1,0 +1,22 @@
+type Village {
+  id:ID!
+  name:String!
+  description:String
+  isPublic:Boolean!
+  users:[User!]
+  messages:[Message!]
+  createdAt:String!
+  updatedAt:String
+}
+
+type Query {
+  getVillages:[Village!]
+  getVillageDetail:Village
+}
+
+type Mutation {
+  createVillage(name:String!, description:String):Village
+  editVillage(id:ID!, name:String, description:String, isPublic:Boolean):Village
+  deleteVillage(id:ID!):Village
+  leaveVillage(id:ID):Village
+}

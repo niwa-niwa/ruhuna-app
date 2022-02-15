@@ -1,0 +1,19 @@
+type Message {
+  id:ID!
+  content:String!
+  village:Village!
+  user:User
+  createdAt:String!
+  updatedAt:String
+}
+
+type Query {
+  getMessages:[Message!]
+  getMessageDetail(id:ID!):Message
+}
+
+type Mutation {
+  createMessage(content:String!, villageId:String!):Message
+  editMessage(id:ID!, content:String):Message
+  deleteMessage(id:ID!):Message
+}
