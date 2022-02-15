@@ -14,6 +14,7 @@ type User {
 type Query  {
   getUserDetail(id:ID!):User
   getUsers:[User!]
+  getMe:User
 }
 
 type Mutation {

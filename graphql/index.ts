@@ -1,8 +1,12 @@
+import { Request } from "express";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 import { ApolloServer } from "apollo-server-express";
 import { ExpressContext } from "apollo-server-express";
+import { prismaClient } from "../lib/prismaClient";
 import { join } from "path";
+import { authentication } from "./middlewares/authentication";
+import { User } from "@prisma/client";
 
 // merge types
 const typesArray: any[] = loadFilesSync(
@@ -14,8 +18,15 @@ const resolversArray: any[] = loadFilesSync(
   join(__dirname, "/resolvers/**/*.resolvers.*")
 );
 
+// TODO able to authentication after implement  getUsers and createUser of resolver
 export const apolloServer: ApolloServer<ExpressContext> = new ApolloServer({
   typeDefs: mergeTypeDefs(typesArray),
   resolvers: mergeResolvers(resolversArray),
-  context: ({ req }) => {},
+  context: async ({ req }: { req: Request }) => {
+    // const currentUser: User = await authentication(req);
+    return {
+      prismaClient,
+      // currentUser,
+    };
+  },
 });

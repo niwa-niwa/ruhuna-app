@@ -13,7 +13,134 @@ export type Scalars = {
   Float: number;
 };
 
+export type Message = {
+  __typename?: 'Message';
+  content: Scalars['String'];
+  createdAt: Scalars['String'];
+  id: Scalars['ID'];
+  updatedAt?: Maybe<Scalars['String']>;
+  user?: Maybe<User>;
+  village: Village;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createMessage?: Maybe<Message>;
+  createUser?: Maybe<User>;
+  createVillage?: Maybe<Village>;
+  deleteMessage?: Maybe<Message>;
+  deleteUser?: Maybe<User>;
+  deleteVillage?: Maybe<Village>;
+  editMessage?: Maybe<Message>;
+  editUser?: Maybe<User>;
+  editVillage?: Maybe<Village>;
+  leaveVillage?: Maybe<Village>;
+};
+
+
+export type MutationCreateMessageArgs = {
+  content: Scalars['String'];
+  villageId: Scalars['String'];
+};
+
+
+export type MutationCreateUserArgs = {
+  firebaseId: Scalars['ID'];
+};
+
+
+export type MutationCreateVillageArgs = {
+  description?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+};
+
+
+export type MutationDeleteMessageArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteUserArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteVillageArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationEditMessageArgs = {
+  content?: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+};
+
+
+export type MutationEditUserArgs = {
+  id: Scalars['ID'];
+  isActive?: InputMaybe<Scalars['Boolean']>;
+  isAdmin?: InputMaybe<Scalars['Boolean']>;
+  isAnonymous?: InputMaybe<Scalars['Boolean']>;
+  username?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationEditVillageArgs = {
+  description?: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+  isPublic?: InputMaybe<Scalars['Boolean']>;
+  name?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationLeaveVillageArgs = {
+  id?: InputMaybe<Scalars['ID']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   connect?: Maybe<Scalars['String']>;
+  getMe?: Maybe<User>;
+  getMessageDetail?: Maybe<Message>;
+  getMessages?: Maybe<Array<Message>>;
+  getUserDetail?: Maybe<User>;
+  getUsers?: Maybe<Array<User>>;
+  getVillageDetail?: Maybe<Village>;
+  getVillages?: Maybe<Array<Village>>;
+};
+
+
+export type QueryGetMessageDetailArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryGetUserDetailArgs = {
+  id: Scalars['ID'];
+};
+
+export type User = {
+  __typename?: 'User';
+  createdAt: Scalars['String'];
+  firebaseId: Scalars['String'];
+  id: Scalars['ID'];
+  isActive: Scalars['Boolean'];
+  isAdmin: Scalars['Boolean'];
+  isAnonymous: Scalars['Boolean'];
+  messages?: Maybe<Array<Message>>;
+  updatedAt?: Maybe<Scalars['String']>;
+  username: Scalars['String'];
+  villages?: Maybe<Array<Village>>;
+};
+
+export type Village = {
+  __typename?: 'Village';
+  createdAt: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  isPublic: Scalars['Boolean'];
+  messages?: Maybe<Array<Message>>;
+  name: Scalars['String'];
+  updatedAt?: Maybe<Scalars['String']>;
+  users?: Maybe<Array<User>>;
 };
