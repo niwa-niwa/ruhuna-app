@@ -18,15 +18,14 @@ const resolversArray: any[] = loadFilesSync(
   join(__dirname, "/resolvers/**/*.resolvers.*")
 );
 
-// TODO able to authentication after implement  getUsers and createUser of resolver
 export const apolloServer: ApolloServer<ExpressContext> = new ApolloServer({
   typeDefs: mergeTypeDefs(typesArray),
   resolvers: mergeResolvers(resolversArray),
   context: async ({ req }: { req: Request }) => {
-    // const currentUser: User = await authentication(req);
+    const currentUser: User = await authentication(req);
     return {
       prismaClient,
-      // currentUser,
+      currentUser,
     };
   },
 });
