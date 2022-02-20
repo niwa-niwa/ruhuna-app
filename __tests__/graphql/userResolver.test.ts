@@ -16,6 +16,26 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     apolloServer.applyMiddleware({ app, path: gql_endpoint });
   });
 
+  test("TEST failed getMe and authentication failed ", async () => {
+    const { status, body } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer aaaaa`)
+      .send({
+        query: `{
+        getMe{
+          id
+        }
+      }`,
+      });
+
+    expect(status).toBe(400);
+    expect(body).not.toHaveProperty("data");
+    expect(body).toHaveProperty("errors");
+    expect(body.errors[0].message).toEqual(
+      expect.stringContaining("Context creation failed:")
+    );
+  });
+
   test("TEST getMe in Query", async () => {
     const {
       status,
