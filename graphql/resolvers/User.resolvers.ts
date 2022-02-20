@@ -20,6 +20,7 @@ export const resolvers = {
       // TODO include messages and villages
       const user: User | null = await prismaClient.user.findUnique({
         where: { id },
+        include: {messages:true, villages:true}
       });
       // throw an error if user is null
       if (!user) {
