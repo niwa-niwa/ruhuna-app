@@ -7,8 +7,9 @@ export const resolvers = {
       return context.currentUser;
     },
     getUsers: async (): Promise<User[]> => {
-      // TODO include messages and villages
-      const users: User[] = await prismaClient.user.findMany();
+      const users: User[] = await prismaClient.user.findMany({
+        include: { messages: true, villages: true },
+      });
       return users;
     },
     getUserDetail: async (
@@ -17,16 +18,14 @@ export const resolvers = {
       context: any,
       info: any
     ): Promise<User> => {
-      // TODO include messages and villages
       const user: User | null = await prismaClient.user.findUnique({
         where: { id },
-        include: {messages:true, villages:true}
+        include: { messages: true, villages: true },
       });
       // throw an error if user is null
       if (!user) {
         throw new Error("bad parameter request");
       }
-
       return user;
     },
   },

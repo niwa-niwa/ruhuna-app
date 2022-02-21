@@ -36,7 +36,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     );
   });
 
-  test("TEST getMe in Query", async () => {
+  test("TEST Query getMe", async () => {
     const {
       status,
       body: {
@@ -103,10 +103,11 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     expect(getMe.villages[0]).toHaveProperty("updatedAt");
   });
 
-  test("TEST getUsers ", async () => {
-    const dbUsers: User[] = await prismaClient.user.findMany({
-      include: { messages: true, villages: true },
-    });
+  test("TEST Query getUsers ", async () => {
+    const dbUsers: User[] & { messages: Message[]; villages: Village[] }[] =
+      await prismaClient.user.findMany({
+        include: { messages: true, villages: true },
+      });
 
     const {
       status,
@@ -127,9 +128,17 @@ describe("TEST User of resolvers in GraphQL cases", () => {
             username
             messages{
               id
+              content
+              createdAt
+              updatedAt
             }
             villages{
               id
+              name
+              description
+              isPublic
+              createdAt
+              updatedAt
             }
             createdAt
             updatedAt
@@ -139,9 +148,29 @@ describe("TEST User of resolvers in GraphQL cases", () => {
 
     expect(status).toBe(200);
     expect(getUsers.length).toBe(dbUsers.length);
+    expect(getUsers[0].id).toBe(dbUsers[0]?.id);
+    expect(getUsers[0].firebaseId).toBe(dbUsers[0]?.firebaseId);
+    expect(getUsers[0].isAdmin).toBe(dbUsers[0]?.isAdmin);
+    expect(getUsers[0].isActive).toBe(dbUsers[0]?.isActive);
+    expect(getUsers[0].isAnonymous).toBe(dbUsers[0]?.isAnonymous);
+    expect(getUsers[0].username).toBe(dbUsers[0]?.username);
+    expect(getUsers[0]).toHaveProperty("createdAt");
+    expect(getUsers[0]).toHaveProperty("updatedAt");
+    expect(getUsers[0].messages.length).toBe(dbUsers[0]?.messages.length);
+    expect(getUsers[0].messages[0]).toHaveProperty("id");
+    expect(getUsers[0].messages[0]).toHaveProperty("content");
+    expect(getUsers[0].messages[0]).toHaveProperty("createdAt");
+    expect(getUsers[0].messages[0]).toHaveProperty("updatedAt");
+    expect(getUsers[0].villages.length).toBe(dbUsers[0]?.villages.length);
+    expect(getUsers[0].villages[0]).toHaveProperty("id");
+    expect(getUsers[0].villages[0]).toHaveProperty("name");
+    expect(getUsers[0].villages[0]).toHaveProperty("description");
+    expect(getUsers[0].villages[0]).toHaveProperty("isPublic");
+    expect(getUsers[0].villages[0]).toHaveProperty("createdAt");
+    expect(getUsers[0].villages[0]).toHaveProperty("updatedAt");
   });
 
-  test("TEST getUserDetail ", async () => {
+  test("TEST Query getUserDetail ", async () => {
     const dbUser: (User & { messages: Message[]; villages: Village[] }) | null =
       await prismaClient.user.findFirst({
         include: { messages: true, villages: true },
