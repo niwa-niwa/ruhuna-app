@@ -1,9 +1,9 @@
 import request from "supertest";
 import express, { Express } from "express";
 import { prismaClient } from "../../lib/prismaClient";
-import { Prisma, User, Message, Village } from "@prisma/client";
+import { User, Message, Village } from "@prisma/client";
 import { apolloServer } from "../../graphql";
-import { testTokens, admin_user } from "../test_config/testData";
+import { testTokens } from "../test_config/testData";
 
 const gql_endpoint: string = "/graphql";
 
@@ -233,5 +233,66 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     expect(getUserDetail.villages[0]).toHaveProperty("isPublic");
     expect(getUserDetail.villages[0]).toHaveProperty("createdAt");
     expect(getUserDetail.villages[0]).toHaveProperty("updatedAt");
+  });
+
+  test("TEST Mutation createUser", async () => {
+    const {
+      status,
+      body: {
+        data: { createUser },
+      },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
+          createUser(firebaseToken:"token_firebase_user"){
+            id
+            firebaseId
+            isAdmin
+            isActive
+            isAnonymous
+            username
+            createdAt
+            updatedAt
+          }
+        }`,
+      });
+
+    const dbUser: User | null = await prismaClient.user.findFirst({
+      where: { id: createUser.id },
+    });
+
+    expect(status).toBe(200);
+    expect(createUser.id).toBe(dbUser?.id);
+    expect(createUser.firebaseId).toBe(dbUser?.firebaseId);
+    expect(createUser.isAdmin).toBe(dbUser?.isAdmin);
+    expect(createUser.isActive).toBe(dbUser?.isActive);
+    expect(createUser.isAnonymous).toBe(dbUser?.isAnonymous);
+    expect(createUser.username).toBe(dbUser?.username);
+    expect(createUser).toHaveProperty("createdAt");
+    expect(createUser).toHaveProperty("updatedAt");
+  });
+
+  test("TEST FAILED Mutation crateUser by wrong token", async () => {
+    const { status, body } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
+          createUser(firebaseToken:"test_token"){
+            id
+            firebaseId
+            isAdmin
+            isActive
+            isAnonymous
+            username
+            createdAt
+            updatedAt
+          }
+        }`,
+      });
+    expect(status).toBe(200);
+    expect(body.errors[0].message).toEqual("ID token has invalid signature");
   });
 });

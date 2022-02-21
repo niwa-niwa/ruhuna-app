@@ -18,7 +18,7 @@ type Query  {
 }
 
 type Mutation {
-  createUser(firebaseId:ID!):User
+  createUser(firebaseToken:String!):User
   editUser(id:ID!, isAdmin:Boolean, isActive:Boolean, isAnonymous:Boolean, username:String):User
   deleteUser(id:ID!):User
 }
