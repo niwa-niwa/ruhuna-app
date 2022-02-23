@@ -295,4 +295,70 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     expect(status).toBe(200);
     expect(body.errors[0].message).toEqual("ID token has invalid signature");
   });
+
+  test("TEST Mutation editUser", async () => {
+    const dbUser: User | null = await prismaClient.user.findFirst({});
+
+    const edit_data = {
+      isAdmin: !dbUser?.isAdmin,
+      username: "edited_user_name",
+    };
+    const {
+      status,
+      body: {
+        data: { editUser },
+      },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
+          editUser(id:"${dbUser?.id}", isAdmin:${edit_data.isAdmin},  username:"${edit_data.username}"){
+            id
+            firebaseId
+            isAdmin
+            isActive
+            isAnonymous
+            username
+            createdAt
+            updatedAt
+          }
+        }`,
+      });
+    expect(status).toBe(200);
+    expect(editUser.id).toBe(dbUser?.id);
+    expect(editUser.isAdmin).toBe(edit_data.isAdmin);
+    expect(editUser.username).toBe(edit_data.username);
+  });
+
+  test("TEST FAIL Mutation editUser cause request from not admin user", async () => {
+    const dbUser: User | null = await prismaClient.user.findFirst({});
+
+    const edit_data = {
+      isAdmin: !dbUser?.isAdmin,
+      username: "edited_user_name",
+    };
+    const {
+      status,
+      body
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.general_user}`)
+      .send({
+        query: `mutation{
+          editUser(id:"${dbUser?.id}", isAdmin:${edit_data.isAdmin},  username:"${edit_data.username}"){
+            id
+            firebaseId
+            isAdmin
+            isActive
+            isAnonymous
+            username
+            createdAt
+            updatedAt
+          }
+        }`,
+      });
+    expect(status).toBe(200);
+    expect(body.errors[0].message).toEqual("Not allowed to edit the user data");
+  });
 });
