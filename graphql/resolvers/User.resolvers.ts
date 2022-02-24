@@ -1,30 +1,33 @@
-import { Query, Mutation } from "./../types.d";
-import { prismaClient } from "../../lib/prismaClient";
 import { Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { ErrorObj } from "../../api/types/ErrorObj";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
-import { MutationEditUserArgs, QueryGetUserDetailArgs } from "../types";
+import { TContext } from "../gql.types";
 
 export const resolvers = {
   Query: {
-    getMe: (parent: any, args: any, context: any, info: any): User => {
+    getMe: (parent: any, args: any, context: TContext, info: any): User => {
       return context.currentUser;
     },
-    getUsers: async (): Promise<User[]> => {
-      const users: User[] = await prismaClient.user.findMany({
+    getUsers: async (
+      parent: any,
+      args: any,
+      context: TContext,
+      info: any
+    ): Promise<User[]> => {
+      const users: User[] = await context.prisma.user.findMany({
         include: { messages: true, villages: true },
       });
       return users;
     },
     getUserDetail: async (
       parent: any,
-      { id }: { id: QueryGetUserDetailArgs & User["id"] },
-      context: any,
+      { id }: { id: User["id"] },
+      context: TContext,
       info: any
     ): Promise<User> => {
-      const user: User | null = await prismaClient.user.findUnique({
+      const user: User | null = await context.prisma.user.findUnique({
         where: { id },
         include: { messages: true, villages: true },
       });
@@ -40,7 +43,7 @@ export const resolvers = {
     createUser: async (
       parent: any,
       args: any,
-      context: any,
+      context: TContext,
       info: any
     ): Promise<User> => {
       // get firebase user from firebase
@@ -52,7 +55,7 @@ export const resolvers = {
         throw new UserInputError(firebaseUser.errorMessage);
 
       // create a user by firebase account
-      const createdUser: User = await prismaClient.user.create({
+      const createdUser: User = await context.prisma.user.create({
         data: {
           firebaseId: firebaseUser.uid,
           username: firebaseUser.name,
@@ -63,19 +66,19 @@ export const resolvers = {
     },
     editUser: async (
       parent: any,
-      args: MutationEditUserArgs & Prisma.UserUpdateInput,
-      context: any,
+      { id, ...args }: { id: User["id"]; args: Prisma.UserUpdateInput },
+      context: TContext,
       info: any
     ): Promise<User> => {
       // if the user who sent request is admin it would confirm params.userId
-      if (!context.currentUser.isAdmin && context.currentUser.id !== args.id) {
+      if (!context.currentUser.isAdmin && context.currentUser.id !== id) {
         throw new Error("Not allowed to edit the user data");
       }
 
       // edit the user
-      const editedUser: User = await prismaClient.user.update({
-        where: { id: args.id },
-        data: { ...args },
+      const editedUser: User = await context.prisma.user.update({
+        where: { id },
+        data: args,
       });
 
       return editedUser;

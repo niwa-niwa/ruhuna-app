@@ -5,3 +5,5 @@ export const prismaClient: PrismaClient<
   never,
   Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
 > = new PrismaClient();
+
+export type PClient = typeof prismaClient
