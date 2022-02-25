@@ -307,6 +307,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       status,
       body: {
         data: { editUser },
+        errors,
       },
     } = await request(app)
       .post(gql_endpoint)
@@ -325,6 +326,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
           }
         }`,
       });
+    expect(errors).toBeUndefined();
     expect(status).toBe(200);
     expect(editUser.id).toBe(dbUser?.id);
     expect(editUser.isAdmin).toBe(edit_data.isAdmin);
@@ -338,10 +340,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       isAdmin: !dbUser?.isAdmin,
       username: "edited_user_name",
     };
-    const {
-      status,
-      body
-    } = await request(app)
+    const { status, body } = await request(app)
       .post(gql_endpoint)
       .set("Authorization", `Bearer ${testTokens.general_user}`)
       .send({

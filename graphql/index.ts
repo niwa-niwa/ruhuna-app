@@ -6,8 +6,7 @@ import { ExpressContext } from "apollo-server-express";
 import { prismaClient } from "../lib/prismaClient";
 import { join } from "path";
 import { authentication } from "./middlewares/authentication";
-import { User } from "@prisma/client";
-import { TContext } from "./gql.types";
+import { TContext, UserIncludeRelations } from "./gql_types";
 
 // merge types
 const typesArray: any[] = loadFilesSync(
@@ -23,7 +22,7 @@ export const apolloServer: ApolloServer<ExpressContext> = new ApolloServer({
   typeDefs: mergeTypeDefs(typesArray),
   resolvers: mergeResolvers(resolversArray),
   context: async ({ req }: { req: Request }): Promise<TContext> => {
-    const currentUser: User = await authentication(req);
+    const currentUser: UserIncludeRelations = await authentication(req);
     return {
       prisma: prismaClient,
       currentUser,
