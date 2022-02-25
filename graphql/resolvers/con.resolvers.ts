@@ -1,6 +1,6 @@
-import { Resolvers} from '../resolvers-types'
+import { Resolvers } from "../../types/resolvers-types";
 
-export const resolvers:Resolvers = {
+export const resolvers: Resolvers = {
   Query: {
     connect: () => {
       return "Hello resolvers";

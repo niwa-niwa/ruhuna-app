@@ -1,9 +1,10 @@
 import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { ErrorObj } from "../../api/types/ErrorObj";
+import { ErrorObj } from "../../types/error.types";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
-import { TContext, UserIncludeRelations } from "../gql_types";
+import { TContext } from "../../types/gql.types";
+import { UserIncludeRelations } from "../../types/prisma.types";
 
 export const resolvers = {
   Query: {

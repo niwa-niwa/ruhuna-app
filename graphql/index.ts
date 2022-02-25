@@ -6,7 +6,8 @@ import { ExpressContext } from "apollo-server-express";
 import { prismaClient } from "../lib/prismaClient";
 import { join } from "path";
 import { authentication } from "./middlewares/authentication";
-import { TContext, UserIncludeRelations } from "./gql_types";
+import { TContext } from "../types/gql.types";
+import { UserIncludeRelations } from "../types/prisma.types";
 
 // merge types
 const typesArray: any[] = loadFilesSync(

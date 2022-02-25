@@ -1,9 +1,9 @@
-import { CustomRequest } from "../types/CustomRequest";
+import { CustomRequest } from "../../types/rest.types";
 import { Response, NextFunction } from "express";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { Message, User, Village } from "@prisma/client";
-import { ErrorObj } from "../types/ErrorObj";
+import { ErrorObj } from "../../types/error.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { verifyToken } from "../../lib/firebaseAdmin";
 

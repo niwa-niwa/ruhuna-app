@@ -1,7 +1,7 @@
 import FirebaseAdmin from "firebase-admin";
 import { readFileSync, existsSync } from "fs";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { ErrorObj } from "../api/types/ErrorObj";
+import { ErrorObj } from "../types/error.types";
 import { generateErrorObj } from "./generateErrorObj";
 
 let serviceAccount: object = {};

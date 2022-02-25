@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { CustomRequest } from "../types/CustomRequest";
+import { CustomRequest } from "../../types/rest.types";
 
 function auth(req: CustomRequest, res: Response): void {
   res.status(200).json({ currentUser: req.currentUser });

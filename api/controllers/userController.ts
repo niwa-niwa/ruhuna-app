@@ -4,8 +4,8 @@ import { Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
-import { ErrorObj } from "../types/ErrorObj";
-import { CustomRequest } from "../types/CustomRequest";
+import { ErrorObj } from "../../types/error.types";
+import { CustomRequest } from "../../types/rest.types";
 
 /**
  * Get user profile detail

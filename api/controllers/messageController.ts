@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { Message, Prisma, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import { CustomRequest } from "../types/CustomRequest";
+import { CustomRequest } from "../../types/rest.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 

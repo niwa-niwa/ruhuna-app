@@ -2,9 +2,9 @@ import { Request } from "express";
 import { AuthenticationError } from "apollo-server-express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
-import { ErrorObj } from "../../api/types/ErrorObj";
+import { ErrorObj } from "../../types/error.types";
 import { prismaClient } from "../../lib/prismaClient";
-import { UserIncludeRelations } from "../gql_types";
+import { UserIncludeRelations } from "../../types/prisma.types";
 
 export async function authentication(
   req: Request

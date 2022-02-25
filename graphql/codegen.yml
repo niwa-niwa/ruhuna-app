@@ -1,12 +1,12 @@
 overwrite: true
 schema: ./graphql/schemas/**/*.graphql
 generates:
-  ./graphql/types.d.ts:
+  ./types/types.d.ts:
     plugins:
       - typescript
       - typescript-operations
       - typescript-react-apollo
-  ./graphql/resolvers-types.d.ts:
+  ./types/resolvers-types.d.ts:
     config:
       useIndexSignature: true
     plugins:

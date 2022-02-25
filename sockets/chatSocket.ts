@@ -4,7 +4,7 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User, Village } from "@prisma/client";
 import { prismaClient } from "../lib/prismaClient";
 import { verifyToken } from "../lib/firebaseAdmin";
-import { ErrorObj } from "../api/types/ErrorObj";
+import { ErrorObj } from "../types/error.types";
 import { generateErrorObj } from "../lib/generateErrorObj";
 
 /**
