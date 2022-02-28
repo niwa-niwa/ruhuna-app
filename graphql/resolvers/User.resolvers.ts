@@ -118,24 +118,24 @@ export const resolvers = {
 
       return editedUser;
     },
-    // deleteUser: async(
-    //   parent: any,
-    //   { id}: { id: User["id"] },
-    //   context: TContext,
-    //   info: any
-    // ): Promise<User> =>{
-    //   // if the user who sent request is admin it would confirm params.userId
-    //   if (!context.currentUser.isAdmin && context.currentUser.id !== id) {
-    //     throw new Error("Not allowed to edit the user data");
-    //   }
+    deleteUser: async (
+      parent: any,
+      { id }: { id: User["id"] },
+      context: TContext,
+      info: any
+    ): Promise<User> => {
+      // if the user who sent request is admin it would confirm params.userId
+      if (!context.currentUser.isAdmin && context.currentUser.id !== id) {
+        throw new Error("Not allowed to edit the user data");
+      }
 
-    //   // edit the user
-    //   const deletedUser: User = await context.prisma.user.delete({
-    //     where: { id },
-    //     include:{ messages:true, villages:true}
-    //   });
+      // edit the user
+      const deletedUser: User = await context.prisma.user.delete({
+        where: { id },
+        include: { messages: true, villages: true },
+      });
 
-    //   return deletedUser;
-    // }
+      return deletedUser;
+    },
   },
 };

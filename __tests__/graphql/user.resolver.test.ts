@@ -360,4 +360,78 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     expect(status).toBe(200);
     expect(body.errors[0].message).toEqual("Not allowed to edit the user data");
   });
+
+  test("TEST Success Mutation deleteUser ", async () => {
+    const func: string = "deleteUser";
+
+    const dbUser: User | null = await prismaClient.user.findFirst({});
+
+    const {
+      status,
+      body: { data, errors },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
+        ${func}(id:"${dbUser?.id}"){
+          id
+          firebaseId
+          isAdmin
+          isActive
+          isAnonymous
+          username
+          createdAt
+          updatedAt
+        }
+      }`,
+      });
+
+    const deletedUser: User | null = await prismaClient.user.findFirst({
+      where: { id: dbUser?.id },
+    });
+
+    expect(status).toBe(200);
+    expect(errors).toBeUndefined();
+    expect(data).not.toBeUndefined();
+    expect(data[func].id).toBe(dbUser?.id);
+    expect(deletedUser).toBeNull();
+  });
+
+  test("TEST Fail Mutation deleteUser because of a general user ", async () => {
+    const func: string = "deleteUser";
+
+    const dbUser: User | null = await prismaClient.user.findFirst({});
+
+    const {
+      status,
+      body: { data, errors },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.general_user}`)
+      .send({
+        query: `mutation{
+        ${func}(id:"${dbUser?.id}"){
+          id
+          firebaseId
+          isAdmin
+          isActive
+          isAnonymous
+          username
+          createdAt
+          updatedAt
+        }
+      }`,
+      });
+
+    const deletedUser: User | null = await prismaClient.user.findFirst({
+      where: { id: dbUser?.id },
+    });
+
+    expect(status).toBe(200);
+    expect(errors).not.toBeUndefined();
+    expect(errors[0].message).toBe("Not allowed to edit the user data");
+    expect(data[func]).toBeNull();
+    expect(deletedUser).not.toBeNull();
+  });
 });
