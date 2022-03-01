@@ -18,6 +18,7 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
   });
 
   test("TEST Query getVillages ", async () => {
+    const func: string = "getVillages"
     const dbVillages: VillageIncludeRelations[] = await prismaClient.village.findMany({
       include: { users: true, messages: true },
     });
@@ -33,7 +34,7 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({
         query: `{
-          getVillages{
+          ${func}{
             id
             name
             description
@@ -56,31 +57,20 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
         }`,
       });
 
+    // TODO implement custom scaler type for date
     expect(status).toBe(200);
     expect(data).not.toBeNull();
     expect(errors).toBeUndefined();
-    console.log(data)
-    // expect(getUsers.length).toBe(dbUsers.length);
-    // expect(getUsers[0].id).toBe(dbUsers[0]?.id);
-    // expect(getUsers[0].firebaseId).toBe(dbUsers[0]?.firebaseId);
-    // expect(getUsers[0].isAdmin).toBe(dbUsers[0]?.isAdmin);
-    // expect(getUsers[0].isActive).toBe(dbUsers[0]?.isActive);
-    // expect(getUsers[0].isAnonymous).toBe(dbUsers[0]?.isAnonymous);
-    // expect(getUsers[0].username).toBe(dbUsers[0]?.username);
-    // expect(getUsers[0]).toHaveProperty("createdAt");
-    // expect(getUsers[0]).toHaveProperty("updatedAt");
-    // expect(getUsers[0].messages.length).toBe(dbUsers[0]?.messages.length);
-    // expect(getUsers[0].messages[0]).toHaveProperty("id");
-    // expect(getUsers[0].messages[0]).toHaveProperty("content");
-    // expect(getUsers[0].messages[0]).toHaveProperty("createdAt");
-    // expect(getUsers[0].messages[0]).toHaveProperty("updatedAt");
-    // expect(getUsers[0].villages.length).toBe(dbUsers[0]?.villages.length);
-    // expect(getUsers[0].villages[0]).toHaveProperty("id");
-    // expect(getUsers[0].villages[0]).toHaveProperty("name");
-    // expect(getUsers[0].villages[0]).toHaveProperty("description");
-    // expect(getUsers[0].villages[0]).toHaveProperty("isPublic");
-    // expect(getUsers[0].villages[0]).toHaveProperty("createdAt");
-    // expect(getUsers[0].villages[0]).toHaveProperty("updatedAt");
+    expect(data[func].length).toBe(dbVillages.length)
+    expect(data[func][0]).toHaveProperty("id")
+    expect(data[func][0]).toHaveProperty("name")
+    expect(data[func][0]).toHaveProperty("isPublic")
+    expect(data[func][0]).toHaveProperty("createdAt")
+    expect(data[func][0]).toHaveProperty("updatedAt")
+    expect(data[func][0]).toHaveProperty("messages")
+    expect(data[func][0]).toHaveProperty("users")
+    // expect(data[func]).toEqual(dbVillages);
+
   });
 
   // test("TEST Query getUserDetail ", async () => {
