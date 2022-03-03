@@ -6,7 +6,7 @@ import express, { Express, Request, Response } from "express";
 import { api } from "./api";
 import { ioChatSocket } from "./sockets/chatSocket";
 import { NextServer, RequestHandler } from "next/dist/server/next";
-import { apolloServer } from "./graphql";
+import { apolloServer } from "./graphql/app";
 
 const dev: boolean = process.env.NODE_ENV !== "production";
 const port: string = process.env.PORT || "3000";

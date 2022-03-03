@@ -2,7 +2,7 @@ import request from "supertest";
 import express, { Express } from "express";
 import { prismaClient } from "../../lib/prismaClient";
 import { User, Message, Village } from "@prisma/client";
-import { apolloServer } from "../../graphql";
+import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
 import { VillageIncludeRelations } from "../../types/prisma.types";
 
@@ -19,6 +19,7 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
 
   test("TEST Query getVillages ", async () => {
     const func: string = "getVillages"
+
     const dbVillages: VillageIncludeRelations[] = await prismaClient.village.findMany({
       include: { users: true, messages: true },
     });
@@ -57,7 +58,6 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
         }`,
       });
 
-    // TODO implement custom scaler type for date
     expect(status).toBe(200);
     expect(data).not.toBeNull();
     expect(errors).toBeUndefined();
@@ -69,7 +69,6 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
     expect(data[func][0]).toHaveProperty("updatedAt")
     expect(data[func][0]).toHaveProperty("messages")
     expect(data[func][0]).toHaveProperty("users")
-    // expect(data[func]).toEqual(dbVillages);
 
   });
 

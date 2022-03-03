@@ -2,7 +2,7 @@ import request from "supertest";
 import express, { Express } from "express";
 import { prismaClient } from "../../lib/prismaClient";
 import { User, Message, Village } from "@prisma/client";
-import { apolloServer } from "../../graphql";
+import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
 
 const gql_endpoint: string = "/graphql";

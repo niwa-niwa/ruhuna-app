@@ -1,3 +1,5 @@
+scalar Date
+
 type User {
   id:ID!
   firebaseId:String!
@@ -7,8 +9,8 @@ type User {
   username:String!
   messages:[Message!]
   villages:[Village!]
-  createdAt:String!
-  updatedAt:String
+  createdAt:Date!
+  updatedAt:Date
 }
 
 type Query  {
