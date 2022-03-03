@@ -12,8 +12,8 @@ type Village {
 }
 
 type Query {
+  getVillageDetail(villageId:ID!):Village
   getVillages:[Village!]
-  getVillageDetail:Village
 }
 
 type Mutation {

@@ -18,18 +18,16 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
   });
 
   test("TEST Query getVillages ", async () => {
-    const func: string = "getVillages"
+    const func: string = "getVillages";
 
-    const dbVillages: VillageIncludeRelations[] = await prismaClient.village.findMany({
-      include: { users: true, messages: true },
-    });
+    const dbVillages: VillageIncludeRelations[] =
+      await prismaClient.village.findMany({
+        include: { users: true, messages: true },
+      });
 
     const {
       status,
-      body: {
-        data,
-        errors,
-      },
+      body: { data, errors },
     } = await request(app)
       .post(gql_endpoint)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
@@ -61,17 +59,59 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
     expect(status).toBe(200);
     expect(data).not.toBeNull();
     expect(errors).toBeUndefined();
-    expect(data[func].length).toBe(dbVillages.length)
-    expect(data[func][0]).toHaveProperty("id")
-    expect(data[func][0]).toHaveProperty("name")
-    expect(data[func][0]).toHaveProperty("isPublic")
-    expect(data[func][0]).toHaveProperty("createdAt")
-    expect(data[func][0]).toHaveProperty("updatedAt")
-    expect(data[func][0]).toHaveProperty("messages")
-    expect(data[func][0]).toHaveProperty("users")
-
+    expect(data[func].length).toBe(dbVillages.length);
+    expect(data[func][0]).toHaveProperty("id");
+    expect(data[func][0]).toHaveProperty("name");
+    expect(data[func][0]).toHaveProperty("isPublic");
+    expect(data[func][0]).toHaveProperty("createdAt");
+    expect(data[func][0]).toHaveProperty("updatedAt");
+    expect(data[func][0]).toHaveProperty("messages");
+    expect(data[func][0]).toHaveProperty("users");
   });
 
+  test("TEST Query getVillageDetail", async () => {
+    const func: string = "getVillageDetail";
+
+    const dbVillage: VillageIncludeRelations | null =
+      await prismaClient.village.findFirst({
+        include: { users: true, messages: true },
+      });
+
+    const {
+      status,
+      body: { data, errors },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `{
+          ${func}(villageId:"${dbVillage?.id}"){
+            id
+            name
+            description
+            isPublic
+            messages{
+              id
+              content
+            }
+            users{
+              id
+              username
+            }
+          }
+        }`,
+      });
+
+    expect(status).toBe(200);
+    expect(data).not.toBeNull();
+    expect(errors).toBeUndefined();
+    expect(data[func].id).toBe(dbVillage?.id);
+    expect(data[func].name).toBe(dbVillage?.name);
+    expect(data[func].description).toBe(dbVillage?.description);
+    expect(data[func].isPublic).toBe(dbVillage?.isPublic);
+    expect(data[func]).toHaveProperty("messages");
+    expect(data[func]).toHaveProperty("users");
+  });
   // test("TEST Query getUserDetail ", async () => {
   //   const dbUser: (User & { messages: Message[]; villages: Village[] }) | null =
   //     await prismaClient.user.findFirst({

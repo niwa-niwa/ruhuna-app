@@ -15,10 +15,36 @@ export const resolvers = {
       context: TContext,
       info: any
     ): Promise<VillageIncludeRelations[]> => {
-      const villages: VillageIncludeRelations[] = await context.prisma.village.findMany({
-        include: { users: true, messages: true },
-      });
+      const villages: VillageIncludeRelations[] = await context.prisma.village
+        .findMany({
+          include: { users: true, messages: true },
+        })
+        .catch((e) => {
+          throw new Error("Internal Server Error");
+        });
+
       return villages;
+    },
+
+    getVillageDetail: async (
+      parent: any,
+      { villageId }: { villageId: Village["id"] },
+      context: TContext,
+      info: any
+    ): Promise<VillageIncludeRelations> => {
+      const village: VillageIncludeRelations | null =
+        await context.prisma.village
+          .findUnique({
+            where: { id: villageId },
+            include: { users: true, messages: true },
+          })
+          .catch((e) => {
+            throw new Error("Internal Server Error");
+          });
+
+      if (!village) throw new UserInputError("bad parameter request");
+      
+      return village;
     },
   },
 };
