@@ -11,14 +11,15 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Date: any;
 };
 
 export type Message = {
   __typename?: 'Message';
   content: Scalars['String'];
-  createdAt: Scalars['String'];
+  createdAt: Scalars['Date'];
   id: Scalars['ID'];
-  updatedAt?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['Date']>;
   user?: Maybe<User>;
   village: Village;
 };
@@ -45,12 +46,13 @@ export type MutationCreateMessageArgs = {
 
 
 export type MutationCreateUserArgs = {
-  firebaseId: Scalars['ID'];
+  firebaseToken: Scalars['String'];
 };
 
 
 export type MutationCreateVillageArgs = {
   description?: InputMaybe<Scalars['String']>;
+  isPublic?: InputMaybe<Scalars['Boolean']>;
   name: Scalars['String'];
 };
 
@@ -119,28 +121,33 @@ export type QueryGetUserDetailArgs = {
   id: Scalars['ID'];
 };
 
+
+export type QueryGetVillageDetailArgs = {
+  villageId: Scalars['ID'];
+};
+
 export type User = {
   __typename?: 'User';
-  createdAt: Scalars['String'];
+  createdAt: Scalars['Date'];
   firebaseId: Scalars['String'];
   id: Scalars['ID'];
   isActive: Scalars['Boolean'];
   isAdmin: Scalars['Boolean'];
   isAnonymous: Scalars['Boolean'];
   messages?: Maybe<Array<Message>>;
-  updatedAt?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
   villages?: Maybe<Array<Village>>;
 };
 
 export type Village = {
   __typename?: 'Village';
-  createdAt: Scalars['String'];
+  createdAt: Scalars['Date'];
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   isPublic: Scalars['Boolean'];
   messages?: Maybe<Array<Message>>;
   name: Scalars['String'];
-  updatedAt?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['Date']>;
   users?: Maybe<Array<User>>;
 };

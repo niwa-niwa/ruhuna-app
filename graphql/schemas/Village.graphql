@@ -17,7 +17,7 @@ type Query {
 }
 
 type Mutation {
-  createVillage(name:String!, description:String):Village
+  createVillage(name:String!, description:String, isPublic:Boolean):Village
   editVillage(id:ID!, name:String, description:String, isPublic:Boolean):Village
   deleteVillage(id:ID!):Village
   leaveVillage(id:ID):Village
