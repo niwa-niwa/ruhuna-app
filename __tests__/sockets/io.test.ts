@@ -5,7 +5,7 @@ import { testTokens, admin_user } from "../test_config/testData";
 import { prismaClient } from "../../lib/prismaClient";
 import { User, Village } from "@prisma/client";
 import request from "supertest";
-import { api } from "../../api";
+import { api } from "../../rest";
 
 describe("TEST Web Socket io", () => {
   const port: string = process.env.PORT || "3000";

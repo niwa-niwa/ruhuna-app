@@ -1,6 +1,6 @@
 import { prismaClient } from "../../../lib/prismaClient";
 import request from "supertest";
-import { api } from "../../../api";
+import { api } from "../../../rest";
 import { testTokens, admin_user } from "../../test_config/testData";
 
 const PREFIX_VILLAGES = "/api/v1/villages";

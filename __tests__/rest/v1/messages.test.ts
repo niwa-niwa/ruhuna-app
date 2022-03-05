@@ -2,8 +2,8 @@ import { Message, Village } from "@prisma/client";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import request from "supertest";
-import { api } from "../../../api";
-import { testTokens } from "./../../test_config/testData";
+import { api } from "../../../rest";
+import { testTokens } from "../../test_config/testData";
 
 const PREFIX_MESSAGES = "/api/v1/messages";
 

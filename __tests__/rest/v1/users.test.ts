@@ -1,5 +1,5 @@
 import request from "supertest";
-import { api } from "../../../api";
+import { api } from "../../../rest";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";

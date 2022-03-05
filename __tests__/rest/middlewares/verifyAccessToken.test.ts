@@ -1,5 +1,5 @@
 import request from "supertest";
-import { api } from "../../../api";
+import { api } from "../../../rest";
 
 describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {
