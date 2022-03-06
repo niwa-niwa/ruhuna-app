@@ -69,7 +69,7 @@ export type MutationDeleteUserArgs = {
 
 
 export type MutationDeleteVillageArgs = {
-  id: Scalars['ID'];
+  villageId: Scalars['ID'];
 };
 
 
@@ -90,14 +90,14 @@ export type MutationEditUserArgs = {
 
 export type MutationEditVillageArgs = {
   description?: InputMaybe<Scalars['String']>;
-  id: Scalars['ID'];
   isPublic?: InputMaybe<Scalars['Boolean']>;
   name?: InputMaybe<Scalars['String']>;
+  villageId: Scalars['ID'];
 };
 
 
 export type MutationLeaveVillageArgs = {
-  id?: InputMaybe<Scalars['ID']>;
+  villageId?: InputMaybe<Scalars['ID']>;
 };
 
 export type Query = {
@@ -267,10 +267,10 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<MutationCreateVillageArgs, 'name'>>;
   deleteMessage?: Resolver<Maybe<ResolversTypes['Message']>, ParentType, ContextType, RequireFields<MutationDeleteMessageArgs, 'id'>>;
   deleteUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'id'>>;
-  deleteVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<MutationDeleteVillageArgs, 'id'>>;
+  deleteVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<MutationDeleteVillageArgs, 'villageId'>>;
   editMessage?: Resolver<Maybe<ResolversTypes['Message']>, ParentType, ContextType, RequireFields<MutationEditMessageArgs, 'id'>>;
   editUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationEditUserArgs, 'id'>>;
-  editVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<MutationEditVillageArgs, 'id'>>;
+  editVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<MutationEditVillageArgs, 'villageId'>>;
   leaveVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, Partial<MutationLeaveVillageArgs>>;
 }>;
 

@@ -1,3 +1,4 @@
+import { MutationEditVillageArgs } from "./../../types/types.d";
 import {
   QueryResolvers,
   MutationResolvers,
@@ -73,10 +74,26 @@ async function createVillage(
 
 async function editVillage(
   parent: any,
-  { villageId }: { villageId: Village["id"] },
-  context: TContext,
+  { villageId, description, isPublic, name }: MutationEditVillageArgs,
+  { prisma, currentUser }: TContext,
   info: any
-) {}
+): Promise<Village> {
+  const village: Village = await prisma.village
+    .update({
+      where: { id: villageId },
+      data: {
+        name: name || undefined,
+        description,
+        isPublic: isPublic || undefined,
+      },
+      include: { users: true, messages: true },
+    })
+    .catch((e) => {
+      throw new Error("Internal Server Error");
+    });
+
+  return village;
+}
 
 async function deleteVillage(
   parent: any,
@@ -99,7 +116,7 @@ const villageResolvers: {
   };
   Mutation: {
     createVillage: MutationResolvers["createVillage"];
-    // editVillage:MutationResolvers["editVillage"]
+    editVillage: MutationResolvers["editVillage"];
     // deleteVillage:MutationResolvers["deleteVillage"]
     // leaveVillage:MutationResolvers["leaveVillage"]
   };
@@ -110,7 +127,7 @@ const villageResolvers: {
   },
   Mutation: {
     createVillage,
-    // editVillage,
+    editVillage,
     // deleteVillage,
     // leaveVillage,
   },

@@ -68,7 +68,7 @@ export type MutationDeleteUserArgs = {
 
 
 export type MutationDeleteVillageArgs = {
-  id: Scalars['ID'];
+  villageId: Scalars['ID'];
 };
 
 
@@ -89,14 +89,14 @@ export type MutationEditUserArgs = {
 
 export type MutationEditVillageArgs = {
   description?: InputMaybe<Scalars['String']>;
-  id: Scalars['ID'];
   isPublic?: InputMaybe<Scalars['Boolean']>;
   name?: InputMaybe<Scalars['String']>;
+  villageId: Scalars['ID'];
 };
 
 
 export type MutationLeaveVillageArgs = {
-  id?: InputMaybe<Scalars['ID']>;
+  villageId?: InputMaybe<Scalars['ID']>;
 };
 
 export type Query = {
