@@ -1,3 +1,4 @@
+import { users } from './../../prisma/seeds';
 import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { ErrorObj } from "../../types/error.types";
@@ -9,11 +10,11 @@ import { UserIncludeRelations } from "../../types/prisma.types";
 export const resolvers = {
   Query: {
     getMe: (
-      parent: any,
-      args: any,
+      _parent,
+      _args,
       context: TContext,
-      info: any
-    ): User & { messages: Message[]; villages: Village[] } => {
+      _info
+    ) => {
       return context.currentUser;
     },
 
@@ -22,11 +23,9 @@ export const resolvers = {
       args: any,
       context: TContext,
       info: any
-    ): Promise<UserIncludeRelations[] | null> => {
-      const users: UserIncludeRelations[] | null = await context.prisma.user
-        .findMany({
-          include: { messages: true, villages: true },
-        })
+    ) => {
+      const users: User[] | null = await context.prisma.user
+        .findMany()
         .catch((e) => {
           throw new Error("Internal Server Error");
         });
@@ -137,5 +136,33 @@ export const resolvers = {
 
       return deletedUser;
     },
+  },
+
+  User: {
+    messages: async (
+      user: any,
+      args: any,
+      { prisma, currentUser }: TContext
+    ) => {
+      const data =
+        await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { messages: true },
+        });
+      return data?.messages;
+    },
+
+    villages: async (
+      user: any,
+      args: any,
+      { prisma, currentUser }: TContext
+    ) => {
+      const data =
+        await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { villages: true },
+        });
+      return data?.villages;
+    }
   },
 };

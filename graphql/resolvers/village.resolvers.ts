@@ -31,13 +31,13 @@ async function getVillages(
 
 async function getVillageDetail(
   parent: any,
-  { villageId }: { villageId: Village["id"] },
+  args: { villageId: Village["id"] },
   context: TContext,
   info: any
 ): Promise<Village> {
   const village: VillageIncludeRelations | null = await context.prisma.village
     .findUnique({
-      where: { id: villageId },
+      where: { id: args.villageId },
       include: { users: true, messages: true },
     })
     .catch((e) => {
@@ -45,6 +45,10 @@ async function getVillageDetail(
     });
 
   if (!village) throw new UserInputError("bad parameter request");
+  console.log("parent = ",parent)
+  console.log("args = ",args)
+  // console.log("context = ",context)
+  console.log("info = ",info)
 
   return village;
 }
