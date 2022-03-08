@@ -1,14 +1,14 @@
+import { CContext } from "./../../types/gql.types";
 import { Request } from "express";
 import { AuthenticationError } from "apollo-server-express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { ErrorObj } from "../../types/error.types";
 import { prismaClient } from "../../lib/prismaClient";
-import { UserIncludeRelations } from "../../types/prisma.types";
 
 export async function authentication(
   req: Request
-): Promise<UserIncludeRelations> {
+): Promise<CContext["currentUser"]> {
   // get token from request header
   const idToken: string | undefined = req.header("Authorization");
 
@@ -25,7 +25,7 @@ export async function authentication(
     throw new AuthenticationError("You are wrong.");
 
   // get user
-  const currentUser: UserIncludeRelations | null =
+  const currentUser: CContext["currentUser"] | null =
     await prismaClient.user.findUnique({
       where: { firebaseId: firebaseUser.uid },
       include: { villages: true, messages: true },

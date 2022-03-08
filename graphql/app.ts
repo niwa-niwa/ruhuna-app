@@ -1,13 +1,9 @@
-import { Request } from "express";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 import { ApolloServer } from "apollo-server-express";
 import { ExpressContext } from "apollo-server-express";
-import { prismaClient } from "../lib/prismaClient";
+import { context } from "./context/";
 import { join } from "path";
-import { authentication } from "./middlewares/authentication";
-import { TContext } from "../types/gql.types";
-import { UserIncludeRelations } from "../types/prisma.types";
 
 // merge types
 const typesArray: any[] = loadFilesSync(
@@ -22,11 +18,5 @@ const resolversArray: any[] = loadFilesSync(
 export const apolloServer: ApolloServer<ExpressContext> = new ApolloServer({
   typeDefs: mergeTypeDefs(typesArray),
   resolvers: mergeResolvers(resolversArray),
-  context: async ({ req }: { req: Request }): Promise<TContext> => {
-    const currentUser: UserIncludeRelations = await authentication(req);
-    return {
-      prisma: prismaClient,
-      currentUser,
-    };
-  },
+  context: context,
 });

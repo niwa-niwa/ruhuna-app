@@ -4,8 +4,8 @@ import { User, Message, Village } from "@prisma/client";
 export type { PClient };
 
 export type UserIncludeRelations = User & {
-  messages: Message[];
-  villages: Village[];
+  messages?: Message[];
+  villages?: Village[];
 };
 
 export type VillageIncludeRelations = Village & {

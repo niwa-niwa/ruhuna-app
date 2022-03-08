@@ -9,13 +9,13 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { ErrorObj } from "../../types/error.types";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
-import { TContext } from "../../types/gql.types";
+import { CContext } from "../../types/gql.types";
 import { VillageIncludeRelations } from "../../types/prisma.types";
 
 async function getVillages(
   parent: any,
   args: any,
-  context: TContext,
+  context: CContext,
   info: any
 ): Promise<Village[]> {
   const villages: VillageIncludeRelations[] = await context.prisma.village
@@ -32,7 +32,7 @@ async function getVillages(
 async function getVillageDetail(
   parent: any,
   args: { villageId: Village["id"] },
-  context: TContext,
+  context: CContext,
   info: any
 ): Promise<Village> {
   const village: VillageIncludeRelations | null = await context.prisma.village
@@ -45,10 +45,6 @@ async function getVillageDetail(
     });
 
   if (!village) throw new UserInputError("bad parameter request");
-  console.log("parent = ",parent)
-  console.log("args = ",args)
-  // console.log("context = ",context)
-  console.log("info = ",info)
 
   return village;
 }
@@ -56,7 +52,7 @@ async function getVillageDetail(
 async function createVillage(
   parent: any,
   { name, description, isPublic }: MutationCreateVillageArgs,
-  { prisma, currentUser }: TContext,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<Village> {
   const village: Village = await prisma.village
@@ -79,7 +75,7 @@ async function createVillage(
 async function editVillage(
   parent: any,
   { villageId, description, isPublic, name }: MutationEditVillageArgs,
-  { prisma, currentUser }: TContext,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<Village> {
   const village: Village = await prisma.village
@@ -102,14 +98,14 @@ async function editVillage(
 async function deleteVillage(
   parent: any,
   { villageId }: { villageId: Village["id"] },
-  context: TContext,
+  context: CContext,
   info: any
 ) {}
 
 async function leaveVillage(
   parent: any,
   { villageId }: { villageId: Village["id"] },
-  context: TContext,
+  context: CContext,
   info: any
 ) {}
 
