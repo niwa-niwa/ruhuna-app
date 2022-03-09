@@ -80,7 +80,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         include: { messages: true, villages: true },
       });
 
-    expect(status).toBe(200);
+      expect(status).toBe(200);
     expect(getMe.id).toBe(dbUser?.id);
     expect(getMe.firebaseId).toBe(dbUser?.firebaseId);
     expect(getMe.isAdmin).toBe(dbUser?.isAdmin);
@@ -303,6 +303,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       isAdmin: !dbUser?.isAdmin,
       username: "edited_user_name",
     };
+
     const {
       status,
       body: {

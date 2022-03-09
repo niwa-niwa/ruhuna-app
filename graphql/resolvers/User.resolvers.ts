@@ -3,19 +3,36 @@ import { ErrorObj } from "../../types/error.types";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
 import { CContext } from "../../types/gql.types";
-import { User, Message, Village } from "../../types/types.d";
+import {
+  User,
+  Message,
+  Village,
+  QueryGetUserDetailArgs,
+  MutationCreateUserArgs,
+  MutationEditUserArgs,
+  MutationDeleteUserArgs,
+} from "../../types/types.d";
 import {
   QueryResolvers,
   MutationResolvers,
+  UserResolvers,
 } from "./../../types/resolvers-types.d";
 
-function getMe(
-  _parent: any,
-  _args: any,
+async function getMe(
+  parent: any,
+  args: any,
   { prisma, currentUser }: CContext,
-  _info: any
-): CContext["currentUser"] {
-  return currentUser;
+  info: any
+): Promise<User | null> {
+  const user: User | null = await prisma.user
+    .findUnique({
+      where: { id: currentUser.id },
+    })
+    .catch((e) => {
+      console.error(e);
+      throw new Error("Internal Server Error");
+    });
+  return user;
 }
 
 async function getUsers(
@@ -33,11 +50,11 @@ async function getUsers(
 
 async function getUserDetail(
   parent: any,
-  { id }: { id: any },
-  context: CContext,
+  { id }: QueryGetUserDetailArgs,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<User> {
-  const user = await context.prisma.user
+  const user = await prisma.user
     .findUnique({
       where: { id },
     })
@@ -56,20 +73,20 @@ async function getUserDetail(
 
 async function createUser(
   parent: any,
-  args: any,
-  context: CContext,
+  { firebaseToken }: MutationCreateUserArgs,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<User> {
   // get firebase user from firebase
   const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(
-    args.firebaseToken
+    firebaseToken
   );
   // throw an error if firebaseUser has an errorCode property
   if ("errorCode" in firebaseUser)
     throw new UserInputError(firebaseUser.errorMessage);
 
   // create a user by firebase account
-  const createdUser = await context.prisma.user
+  const createdUser = await prisma.user
     .create({
       data: {
         firebaseId: firebaseUser.uid,
@@ -86,20 +103,25 @@ async function createUser(
 
 async function editUser(
   parent: any,
-  args: any,
-  context: CContext,
+  { id, isAdmin, isActive, isAnonymous, username }: MutationEditUserArgs,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<User> {
   // if the user who sent request is admin it would confirm params.userId
-  if (!context.currentUser.isAdmin && context.currentUser.id !== args.id) {
+  if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
   }
 
   // edit the user
-  const editedUser = await context.prisma.user
+  const editedUser = await prisma.user
     .update({
-      where: { id: args.id },
-      data: args,
+      where: { id: id },
+      data: {
+        isAdmin: isAdmin!,
+        isActive: isActive!,
+        isAnonymous: isAnonymous!,
+        username: username || undefined,
+      },
     })
     .catch((e) => {
       console.error(e);
@@ -111,19 +133,24 @@ async function editUser(
 
 async function deleteUser(
   parent: any,
-  { id }: { id: any },
-  context: CContext,
+  { id }: MutationDeleteUserArgs,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<User> {
   // if the user who sent request is admin it would confirm params.userId
-  if (!context.currentUser.isAdmin && context.currentUser.id !== id) {
+  if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
   }
 
   // edit the user
-  const deletedUser = await context.prisma.user.delete({
-    where: { id },
-  });
+  const deletedUser = await prisma.user
+    .delete({
+      where: { id },
+    })
+    .catch((e) => {
+      console.error(e);
+      throw new Error("Internal Server Error");
+    });
 
   return deletedUser;
 }
@@ -133,30 +160,47 @@ const User = {
     user: any,
     args: any,
     { prisma, currentUser }: CContext
-  ): Promise<Message[] | undefined> => {
-    const data = await prisma.message.findMany({
-      where: { userId: user.id },
-      include: { village: true },
-    });
-    return data;
+  ): Promise<Message[]> => {
+    const messages = await prisma.message
+      .findMany({
+        where: { userId: user.id },
+        include: { village: true, user: true },
+      })
+      .catch((e) => {
+        console.error(e);
+        throw new Error("Internal Server Error");
+      });
+
+    return messages;
   },
 
   villages: async (
     user: any,
     args: any,
     { prisma, currentUser }: CContext
-  ): Promise<Village[] | undefined> => {
-    const data = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { villages: true },
-    });
-    return data?.villages;
+  ): Promise<Village[]> => {
+    const villages = await prisma.village
+      .findMany({
+        where: {
+          users: {
+            some: {
+              id: user.id,
+            },
+          },
+        },
+      })
+      .catch((e) => {
+        console.error(e);
+        throw new Error("Internal Server Error");
+      });
+
+    return villages;
   },
 };
 
 const userResolvers: {
   Query: {
-    getMe: any;
+    getMe: QueryResolvers["getMe"];
     getUsers: QueryResolvers["getUsers"];
     getUserDetail: QueryResolvers["getUserDetail"];
   };
@@ -165,7 +209,7 @@ const userResolvers: {
     editUser: MutationResolvers["editUser"];
     deleteUser: MutationResolvers["deleteUser"];
   };
-  User: any;
+  User: Pick<UserResolvers, "messages" | "villages">;
 } = {
   Query: {
     getMe,
