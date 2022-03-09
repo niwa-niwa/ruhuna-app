@@ -84,7 +84,7 @@ async function editVillage(
       data: {
         name: name || undefined,
         description,
-        isPublic: isPublic || undefined,
+        isPublic: isPublic!,
       },
       include: { users: true, messages: true },
     })
