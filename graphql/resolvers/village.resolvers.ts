@@ -1,9 +1,9 @@
-import { MutationEditVillageArgs } from "./../../types/types.d";
+import { MutationEditVillageArgs } from "../../types/types.d";
 import {
   QueryResolvers,
   MutationResolvers,
   MutationCreateVillageArgs,
-} from "./../../types/resolvers-types.d";
+} from "../../types/resolvers-types.d";
 import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { ErrorObj } from "../../types/error.types";
@@ -15,10 +15,10 @@ import { VillageIncludeRelations } from "../../types/prisma.types";
 async function getVillages(
   parent: any,
   args: any,
-  context: CContext,
+  { prisma, currentUser }: CContext,
   info: any
 ): Promise<Village[]> {
-  const villages: VillageIncludeRelations[] = await context.prisma.village
+  const villages: VillageIncludeRelations[] = await prisma.village
     .findMany({
       include: { users: true, messages: true },
     })
@@ -82,7 +82,7 @@ async function editVillage(
     .update({
       where: { id: villageId },
       data: {
-        name: name || undefined,
+        name: name ?? undefined,
         description,
         isPublic: isPublic!,
       },

@@ -1,6 +1,6 @@
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { ErrorObj } from "../../types/error.types";
-import { verifyToken } from "../../lib/firebaseAdmin";
+import { verifyToken } from "../../lib/firebaseAdmin"
 import { UserInputError } from "apollo-server-express";
 import { CContext } from "../../types/gql.types";
 import {
@@ -16,7 +16,7 @@ import {
   QueryResolvers,
   MutationResolvers,
   UserResolvers,
-} from "./../../types/resolvers-types.d";
+} from "../../types/resolvers-types.d";
 
 async function getMe(
   parent: any,
