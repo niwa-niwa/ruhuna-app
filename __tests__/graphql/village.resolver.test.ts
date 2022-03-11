@@ -6,7 +6,10 @@ import { User, Message, Village } from "@prisma/client";
 import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
 import { VillageIncludeRelations } from "../../types/prisma.types";
-import { MutationEditVillageArgs } from "../../types/types.d";
+import {
+  MutationDeleteVillageArgs,
+  MutationEditVillageArgs,
+} from "../../types/types.d";
 
 const gql_endpoint: string = "/graphql";
 
@@ -168,29 +171,30 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
     expect(data[func]).toHaveProperty("createdAt");
   });
 
-  test("TEST success Mutation editVillage",async()=>{
+  test("TEST success Mutation editVillage", async () => {
     const func = "editVillage";
 
-    const edit_data: MutationEditVillageArgs= {
-      villageId:"",
-      description:"edited description",
-      isPublic:true,
-      name:"edited name",
-    }
+    const edit_data: MutationEditVillageArgs = {
+      villageId: "",
+      description: "edited description",
+      isPublic: true,
+      name: "edited name",
+    };
 
-    const dbVillage: VillageIncludeRelations | null = await prismaClient.village.findFirst({
-      include:{users:true, messages:true}
-    });
+    const dbVillage: VillageIncludeRelations | null =
+      await prismaClient.village.findFirst({
+        include: { users: true, messages: true },
+      });
     edit_data.villageId = dbVillage?.id!;
 
     const {
       status,
-      body:{data, errors}
+      body: { data, errors },
     } = await request(app)
-    .post(gql_endpoint)
-    .set("Authorization", `Bearer ${testTokens.admin_user}`)
-    .send({
-      query: `mutation{
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
         ${func}(
           villageId:"${edit_data.villageId}",
           name:"${edit_data.name}",
@@ -210,26 +214,74 @@ describe("TEST Village of resolvers in GraphQL cases", () => {
           updatedAt
         }
       }`,
-    });
+      });
 
-    const editedDbVillage: VillageIncludeRelations | null = await prismaClient.village.findUnique({
-      where:{id:edit_data.villageId},
-      include:{users:true, messages:true}
-    });
+    const editedDbVillage: VillageIncludeRelations | null =
+      await prismaClient.village.findUnique({
+        where: { id: edit_data.villageId },
+        include: { users: true, messages: true },
+      });
 
     expect(status).toBe(200);
     expect(data[func]).not.toBeNull();
     expect(errors).toBeUndefined();
-    expect(edit_data.villageId).toBe(editedDbVillage?.id)
-    expect(edit_data.name).toBe(editedDbVillage?.name)
-    expect(edit_data.description).toBe(editedDbVillage?.description)
-    expect(edit_data.isPublic).toBe(editedDbVillage?.isPublic)
-    expect(edit_data.villageId).toBe(data[func].id)
-    expect(edit_data.name).toBe(data[func].name)
-    expect(edit_data.description).toBe(data[func].description)
-    expect(edit_data.isPublic).toBe(data[func].isPublic)
+    expect(edit_data.villageId).toBe(editedDbVillage?.id);
+    expect(edit_data.name).toBe(editedDbVillage?.name);
+    expect(edit_data.description).toBe(editedDbVillage?.description);
+    expect(edit_data.isPublic).toBe(editedDbVillage?.isPublic);
+    expect(edit_data.villageId).toBe(data[func].id);
+    expect(edit_data.name).toBe(data[func].name);
+    expect(edit_data.description).toBe(data[func].description);
+    expect(edit_data.isPublic).toBe(data[func].isPublic);
+  });
 
+  test("TEST success Mutation deleteVillage", async () => {
+    const func = "deleteVillage";
 
+    const dbVillage: Village | null = await prismaClient.village.findFirst();
 
-  })
+    const args: MutationDeleteVillageArgs = {
+      villageId: dbVillage!.id,
+    };
+
+    const {
+      status,
+      body: { data, errors },
+    } = await request(app)
+      .post(gql_endpoint)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({
+        query: `mutation{
+        ${func}
+        ( 
+          villageId:"${args.villageId}"
+        )
+        {
+          id
+          name
+          description
+          isPublic
+          users{
+            id
+          }
+          messages{
+            id
+          }
+          createdAt
+          updatedAt
+        }
+      }`,
+      });
+
+    const deletedDbVillage: Village | null =
+      await prismaClient.village.findUnique({
+        where: { id: args.villageId },
+      });
+
+    expect(status).toBe(200);
+    expect(data[func]).not.toBeNull();
+    expect(errors).toBeUndefined();
+    expect(deletedDbVillage).toBeNull();
+    expect(data[func].id).toBe(args.villageId)
+  });
 });

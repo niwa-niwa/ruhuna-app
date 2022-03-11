@@ -1,4 +1,4 @@
-import { MutationEditVillageArgs } from "../../types/types.d";
+import { MutationDeleteVillageArgs, MutationEditVillageArgs } from "../../types/types.d";
 import {
   QueryResolvers,
   MutationResolvers,
@@ -23,6 +23,7 @@ async function getVillages(
       include: { users: true, messages: true },
     })
     .catch((e) => {
+      console.error(e)
       throw new Error("Internal Server Error");
     });
 
@@ -41,6 +42,7 @@ async function getVillageDetail(
       include: { users: true, messages: true },
     })
     .catch((e) => {
+      console.error(e)
       throw new Error("Internal Server Error");
     });
 
@@ -66,6 +68,7 @@ async function createVillage(
       include: { users: true, messages: true },
     })
     .catch((e) => {
+      console.error(e)
       throw new Error("Internal Server Error");
     });
 
@@ -89,6 +92,7 @@ async function editVillage(
       include: { users: true, messages: true },
     })
     .catch((e) => {
+      console.error(e)
       throw new Error("Internal Server Error");
     });
 
@@ -97,10 +101,20 @@ async function editVillage(
 
 async function deleteVillage(
   parent: any,
-  { villageId }: { villageId: Village["id"] },
-  context: CContext,
+  { villageId }: MutationDeleteVillageArgs,
+  { prisma, currentUser }: CContext,
   info: any
-) {}
+):Promise<Village> {
+  const village: Village = await prisma.village.delete({
+    where: { id:villageId  },
+  })
+  .catch((e) => {
+    console.error(e)
+    throw new Error("Internal Server Error");
+  });
+
+  return village
+}
 
 async function leaveVillage(
   parent: any,
@@ -117,7 +131,7 @@ const villageResolvers: {
   Mutation: {
     createVillage: MutationResolvers["createVillage"];
     editVillage: MutationResolvers["editVillage"];
-    // deleteVillage:MutationResolvers["deleteVillage"]
+    deleteVillage:MutationResolvers["deleteVillage"]
     // leaveVillage:MutationResolvers["leaveVillage"]
   };
 } = {
@@ -128,7 +142,7 @@ const villageResolvers: {
   Mutation: {
     createVillage,
     editVillage,
-    // deleteVillage,
+    deleteVillage,
     // leaveVillage,
   },
 };
