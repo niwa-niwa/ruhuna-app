@@ -37,70 +37,74 @@ describe("TEST User of resolvers in GraphQL cases", () => {
   });
 
   test("TEST Query getMe", async () => {
+    const func = "getMe";
+    const args = "";
+    const query = `{
+      result:${func}${args}{
+        id
+        firebaseId
+        isAdmin
+        isActive
+        isAnonymous
+        username
+        messages{
+          id
+          content
+          createdAt
+          updatedAt
+        }
+        villages{
+          id
+          name
+          description
+          isPublic
+          createdAt
+          updatedAt
+        }
+        createdAt
+        updatedAt
+      }
+    }`;
+
     const {
       status,
       body: {
-        data: { getMe },
+        data: { result, errors },
       },
     } = await request(app)
       .post(gql_endpoint)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
-      .send({
-        query: `{
-          getMe{
-            id
-            firebaseId
-            isAdmin
-            isActive
-            isAnonymous
-            username
-            messages{
-              id
-              content
-              createdAt
-              updatedAt
-            }
-            villages{
-              id
-              name
-              description
-              isPublic
-              createdAt
-              updatedAt
-            }
-            createdAt
-            updatedAt
-          }
-        }`,
-      });
+      .send({query});
 
     const dbUser: (User & { messages: Message[]; villages: Village[] }) | null =
       await prismaClient.user.findFirst({
-        where: { id: getMe.id },
+        where: { id: result.id },
         include: { messages: true, villages: true },
       });
 
-      expect(status).toBe(200);
-    expect(getMe.id).toBe(dbUser?.id);
-    expect(getMe.firebaseId).toBe(dbUser?.firebaseId);
-    expect(getMe.isAdmin).toBe(dbUser?.isAdmin);
-    expect(getMe.isActive).toBe(dbUser?.isActive);
-    expect(getMe.isAnonymous).toBe(dbUser?.isAnonymous);
-    expect(getMe.username).toBe(dbUser?.username);
-    expect(getMe).toHaveProperty("createdAt");
-    expect(getMe).toHaveProperty("updatedAt");
-    expect(getMe.messages.length).toBe(dbUser?.messages.length);
-    expect(getMe.messages[0]).toHaveProperty("id");
-    expect(getMe.messages[0]).toHaveProperty("content");
-    expect(getMe.messages[0]).toHaveProperty("createdAt");
-    expect(getMe.messages[0]).toHaveProperty("updatedAt");
-    expect(getMe.villages.length).toBe(dbUser?.villages.length);
-    expect(getMe.villages[0]).toHaveProperty("id");
-    expect(getMe.villages[0]).toHaveProperty("name");
-    expect(getMe.villages[0]).toHaveProperty("description");
-    expect(getMe.villages[0]).toHaveProperty("isPublic");
-    expect(getMe.villages[0]).toHaveProperty("createdAt");
-    expect(getMe.villages[0]).toHaveProperty("updatedAt");
+    expect(status).toBe(200);
+    expect(result).not.toBeNull();
+    expect(errors).toBeUndefined();
+    expect(result.id).toBe(dbUser?.id);
+    expect(result.firebaseId).toBe(dbUser?.firebaseId);
+    expect(result.isAdmin).toBe(dbUser?.isAdmin);
+    expect(result.isActive).toBe(dbUser?.isActive);
+    expect(result.isAnonymous).toBe(dbUser?.isAnonymous);
+    expect(result.username).toBe(dbUser?.username);
+    expect(result).toHaveProperty("createdAt");
+    expect(result).toHaveProperty("updatedAt");
+    expect(result.messages.length).toBe(dbUser?.messages.length);
+    expect(result.messages[0]).toHaveProperty("id");
+    expect(result.messages[0]).toHaveProperty("content");
+    expect(result.messages[0]).toHaveProperty("createdAt");
+    expect(result.messages[0]).toHaveProperty("updatedAt");
+    expect(result.villages.length).toBe(dbUser?.villages.length);
+    expect(result.villages[0]).toHaveProperty("id");
+    expect(result.villages[0]).toHaveProperty("name");
+    expect(result.villages[0]).toHaveProperty("description");
+    expect(result.villages[0]).toHaveProperty("isPublic");
+    expect(result.villages[0]).toHaveProperty("createdAt");
+    expect(result.villages[0]).toHaveProperty("updatedAt");
   });
 
   test("TEST Query getUsers ", async () => {

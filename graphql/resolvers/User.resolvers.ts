@@ -19,7 +19,7 @@ import {
 } from "../../types/resolvers-types.d";
 
 async function getMe(
-  parent: any,
+  obj: any,
   args: any,
   { prisma, currentUser }: CContext,
   info: any
