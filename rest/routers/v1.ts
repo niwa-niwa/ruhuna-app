@@ -23,7 +23,7 @@ v1.use(
     .get("/", validateToken, userController.getUsers)
     .get("/:userId", validateToken, userController.getUserDetail)
     .post("/create", userController.createUser)
-    .put("/edit/:userId", validateToken, userController.editUser)
+    .patch("/:userId", validateToken, userController.editUser)
     .delete("/delete/:userId", validateToken, userController.deleteUser)
 );
 

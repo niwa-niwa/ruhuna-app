@@ -105,31 +105,48 @@ async function createUser(req: Request, res: Response): Promise<void> {
  * @param res
  */
 async function editUser(req: CustomRequest, res: Response): Promise<void> {
-  try {
-    let id: string | undefined = req.currentUser?.id;
+  const currentUser: CustomRequest["currentUser"] = req.currentUser!;
 
-    // if the user who sent request is admin it would confirm params.userId
-    if (req.currentUser?.isAdmin) {
-      id = req.params.userId || req.currentUser?.id;
-    }
+  const id: Prisma.UserWhereUniqueInput["id"] = req.params.userId;
+  const data: Prisma.UserUpdateInput = req.body;
 
-    const data: Prisma.UserUpdateInput = req.body;
+  // if the user who sent request is not admin, it would confirm params.userId
+  if (!currentUser.isAdmin || id !== currentUser.id) {
+    const error = {
+      code: 10403,
+      message: "403 Forbidden",
+      description: "Not allowed to edit the user",
+    };
+    console.error(error);
+    res.status(403).json(error);
+    return;
+  }
 
-    const editedUser: User = await prismaClient.user.update({
+  const editedUser: User | void = await prismaClient.user
+    .update({
       where: { id },
       data,
+    })
+    .catch((e) => {
+      console.error(e);
+      res.status(404).json({
+        user: null,
+        errorObj: generateErrorObj(404, "The User is not Found"),
+      });
     });
 
-    res.status(200).json({ user: editedUser });
-
+  if (!editUser) {
+    const error = {
+      code: 10403,
+      message: "404 Not found",
+      description: "the user is not found",
+    };
+    console.error(error);
+    res.status(403).json(error);
     return;
-  } catch (e) {
-    console.error(e);
-    res.status(404).json({
-      user: null,
-      errorObj: generateErrorObj(404, "The User is not Found"),
-    });
   }
+
+  res.status(200).json({ user: editedUser });
 }
 
 /**
