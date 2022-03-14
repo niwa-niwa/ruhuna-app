@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { v1 } from "./v1";
 
-const router: Router = express.Router();
+const router: Router = Router();
 
 router.use(express.json());
 

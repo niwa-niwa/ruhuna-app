@@ -37,4 +37,10 @@ describe("TEST Middleware verifyAccessToken", () => {
     expect(res.body.errorObj.errorCode).toBe(400);
     expect(res.body.errorObj).toHaveProperty("errorMessage");
   });
+
+  test("TEST Health check", async () => {
+    const { status, body } = await request(api).get("/api/v1/health");
+    expect(status).toBe(200);
+    expect(body).not.toBeUndefined();
+  });
 });

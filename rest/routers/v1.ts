@@ -1,13 +1,20 @@
-import express, { Router } from "express";
+import express, { Response, Request, Router } from "express";
 import { validateToken } from "../middlewares/validateToken";
 import authController from "../controllers/authController";
 import userController from "../controllers/userController";
 import villageController from "../controllers/villageController";
 import messageController from "../controllers/messageController";
 
-const v1: Router = express.Router();
+const v1: Router = Router();
 
-v1.use("/auth", validateToken, express.Router().get("/", authController.auth));
+v1.use(
+  "/health",
+  Router().get("/", (req: Request, res: Response) => {
+    res.status(200).json("It Works!!");
+  })
+);
+
+v1.use("/auth", validateToken, Router().get("/", authController.auth));
 
 v1.use(
   "/users",
