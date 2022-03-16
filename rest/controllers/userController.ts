@@ -5,7 +5,7 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
-import { CustomRequest } from "../../types/rest.types";
+import { CustomRequest, ResponseHeader } from "../../types/rest.types";
 
 /**
  * Get user profile detail
@@ -113,9 +113,8 @@ async function editUser(req: CustomRequest, res: Response): Promise<void> {
   // if the user who sent request is not admin, it would confirm params.userId
   if (!currentUser.isAdmin || id !== currentUser.id) {
     const error = {
-      code: 10403,
-      message: "403 Forbidden",
-      description: "Not allowed to edit the user",
+      code: 403,
+      message: "Not allowed to edit the user",
     };
     console.error(error);
     res.status(403).json(error);
@@ -137,16 +136,20 @@ async function editUser(req: CustomRequest, res: Response): Promise<void> {
 
   if (!editUser) {
     const error = {
-      code: 10403,
-      message: "404 Not found",
-      description: "the user is not found",
+      code: 404,
+      message: "the user is not found",
     };
     console.error(error);
-    res.status(403).json(error);
+    res.status(404).json(error);
     return;
   }
 
-  res.status(200).json({ user: editedUser });
+  const header:ResponseHeader = {
+    "X-Total-Count":1,
+    "X-TotalPages-Count":1
+  }
+
+  res.status(200).set(header).links({next:"http://niwacan.com",prev:"http://niwacan.com/1"}).json({ user: editedUser });
 }
 
 /**

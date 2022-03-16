@@ -7,3 +7,13 @@ export type CustomRequest = Request & {
     messages: Message[]
   };
 };
+
+export type ErrorObject = {
+  code:number
+  message:string
+}
+
+export type ResponseHeader = {
+  "X-Total-Count"?:number
+  "X-TotalPages-Count"?:number
+}

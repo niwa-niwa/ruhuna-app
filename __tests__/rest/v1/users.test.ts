@@ -106,9 +106,43 @@ describe("/api/v1/users/ TEST : userController ", () => {
   });
 
   test("Patch /api/v1/users/:userId editUser TEST : edit user by edit_data successfully", async () => {
-    const dbUsers: User[] = await prismaClient.user.findMany();
+    const dbUser: User | null = await prismaClient.user.findFirst()!;
 
-    const userId = dbUsers[0].id;
+    const userId = dbUser!.id;
+
+    const edit_data = {
+      username: "hello world",
+      isAdmin: true,
+      isActive: false,
+      isAnonymous: true,
+    };
+
+    const { status, body, headers, header } = await request(api)
+      .patch(PREFIX_USERS + "/" + userId)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .send({ ...edit_data });
+
+    const editedDbUser: User | null= await prismaClient.user.findUnique({
+      where: { id: userId },
+    })!;
+
+    expect(editedDbUser).not.toBeNull();
+    expect(status).toBe(200);
+    expect(body.user.id).toEqual(userId);
+    expect(editedDbUser!.id).toEqual(userId);
+    expect(body.user.username).toEqual(edit_data.username);
+    expect(editedDbUser!.username).toEqual(edit_data.username);
+    expect(body.user.isAdmin).toEqual(edit_data.isAdmin);
+    expect(editedDbUser!.isAdmin).toEqual(edit_data.isAdmin);
+    expect(body.user.isActive).toEqual(edit_data.isActive);
+    expect(body.user.isAnonymous).toEqual(edit_data.isAnonymous);
+    expect(editedDbUser!.isAnonymous).toEqual(edit_data.isAnonymous);
+    expect(body.user).not.toHaveProperty("password");
+    expect(body.user).not.toHaveProperty("errorObj");
+  });
+
+  test("PUT /api/v1/users/:userId editUser TEST should receive errorObj because the user not found by wrong uid", async () => {
+    const wrong_id = "asdf";
 
     const edit_data = {
       username: "hello world",
@@ -118,56 +152,20 @@ describe("/api/v1/users/ TEST : userController ", () => {
     };
 
     const { status, body } = await request(api)
-      .patch(PREFIX_USERS + "/" + userId)
+      .patch(PREFIX_USERS + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ ...edit_data });
 
-    const dbUser: User | null = await prismaClient.user.findUnique({
-      where: { id: userId },
+    const dbUser = await prismaClient.user.findUnique({
+      where: { id: wrong_id },
     });
+    expect(dbUser).toBeNull();
 
-    expect(dbUser).not.toBeNull();
-
-    if (!dbUser) return;
-    expect(status).toBe(200);
-    expect(body.user.id).toEqual(userId);
-    expect(dbUser.id).toEqual(userId);
-    expect(body.user.username).toEqual(edit_data.username);
-    expect(dbUser.username).toEqual(edit_data.username);
-    expect(body.user.isAdmin).toEqual(edit_data.isAdmin);
-    expect(dbUser.isAdmin).toEqual(edit_data.isAdmin);
-    expect(body.user.isActive).toEqual(edit_data.isActive);
-    expect(body.user.isAnonymous).toEqual(edit_data.isAnonymous);
-    expect(dbUser.isAnonymous).toEqual(edit_data.isAnonymous);
-    expect(body.user).not.toHaveProperty("password");
-    expect(body.user).not.toHaveProperty("errorObj");
+    expect(status).toBe(403);
+    expect(body.user).toBeUndefined();
+    expect(body.code).toBe(403);
+    expect(body).toHaveProperty("message");
   });
-
-  // test("PUT /api/v1/users/:userId editUser TEST should receive errorObj because the user not found by wrong uid", async () => {
-  //   const wrong_id = "asdf";
-  //   const edit_data = {
-  //     username: "hello world",
-  //     isAdmin: true,
-  //     isActive: false,
-  //     isAnonymous: true,
-  //   };
-
-  //   const { status, body } = await request(api)
-  //     .put(PREFIX_USERS + "/edit/" + wrong_id)
-  //     .set("Authorization", `Bearer ${testTokens.admin_user}`)
-  //     .send({ ...edit_data });
-
-  //   const dbUser = await prismaClient.user.findUnique({
-  //     where: { id: wrong_id },
-  //   });
-
-  //   expect(dbUser).toBeNull();
-
-  //   expect(status).toBe(404);
-  //   expect(body.user).toBeNull();
-  //   expect(body.errorObj.errorCode).toBe(404);
-  //   expect(body.errorObj).toHaveProperty("errorMessage");
-  // });
 
   test("DELETE /api/v1/users/:userId deleteUser TEST it should receive error", async () => {
     const wrong_id = "aaaaaa";
