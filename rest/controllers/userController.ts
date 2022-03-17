@@ -14,33 +14,29 @@ import { getErrorObj, splitFields } from '../../lib/utilities'
  * @param res
  */
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
-  // get user id from params
   const id: string = req.params.userId;
 
-  const query :CustomRequest["query"] = req.query;
+  let args: Parameters<typeof prismaClient.user.findUnique> = [{where: { id }}];
 
-  if(query){
-    console.log(query)
-    if(query.fields){
-      const fields:{ [key: string]: boolean } = splitFields(query.fields.toString())
-      console.log("fields=",fields)
-    }
-  }
+  const fields: { [key: string]: boolean }|undefined = splitFields(
+    req.query.fields
+  );
+  
+  args[0].select = fields;
 
   // get model of the user by user id
-  const user: Partial<User> | null = await prismaClient.user.findUnique({
-    where: { id },
-  });
+  const user: Partial<User> | null = await prismaClient.user.findUnique(
+    ...args
+  );
 
   // throw an error if user is null
   if (!user) {
-    res.status(404).json(getErrorObj(404,"The user is not found."));
-    return
+    res.status(404).json(getErrorObj(404, "The user is not found."));
+    return;
   }
 
   // response the user
   res.status(200).json({ user });
-
 }
 
 /**

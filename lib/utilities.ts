@@ -17,13 +17,18 @@ export function getErrorObj(
 }
 
 export function splitFields(
-  filed: string,
+  field: any,
   separator: string = ","
-): { [key: string]: boolean } {
-  const fields: string[] = filed.toString().split(",");
+): { [key: string]: boolean } | undefined {
+  if (!field || !field.length) return undefined;
+
+  const fields: string[] = field.toString().split(separator);
+
   let fields_obj: { [key: string]: boolean } = {};
+
   fields.forEach((value) => {
     fields_obj[value] = true;
   });
+
   return fields_obj;
 }

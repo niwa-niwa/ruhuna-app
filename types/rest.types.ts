@@ -6,9 +6,6 @@ export type CustomRequest = Request & {
     villages: Village[] 
     messages: Message[]
   };
-  query:{
-    [key:string]:string
-  } | {}
 };
 
 export type ErrorObject = {

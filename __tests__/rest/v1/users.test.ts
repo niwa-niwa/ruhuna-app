@@ -29,17 +29,11 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should has properties", async () => {
     const dbUser = await prismaClient.user.findFirst();
-    if(!dbUser)return;
+    if (!dbUser) return;
 
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/" + dbUser.id)
-      .query({
-        fields:"id,isAdmin",
-        sort:"-createdAt",
-        
-      })
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
-
     expect(status).toBe(200);
     expect(body.user).toHaveProperty("id", dbUser.id);
     expect(body.user).toHaveProperty("firebaseId", dbUser.firebaseId);
@@ -51,6 +45,33 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.user).toHaveProperty("updatedAt");
     expect(body.user).not.toHaveProperty("uid");
     expect(body.user).not.toHaveProperty("password");
+  });
+
+  test("GET /api/v1/users/:userId getUserDetail TEST : it should has properties that is belong query", async () => {
+    const dbUser = await prismaClient.user.findFirst();
+    if (!dbUser) return;
+
+    const { status, body } = await request(api)
+      .get(PREFIX_USERS + "/" + dbUser.id)
+      .query({
+        fields: "id,isAdmin,messages,villages,username",
+        sort: "-createdAt",
+      })
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+    expect(status).toBe(200);
+    expect(body.user).toHaveProperty("id", dbUser.id);
+    expect(body.user).not.toHaveProperty("firebaseId", dbUser.firebaseId);
+    expect(body.user).toHaveProperty("isAdmin", dbUser.isAdmin);
+    expect(body.user).not.toHaveProperty("isActive", dbUser.isActive);
+    expect(body.user).not.toHaveProperty("isAnonymous", dbUser.isAnonymous);
+    expect(body.user).toHaveProperty("username", dbUser.username);
+    expect(body.user).not.toHaveProperty("createdAt");
+    expect(body.user).not.toHaveProperty("updatedAt");
+    expect(body.user).not.toHaveProperty("uid");
+    expect(body.user).not.toHaveProperty("password");
+    expect(body.user).toHaveProperty("messages");
+    expect(body.user).toHaveProperty("villages");
   });
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should receive error by wrong uid", async () => {
@@ -125,7 +146,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ ...edit_data });
 
-    const editedDbUser: User | null= await prismaClient.user.findUnique({
+    const editedDbUser: User | null = await prismaClient.user.findUnique({
       where: { id: userId },
     })!;
 
