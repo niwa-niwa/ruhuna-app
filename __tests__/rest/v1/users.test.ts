@@ -28,12 +28,16 @@ describe("/api/v1/users/ TEST : userController ", () => {
   });
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should has properties", async () => {
-    const dbUsers: User[] = await prismaClient.user.findMany();
-
-    const dbUser = dbUsers[0];
+    const dbUser = await prismaClient.user.findFirst();
+    if(!dbUser)return;
 
     const { status, body } = await request(api)
       .get(PREFIX_USERS + "/" + dbUser.id)
+      .query({
+        fields:"id,isAdmin",
+        sort:"-createdAt",
+        
+      })
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
@@ -63,9 +67,8 @@ describe("/api/v1/users/ TEST : userController ", () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
-    expect(body.user).toBeNull();
-    expect(body.errorObj.errorCode).toBe(404);
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body.code).toBe(404);
+    expect(body).toHaveProperty("message");
   });
 
   test("POST /api/v1/users/create createUser TEST : http status should be 200 and create a user ", async () => {

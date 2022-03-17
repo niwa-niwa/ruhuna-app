@@ -5,35 +5,42 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
-import { CustomRequest, ResponseHeader } from "../../types/rest.types";
+import { CustomRequest, ResponseHeader} from "../../types/rest.types";
+import { getErrorObj, splitFields } from '../../lib/utilities'
 
 /**
  * Get user profile detail
  * @param req
  * @param res
  */
-async function getUserDetail(req: Request, res: Response): Promise<void> {
+async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   // get user id from params
   const id: string = req.params.userId;
 
+  const query :CustomRequest["query"] = req.query;
+
+  if(query){
+    console.log(query)
+    if(query.fields){
+      const fields:{ [key: string]: boolean } = splitFields(query.fields.toString())
+      console.log("fields=",fields)
+    }
+  }
+
   // get model of the user by user id
-  const user: User | null = await prismaClient.user.findUnique({
+  const user: Partial<User> | null = await prismaClient.user.findUnique({
     where: { id },
   });
 
   // throw an error if user is null
   if (!user) {
-    res.status(404).json({
-      user: null,
-      errorObj: generateErrorObj(404, "The User is not Found"),
-    });
-    return;
+    res.status(404).json(getErrorObj(404,"The user is not found."));
+    return
   }
 
   // response the user
   res.status(200).json({ user });
 
-  return;
 }
 
 /**
