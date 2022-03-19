@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { verifyToken } from "../../lib/firebaseAdmin";
-import { Prisma, User } from "@prisma/client";
+import { Message, Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
 import { CustomRequest, ResponseHeader} from "../../types/rest.types";
-import { getErrorObj, splitFields } from '../../lib/utilities'
+import { getErrorObj, sendError, parseFields, parseSort, parseLimit, parseOffset, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
+import { off } from "process";
 
 /**
  * Get user profile detail
@@ -16,27 +17,75 @@ import { getErrorObj, splitFields } from '../../lib/utilities'
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.userId;
 
-  let args: Parameters<typeof prismaClient.user.findUnique> = [{where: { id }}];
-
-  const fields: { [key: string]: boolean }|undefined = splitFields(
+  const fields: { [key: string]: boolean | {} } | undefined = parseFields(
     req.query.fields
   );
-  
-  args[0].select = fields;
+
+  // relations should have id
+  // if (fields) {
+  //   if ("villages" in fields) fields.villages = { select: { id: true } };
+  //   if ("messages" in fields) fields.messages = { select: { id: true } };
+  // }
 
   // get model of the user by user id
-  const user: Partial<User> | null = await prismaClient.user.findUnique(
-    ...args
-  );
+  try {
+    const user: Partial<User> | null | void =
+      await prismaClient.user.findUnique({
+        where: { id },
+        select: fields,
+      });
 
-  // throw an error if user is null
-  if (!user) {
-    res.status(404).json(getErrorObj(404, "The user is not found."));
-    return;
+    // throw an error if user is null
+    if (!user) {
+      res.status(404).json(getErrorObj(404, "The user is not found."));
+      return;
+    }
+
+    // response the user
+    res.status(200).json({ user });
+  } catch (e) {
+    sendError(res, e);
   }
+}
 
-  // response the user
-  res.status(200).json({ user });
+async function getUserMessages(req: Request, res: Response): Promise<void> {
+  console.log(req.url, req.query);
+
+  let args: Prisma.MessageFindManyArgs = {};
+
+  const userId: User["id"] = req.params.userId;
+
+  args.where = { userId };
+
+  args.select = parseFields(req.query.fields);
+
+  args.orderBy = parseSort(req.query.sort);
+
+  args.take = parseLimit(req.query.par_page);
+
+  const page: number = args.take ? parsePage(req.query.page) : 1;
+
+  args.skip = args.take ? args.take * (page - 1) : undefined;
+
+  try {
+    const messages: Partial<Message>[] = await prismaClient.message.findMany(
+      args
+    );
+
+    const count: number = await prismaClient.message.count({
+      where: { userId },
+    });
+
+    const header: ResponseHeader = genResponseHeader(count, args.take, page);
+
+    const links: ReturnType<typeof genLinksHeader> = args.take
+      ? genLinksHeader(req.query)
+      : genLinksHeader();
+
+    res.status(200).set(header).links(links).json({ messages });
+  } catch (e) {
+    sendError(res, e);
+  }
 }
 
 /**
@@ -188,12 +237,14 @@ async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
 const userController: {
   getUsers: any;
   getUserDetail: any;
+  getUserMessages: any;
   createUser: any;
   editUser: any;
   deleteUser: any;
 } = {
   getUsers,
   getUserDetail,
+  getUserMessages,
   createUser,
   editUser,
   deleteUser,

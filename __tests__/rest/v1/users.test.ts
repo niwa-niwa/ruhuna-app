@@ -73,6 +73,22 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.user).toHaveProperty("messages");
     expect(body.user).toHaveProperty("villages");
   });
+  
+  test("GET Fail /api/v1/users/:userId getUserDetail TEST : it should has error object cause wrong fields param" , async () => {
+    const dbUser = await prismaClient.user.findFirst();
+    if (!dbUser) return;
+
+    const { status, body } = await request(api)
+      .get(PREFIX_USERS + "/" + dbUser.id)
+      .query({
+        fields: "id,isAdmin_____,messages,username",
+        sort: "-createdAt",
+      })
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+      expect(status).toBe(400);
+
+  });
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should receive error by wrong uid", async () => {
     const wrong_uid: string = "aaaaaaa";
@@ -91,6 +107,25 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.code).toBe(404);
     expect(body).toHaveProperty("message");
   });
+
+  test("GET success /api/v1/users/:userId/messages getUserMessages: it should messages of the user",async()=>{
+    const dbUser = await prismaClient.user.findFirst();
+    if (!dbUser) return;
+
+    const { status, body, header } = await request(api)
+      .get(PREFIX_USERS + "/" + dbUser.id + "/messages")
+      .query({
+        fields: "",
+        sort: "-createdAt,+updatedAt",
+        par_page:0,
+        page:2,
+      })
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+    expect(status).toBe(200)
+    console.log(body)
+    console.log(header)
+  })
 
   test("POST /api/v1/users/create createUser TEST : http status should be 200 and create a user ", async () => {
     const { status, body } = await request(api)

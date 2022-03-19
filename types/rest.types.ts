@@ -16,4 +16,5 @@ export type ErrorObject = {
 export type ResponseHeader = {
   "X-Total-Count"?:number
   "X-TotalPages-Count"?:number
+  "X-Current-Page"?:number
 }
