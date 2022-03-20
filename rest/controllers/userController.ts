@@ -6,8 +6,7 @@ import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
 import { CustomRequest, ResponseHeader} from "../../types/rest.types";
-import { getErrorObj, sendError, parseFields, parseSort, parseLimit, parseOffset, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
-import { off } from "process";
+import { genErrorObj, sendError, parseFields, parseSort, parseLimit, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
 
 /**
  * Get user profile detail
@@ -37,7 +36,7 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
 
     // throw an error if user is null
     if (!user) {
-      res.status(404).json(getErrorObj(404, "The user is not found."));
+      res.status(404).json(genErrorObj(404, "The user is not found."));
       return;
     }
 
@@ -51,37 +50,49 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
 async function getUserMessages(req: Request, res: Response): Promise<void> {
   console.log(req.url, req.query);
 
+  // the type for query argument
   let args: Prisma.MessageFindManyArgs = {};
 
+  // the userId is searched to extract messages
   const userId: User["id"] = req.params.userId;
 
   args.where = { userId };
 
+  //  extract columns 
   args.select = parseFields(req.query.fields);
 
+  // record should be the orderBy
   args.orderBy = parseSort(req.query.sort);
 
+  // how many records should be in par page
   args.take = parseLimit(req.query.par_page);
 
+  // where page number should return
   const page: number = args.take ? parsePage(req.query.page) : 1;
 
+  // how many skip records from 0 
   args.skip = args.take ? args.take * (page - 1) : undefined;
 
   try {
+    // extract messages
     const messages: Partial<Message>[] = await prismaClient.message.findMany(
       args
     );
 
+    // extract total records
     const count: number = await prismaClient.message.count({
       where: { userId },
     });
 
+    // generate info of  the result
     const header: ResponseHeader = genResponseHeader(count, args.take, page);
 
+    // generate pagination
     const links: ReturnType<typeof genLinksHeader> = args.take
       ? genLinksHeader(req.query)
       : genLinksHeader();
 
+    // response
     res.status(200).set(header).links(links).json({ messages });
   } catch (e) {
     sendError(res, e);

@@ -32,7 +32,7 @@ export function genLinksHeader(query?:any):{next:string,prev:string}{
  * @param message
  * @returns
  */
-export function getErrorObj(
+export function genErrorObj(
   code: ErrorObject["code"],
   message: ErrorObject["message"]
 ): ErrorObject {
@@ -47,13 +47,20 @@ export function sendError(res: Response, e: unknown): void {
 
   if (e instanceof PrismaClientValidationError) {
     console.error(e.message);
-    res.status(400).json(getErrorObj(400, "Incorrect your request."));
+    res.status(400).json(genErrorObj(400, "Incorrect your request."));
     return;
   }
 
-  res.status(500).json(getErrorObj(500, "Internal Server Error"));
+  res.status(500).json(genErrorObj(500, "Internal Server Error"));
 }
 
+/**
+ * separate strings-field in a request params  with separator.
+ * field = "field=id,name,createdAt"
+ * @param field 
+ * @param separator 
+ * @returns 
+ */
 export function parseFields(
   field: any,
   separator: string = ","
@@ -71,6 +78,14 @@ export function parseFields(
   return fields_obj;
 }
 
+/**
+ * optimize sort-string for prisma.js
+ * sort = "sort=-createdAt,+updatedAt"
+ * Prefix means "-" = desc, "+" = asc
+ * @param sort 
+ * @param separator 
+ * @returns 
+ */
 export function parseSort(
   sort: any,
   separator: string = ","
@@ -92,6 +107,12 @@ export function parseSort(
   return sorts_obj;
 }
 
+/**
+ * optimize limit for prisma
+ * @param limit 
+ * @param by_default 
+ * @returns 
+ */
 export function parseLimit(
   limit: any,
   by_default: number = 10
@@ -103,12 +124,22 @@ export function parseLimit(
   return Number(limit);
 }
 
+/**
+ * offset means skip in Prisma.js
+ * @param offset : ;
+ * @returns 
+ */
 export function parseOffset(offset: any): number{
   if (isNaN(offset) || offset === null) return 1;
 
   return Number(offset);
 }
 
+/**
+ * page =  total-record / limit
+ * @param page 
+ * @returns 
+ */
 export function parsePage(page:any):number{
   if (isNaN(page) || page === null) return 1;
 
