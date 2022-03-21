@@ -6,7 +6,7 @@ import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
 import { CustomRequest, ResponseHeader} from "../../types/rest.types";
-import { genErrorObj, sendError, parseFields, parseSort, parseLimit, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
+import { genErrorObj, sendError, parseFields, parseSort, parsePerPage, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
 
 /**
  * Get user profile detail
@@ -16,15 +16,10 @@ import { genErrorObj, sendError, parseFields, parseSort, parseLimit, genResponse
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.userId;
 
+  // the fields used to select of query
   const fields: { [key: string]: boolean | {} } | undefined = parseFields(
     req.query.fields
   );
-
-  // relations should have id
-  // if (fields) {
-  //   if ("villages" in fields) fields.villages = { select: { id: true } };
-  //   if ("messages" in fields) fields.messages = { select: { id: true } };
-  // }
 
   // get model of the user by user id
   try {
@@ -65,7 +60,7 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
   args.orderBy = parseSort(req.query.sort);
 
   // how many records should be in par page
-  args.take = parseLimit(req.query.par_page);
+  args.take = parsePerPage(req.query.par_page);
 
   // where page number should return
   const page: number = args.take ? parsePage(req.query.page) : 1;

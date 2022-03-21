@@ -3,19 +3,22 @@ import { PrismaClientValidationError } from "@prisma/client/runtime";
 import { ErrorObject,ResponseHeader } from "./../types/rest.types";
 
 // TODO fixme return values
-export function genResponseHeader(count:number, limit:number|undefined, page:number):ResponseHeader{
-  let total_pages:number=1
+export function genResponseHeader(
+  count: number,
+  par_page: number | undefined,
+  page: number
+): ResponseHeader {
+  let total_pages: number = 1;
 
-  
-  if(limit && count > limit){
-    total_pages = Math.ceil(count / limit)
+  if (par_page && count > par_page) {
+    total_pages = Math.ceil(count / par_page);
   }
 
   return {
-    "X-Total-Count":count,
-    "X-TotalPages-Count":total_pages,
-    "X-Current-Page":page
-  }
+    "X-Total-Count": count,
+    "X-Current-Page": page,
+    "X-TotalPages-Count": total_pages,
+  };
 }
 
 export function genLinksHeader(query?:any):{next:string,prev:string}{
@@ -113,7 +116,7 @@ export function parseSort(
  * @param by_default 
  * @returns 
  */
-export function parseLimit(
+export function parsePerPage(
   limit: any,
   by_default: number = 10
 ): number | undefined {
