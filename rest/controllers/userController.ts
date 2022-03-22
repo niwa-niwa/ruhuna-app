@@ -17,6 +17,7 @@ import {
   genLinksHeader,
   parseOffset,
   calcSkipRecords,
+  genFindManyArgs,
 } from "../../lib/utilities";
 import { params } from "../../consts/params";
 
@@ -54,6 +55,7 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
+// TODO refactor that should use genFindManyArgs
 async function getUserMessages(req: Request, res: Response): Promise<void> {
 
   // the type for query argument
@@ -115,8 +117,23 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
  * @param res
  */
 async function getUsers(req: Request, res: Response): Promise<void> {
+  const { args, page }: { args: Prisma.UserFindManyArgs; page: number } =
+    genFindManyArgs(req.query);
+
   // get all users
-  const users: User[] = await prismaClient.user.findMany();
+  const users: Partial<User>[] = await prismaClient.user.findMany(args);
+
+  const count: number = await prismaClient.user.count();
+
+  // generate info of  the result
+  const header: ResponseHeader = genResponseHeader(count, args.take);
+
+  // generate pagination
+  const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+    page,
+    header["x-total-page-count"],
+    req.url
+  );
 
   // response all user data
   res.status(200).json({ users: users });

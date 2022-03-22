@@ -1,4 +1,3 @@
-import { Message } from './../../../types/types.d';
 import request from "supertest";
 import { api } from "../../../rest";
 import { prismaClient } from "../../../lib/prismaClient";

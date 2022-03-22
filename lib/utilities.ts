@@ -2,6 +2,7 @@ import { Response } from "express";
 import { PrismaClientValidationError } from "@prisma/client/runtime";
 import { ErrorObject, ResponseHeader } from "./../types/rest.types";
 import { params } from "../consts/params";
+import { Prisma } from "@prisma/client";
 
 /**
  * for response error message to frontend
@@ -191,4 +192,34 @@ export function calcSkipRecords(
   if (offset !== undefined) skip += offset;
 
   return skip;
+}
+
+// TODO refactor return type that should add id:string|undefined for general
+export function genFindManyArgs(query: any): {
+  args: Pick<Prisma.UserFindManyArgs, "select" | "orderBy" | "take" | "skip">;
+  page: number;
+} {
+  let args: Pick<
+    Prisma.UserFindManyArgs,
+    "select" | "orderBy" | "take" | "skip" |"where"
+  > = {};
+
+  // extract columns
+  args.select = parseFields(query[params.FIELDS]);
+
+  // record should be the orderBy
+  args.orderBy = parseSort(query[params.SORT]);
+
+  // how many records should be in par page
+  args.take = parsePerPage(query[params.PAR_PAGE]);
+
+  // where page number should return
+  const page: number = args.take ? parsePage(query[params.PAGE]) : 1;
+
+  const offset: number | undefined = parseOffset(query[params.OFFSET]);
+
+  // how many skip records from 0
+  args.skip = calcSkipRecords(args.take, page, offset);
+
+  return { args, page };
 }
