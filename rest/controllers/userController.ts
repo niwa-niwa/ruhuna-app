@@ -5,8 +5,20 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
-import { CustomRequest, ResponseHeader} from "../../types/rest.types";
-import { genErrorObj, sendError, parseFields, parseSort, parsePerPage, genResponseHeader, parsePage, genLinksHeader } from '../../lib/utilities'
+import { CustomRequest, ResponseHeader } from "../../types/rest.types";
+import {
+  genErrorObj,
+  sendError,
+  parseFields,
+  parseSort,
+  parsePerPage,
+  genResponseHeader,
+  parsePage,
+  genLinksHeader,
+  parseOffset,
+  calcSkipRecords,
+} from "../../lib/utilities";
+import { params } from "../../consts/params";
 
 /**
  * Get user profile detail
@@ -43,7 +55,6 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
 }
 
 async function getUserMessages(req: Request, res: Response): Promise<void> {
-  console.log(req.url, req.query);
 
   // the type for query argument
   let args: Prisma.MessageFindManyArgs = {};
@@ -53,20 +64,22 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
 
   args.where = { userId };
 
-  //  extract columns 
-  args.select = parseFields(req.query.fields);
+  // extract columns
+  args.select = parseFields(req.query[params.FIELDS]);
 
   // record should be the orderBy
-  args.orderBy = parseSort(req.query.sort);
+  args.orderBy = parseSort(req.query[params.SORT]);
 
   // how many records should be in par page
-  args.take = parsePerPage(req.query.par_page);
+  args.take = parsePerPage(req.query[params.PAR_PAGE]);
 
   // where page number should return
-  const page: number = args.take ? parsePage(req.query.page) : 1;
+  const page: number = args.take ? parsePage(req.query[params.PAGE]) : 1;
 
-  // how many skip records from 0 
-  args.skip = args.take ? args.take * (page - 1) : undefined;
+  const offset: number | undefined = parseOffset(req.query[params.OFFSET]);
+
+  // how many skip records from 0
+  args.skip = calcSkipRecords(args.take, page, offset);
 
   try {
     // extract messages
@@ -80,12 +93,14 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
     });
 
     // generate info of  the result
-    const header: ResponseHeader = genResponseHeader(count, args.take, page);
+    const header: ResponseHeader = genResponseHeader(count, args.take);
 
     // generate pagination
-    const links: ReturnType<typeof genLinksHeader> = args.take
-      ? genLinksHeader(req.query)
-      : genLinksHeader();
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header["x-total-page-count"],
+      req.url
+    );
 
     // response
     res.status(200).set(header).links(links).json({ messages });
@@ -202,12 +217,16 @@ async function editUser(req: CustomRequest, res: Response): Promise<void> {
     return;
   }
 
-  const header:ResponseHeader = {
-    "X-Total-Count":1,
-    "X-TotalPages-Count":1
-  }
+  const header: ResponseHeader = {
+    "x-total-count": 1,
+    "x-total-page-count": 1,
+  };
 
-  res.status(200).set(header).links({next:"http://niwacan.com",prev:"http://niwacan.com/1"}).json({ user: editedUser });
+  res
+    .status(200)
+    .set(header)
+    .links({ next: "http://niwacan.com", prev: "http://niwacan.com/1" })
+    .json({ user: editedUser });
 }
 
 /**

@@ -1,33 +1,7 @@
 import { Response } from "express";
 import { PrismaClientValidationError } from "@prisma/client/runtime";
-import { ErrorObject,ResponseHeader } from "./../types/rest.types";
-
-// TODO fixme return values
-export function genResponseHeader(
-  count: number,
-  par_page: number | undefined,
-  page: number
-): ResponseHeader {
-  let total_pages: number = 1;
-
-  if (par_page && count > par_page) {
-    total_pages = Math.ceil(count / par_page);
-  }
-
-  return {
-    "X-Total-Count": count,
-    "X-Current-Page": page,
-    "X-TotalPages-Count": total_pages,
-  };
-}
-
-export function genLinksHeader(query?:any):{next:string,prev:string}{
-  if(!query){
-    return {next:"",prev:""}
-  }
-  // TODO implement generating links object made by the request query
-  return {next:"http://niwacan.com",prev:"http://niwacan.com/1"}
-}
+import { ErrorObject, ResponseHeader } from "./../types/rest.types";
+import { params } from "../consts/params";
 
 /**
  * for response error message to frontend
@@ -58,11 +32,58 @@ export function sendError(res: Response, e: unknown): void {
 }
 
 /**
+ * generate record information
+ * @param count
+ * @param par_page
+ * @returns
+ */
+export function genResponseHeader(
+  count: number,
+  par_page: number | undefined
+): ResponseHeader {
+  let total_pages: number = 1;
+
+  if (par_page && count > par_page) {
+    total_pages = Math.ceil(count / par_page);
+  }
+
+  return {
+    "x-total-count": count,
+    "x-total-page-count": total_pages,
+  };
+}
+
+/**
+ * generate pagination as link
+ * @param page
+ * @param total_page
+ * @param url
+ * @returns
+ */
+export function genLinksHeader(
+  page: number,
+  total_page: number,
+  url: string
+): { next: string; prev: string } {
+  const next: string =
+    total_page > page
+      ? url.replace(`${params.PAGE}=${page}`, `${params.PAGE}=${page + 1}`)
+      : "";
+
+  const prev: string =
+    page > 1
+      ? url.replace(`${params.PAGE}=${page}`, `${params.PAGE}=${page - 1}`)
+      : "";
+
+  return { next, prev };
+}
+
+/**
  * separate strings-field in a request params  with separator.
  * field = "field=id,name,createdAt"
- * @param field 
- * @param separator 
- * @returns 
+ * @param field
+ * @param separator
+ * @returns
  */
 export function parseFields(
   field: any,
@@ -85,9 +106,9 @@ export function parseFields(
  * optimize sort-string for prisma.js
  * sort = "sort=-createdAt,+updatedAt"
  * Prefix means "-" = desc, "+" = asc
- * @param sort 
- * @param separator 
- * @returns 
+ * @param sort
+ * @param separator
+ * @returns
  */
 export function parseSort(
   sort: any,
@@ -112,9 +133,9 @@ export function parseSort(
 
 /**
  * optimize limit for prisma
- * @param limit 
- * @param by_default 
- * @returns 
+ * @param limit
+ * @param by_default
+ * @returns
  */
 export function parsePerPage(
   limit: any,
@@ -128,26 +149,46 @@ export function parsePerPage(
 }
 
 /**
- * offset means skip in Prisma.js
+ *
  * @param offset : ;
- * @returns 
+ * @returns
  */
-export function parseOffset(offset: any): number{
-  if (isNaN(offset) || offset === null) return 1;
+export function parseOffset(offset: any): number {
+  if (isNaN(offset) || offset === null) return 0;
 
   return Number(offset);
 }
 
 /**
  * page =  total-record / limit
- * @param page 
- * @returns 
+ * @param page
+ * @returns
  */
-export function parsePage(page:any):number{
+export function parsePage(page: any): number {
   if (isNaN(page) || page === null) return 1;
 
   if (Number(page) < 1) return 1;
 
   return Number(page);
+}
 
+/**
+ * calculate total skip records
+ * @param par_page
+ * @param page
+ * @param offset
+ * @returns
+ */
+export function calcSkipRecords(
+  par_page: number | undefined,
+  page: number,
+  offset: number | undefined
+): number | undefined {
+  let skip: number | undefined = 0;
+
+  if (par_page !== undefined) skip = par_page * (page - 1);
+
+  if (offset !== undefined) skip += offset;
+
+  return skip;
 }

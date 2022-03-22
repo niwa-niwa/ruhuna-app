@@ -1,9 +1,11 @@
+import { Message } from './../../../types/types.d';
 import request from "supertest";
 import { api } from "../../../rest";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
+import { params } from "../../../consts/params";
 
 const PREFIX_USERS = "/api/v1/users";
 
@@ -108,24 +110,31 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body).toHaveProperty("message");
   });
 
-  test("GET success /api/v1/users/:userId/messages getUserMessages: it should messages of the user",async()=>{
-    const dbUser = await prismaClient.user.findFirst();
+  test("GET success /api/v1/users/:userId/messages getUserMessages: it should messages of the user", async () => {
+    const dbUser = await prismaClient.user.findFirst({
+      include: { messages: true },
+    });
     if (!dbUser) return;
 
-    const { status, body, header } = await request(api)
+    const { status, body, headers } = await request(api)
       .get(PREFIX_USERS + "/" + dbUser.id + "/messages")
       .query({
         fields: "",
         sort: "-createdAt,+updatedAt",
-        par_page:0,
-        page:2,
+        par_page: 0,
+        page: 1,
+        offset: 0,
       })
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(200)
-    console.log(body)
-    console.log(header)
-  })
+    expect(status).toBe(200);
+    expect(body).toHaveProperty("messages");
+    expect(body.messages.length).toBe(dbUser.messages.length);
+    expect(body.messages[2].id).toBe(dbUser.messages[0].id);
+    expect(body.messages[2].content).toBe(dbUser.messages[0].content);
+    expect(body.messages[2].villageId).toBe(dbUser.messages[0].villageId);
+    expect(Number(headers[params.X_TOTAL_COUNT])).toBe(dbUser.messages.length);
+  });
 
   test("POST /api/v1/users/create createUser TEST : http status should be 200 and create a user ", async () => {
     const { status, body } = await request(api)
