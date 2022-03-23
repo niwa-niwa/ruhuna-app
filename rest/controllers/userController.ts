@@ -5,19 +5,14 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ErrorObj } from "../../types/error.types";
-import { CustomRequest, ResponseHeader } from "../../types/rest.types";
+import { CustomRequest, ResponseHeader, QArgs, QArgsAndPage } from "../../types/rest.types";
 import {
   genErrorObj,
   sendError,
   parseFields,
-  parseSort,
-  parsePerPage,
   genResponseHeader,
-  parsePage,
   genLinksHeader,
-  parseOffset,
-  calcSkipRecords,
-  genFindManyArgs,
+  genQArgsAndPage,
 } from "../../lib/utilities";
 import { params } from "../../consts/params";
 
@@ -30,9 +25,7 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.userId;
 
   // the fields used to select of query
-  const fields: { [key: string]: boolean | {} } | undefined = parseFields(
-    req.query.fields
-  );
+  const fields: QArgs["select"] = parseFields(req.query.fields);
 
   // get model of the user by user id
   try {
@@ -55,33 +48,15 @@ async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-// TODO refactor that should use genFindManyArgs
 async function getUserMessages(req: Request, res: Response): Promise<void> {
-
   // the type for query argument
-  let args: Prisma.MessageFindManyArgs = {};
+  const { args, page }: QArgsAndPage<Prisma.MessageFindManyArgs> =
+    genQArgsAndPage(req.query);
 
   // the userId is searched to extract messages
   const userId: User["id"] = req.params.userId;
 
   args.where = { userId };
-
-  // extract columns
-  args.select = parseFields(req.query[params.FIELDS]);
-
-  // record should be the orderBy
-  args.orderBy = parseSort(req.query[params.SORT]);
-
-  // how many records should be in par page
-  args.take = parsePerPage(req.query[params.PAR_PAGE]);
-
-  // where page number should return
-  const page: number = args.take ? parsePage(req.query[params.PAGE]) : 1;
-
-  const offset: number | undefined = parseOffset(req.query[params.OFFSET]);
-
-  // how many skip records from 0
-  args.skip = calcSkipRecords(args.take, page, offset);
 
   try {
     // extract messages
@@ -117,28 +92,32 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
  * @param res
  */
 async function getUsers(req: Request, res: Response): Promise<void> {
-  const { args, page }: { args: Prisma.UserFindManyArgs; page: number } =
-    genFindManyArgs(req.query);
+  // generate args for query and page
+  const { args, page }: QArgsAndPage<Prisma.UserFindManyArgs> =
+    genQArgsAndPage(req.query);
 
-  // get all users
-  const users: Partial<User>[] = await prismaClient.user.findMany(args);
+  try {
+    // get all users
+    const users: Partial<User>[] = await prismaClient.user.findMany(args);
 
-  const count: number = await prismaClient.user.count();
+    // total count of users
+    const count: number = await prismaClient.user.count();
 
-  // generate info of  the result
-  const header: ResponseHeader = genResponseHeader(count, args.take);
+    // generate info of  the result
+    const header: ResponseHeader = genResponseHeader(count, args.take);
 
-  // generate pagination
-  const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
-    page,
-    header["x-total-page-count"],
-    req.url
-  );
+    // generate pagination
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header["x-total-page-count"],
+      req.url
+    );
 
-  // response all user data
-  res.status(200).json({ users: users });
-
-  return;
+    // response all user data
+    res.status(200).json({ users: users });
+  } catch (e) {
+    sendError(res, e);
+  }
 }
 
 /**

@@ -1,8 +1,7 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import { PrismaClientValidationError } from "@prisma/client/runtime";
-import { ErrorObject, ResponseHeader } from "./../types/rest.types";
+import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { params } from "../consts/params";
-import { Prisma } from "@prisma/client";
 
 /**
  * for response error message to frontend
@@ -89,7 +88,7 @@ export function genLinksHeader(
 export function parseFields(
   field: any,
   separator: string = ","
-): { [key: string]: boolean } | undefined {
+): QArgs["select"] {
   if (!field || !field.length) return undefined;
 
   const fields: string[] = field.toString().split(separator);
@@ -114,7 +113,7 @@ export function parseFields(
 export function parseSort(
   sort: any,
   separator: string = ","
-): { [key: string]: string }[] | undefined {
+): QArgs["orderBy"] {
   if (!sort || !sort.length) return undefined;
 
   const sorts: string[] = sort.toString().split(separator);
@@ -181,10 +180,10 @@ export function parsePage(page: any): number {
  * @returns
  */
 export function calcSkipRecords(
-  par_page: number | undefined,
-  page: number,
-  offset: number | undefined
-): number | undefined {
+  par_page: ReturnType<typeof parsePerPage>,
+  page: ReturnType<typeof parsePage>,
+  offset: ReturnType<typeof parseOffset>
+): QArgs["skip"] {
   let skip: number | undefined = 0;
 
   if (par_page !== undefined) skip = par_page * (page - 1);
@@ -194,15 +193,16 @@ export function calcSkipRecords(
   return skip;
 }
 
-// TODO refactor return type that should add id:string|undefined for general
-export function genFindManyArgs(query: any): {
-  args: Pick<Prisma.UserFindManyArgs, "select" | "orderBy" | "take" | "skip">;
-  page: number;
+/**
+ * generate arguments for Prisma.js and current page number
+ * @param query
+ * @returns
+ */
+export function genQArgsAndPage(query: Request["query"]): {
+  args: QArgs;
+  page: ReturnType<typeof parsePage>;
 } {
-  let args: Pick<
-    Prisma.UserFindManyArgs,
-    "select" | "orderBy" | "take" | "skip" |"where"
-  > = {};
+  let args: QArgs = {};
 
   // extract columns
   args.select = parseFields(query[params.FIELDS]);
