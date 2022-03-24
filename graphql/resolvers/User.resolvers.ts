@@ -1,6 +1,5 @@
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { ErrorObj } from "../../types/error.types";
-import { verifyToken } from "../../lib/firebaseAdmin"
+import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
 import { CContext } from "../../types/gql.types";
 import {
@@ -17,6 +16,7 @@ import {
   MutationResolvers,
   UserResolvers,
 } from "../../types/resolvers-types.d";
+import { ErrorObject } from "../../types/rest.types";
 
 async function getMe(
   obj: any,
@@ -78,12 +78,11 @@ async function createUser(
   info: any
 ): Promise<User> {
   // get firebase user from firebase
-  const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(
+  const firebaseUser: DecodedIdToken | ErrorObject = await verifyToken(
     firebaseToken
   );
   // throw an error if firebaseUser has an errorCode property
-  if ("errorCode" in firebaseUser)
-    throw new UserInputError(firebaseUser.errorMessage);
+  if ("code" in firebaseUser) throw new UserInputError(firebaseUser.message);
 
   // create a user by firebase account
   const createdUser = await prisma.user

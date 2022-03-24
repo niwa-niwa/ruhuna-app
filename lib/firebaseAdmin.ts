@@ -1,10 +1,10 @@
 import FirebaseAdmin from "firebase-admin";
 import { readFileSync, existsSync } from "fs";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { ErrorObj } from "../types/error.types";
-import { generateErrorObj } from "./generateErrorObj";
+import { genErrorObj } from "./utilities";
+import { ErrorObject } from "../types/rest.types";
 
-let serviceAccount: object = {};
+let serviceAccount = {};
 
 /**
  *  it try to read firebase admin file
@@ -50,7 +50,7 @@ export const firebaseAuth = FirebaseAdmin.auth();
 
 export async function verifyToken(
   token: string
-): Promise<DecodedIdToken | ErrorObj> {
+): Promise<DecodedIdToken | ErrorObject> {
   try {
     const currentUser: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
 
@@ -58,6 +58,6 @@ export async function verifyToken(
   } catch (e) {
     console.error(e);
 
-    return generateErrorObj(400, "ID token has invalid signature");
+    return genErrorObj(400, "ID token has invalid signature");
   }
 }

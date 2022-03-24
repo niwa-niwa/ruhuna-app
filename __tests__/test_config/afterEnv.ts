@@ -6,7 +6,7 @@ import {
   general_user,
   nonactive_user,
 } from "./testData";
-import { generateErrorObj } from "../../lib/generateErrorObj";
+import { genErrorObj } from "../../lib/utilities";
 import { testTokens } from "./testData";
 import { testSeeds } from "./testSeeds";
 
@@ -45,7 +45,7 @@ jest.mock("../../lib/firebaseAdmin", () => ({
       return nonactive_user;
     }
 
-    return generateErrorObj(400, "ID token has invalid signature");
+    return genErrorObj(400, "ID token has invalid signature");
   },
 }));
 

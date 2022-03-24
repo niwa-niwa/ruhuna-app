@@ -6,6 +6,7 @@ import { prismaClient } from "../lib/prismaClient";
 import { verifyToken } from "../lib/firebaseAdmin";
 import { ErrorObj } from "../types/error.types";
 import { generateErrorObj } from "../lib/generateErrorObj";
+import { ErrorObject } from "../types/rest.types";
 
 /**
  * Custom socket object for io socket
@@ -71,10 +72,10 @@ ioChatSocket.use(
       : token_data;
 
     // verify token with firebase api
-    const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(token);
+    const firebaseUser: DecodedIdToken | ErrorObject = await verifyToken(token);
 
     // throw an error if firebaseUser is errorObj
-    if ("errorCode" in firebaseUser) {
+    if ("code" in firebaseUser) {
       const err: CustomError = new Error();
       err.data = {
         errorObj: generateErrorObj(
