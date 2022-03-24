@@ -1,5 +1,8 @@
 import { Response, Request } from "express";
-import { PrismaClientValidationError } from "@prisma/client/runtime";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime";
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { params } from "../consts/params";
 
@@ -21,10 +24,17 @@ export function genErrorObj(
 
 export function sendError(res: Response, e: unknown): void {
   console.error(e);
+  // console.log(e); // for testing
 
   if (e instanceof PrismaClientValidationError) {
-    console.error(e.message);
     res.status(400).json(genErrorObj(400, "Incorrect your request."));
+    return;
+  }
+
+  if (e instanceof PrismaClientKnownRequestError) {
+    res
+      .status(400)
+      .json(genErrorObj(400, "Not found record with your request."));
     return;
   }
 
@@ -80,10 +90,11 @@ export function genLinksHeader(
 
 /**
  * separate strings-field in a request params  with separator.
- * field = "field=id,name,createdAt"
+ * field = "id,name,createdAt"
+ * return = {id:true,name:true,createdAt:true}
  * @param field
  * @param separator
- * @returns
+ * @returns {id:true,name:true,createdAt:true}
  */
 export function parseFields(
   field: any,
@@ -106,6 +117,7 @@ export function parseFields(
  * optimize sort-string for prisma.js
  * sort = "sort=-createdAt,+updatedAt"
  * Prefix means "-" = desc, "+" = asc
+ * return = {createdAt:"desc",updatedAt:"asc"}
  * @param sort
  * @param separator
  * @returns
@@ -133,6 +145,7 @@ export function parseSort(
 
 /**
  * optimize limit for prisma
+ * limit should be number
  * @param limit
  * @param by_default
  * @returns
@@ -141,20 +154,21 @@ export function parsePerPage(
   limit: any,
   by_default: number = 10
 ): number | undefined {
-  if (isNaN(limit) || limit === null) return by_default;
+  if (isNaN(limit) || (limit ?? true)) return by_default;
 
+  // That's mean all records
   if (Number(limit) === 0) return undefined;
 
   return Number(limit);
 }
 
 /**
- *
- * @param offset : ;
+ * offset should be number
+ * @param offset
  * @returns
  */
 export function parseOffset(offset: any): number {
-  if (isNaN(offset) || offset === null) return 0;
+  if (isNaN(offset) || !offset) return 0;
 
   return Number(offset);
 }
@@ -165,7 +179,7 @@ export function parseOffset(offset: any): number {
  * @returns
  */
 export function parsePage(page: any): number {
-  if (isNaN(page) || page === null) return 1;
+  if (isNaN(page) || !page) return 1;
 
   if (Number(page) < 1) return 1;
 

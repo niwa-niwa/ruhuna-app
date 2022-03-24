@@ -16,6 +16,7 @@ v1.use(
 
 v1.use("/auth", validateToken, Router().get("/", authController.auth));
 
+// TODO /users validate all request and delete namespace
 v1.use(
   "/users",
   express
@@ -26,7 +27,7 @@ v1.use(
     // .get("/:userId/messages/:messageId", validateToken, userController.getUserDetail)
     // .get("/:userId/villages", validateToken, userController.getUserDetail)
     // .get("/:userId/villages/:villageId", validateToken, userController.getUserDetail)
-    .post("/create", userController.createUser)
+    .post("/create", validateToken, userController.createUser)
     .patch("/:userId", validateToken, userController.editUser)
     .delete("/delete/:userId", validateToken, userController.deleteUser)
 );

@@ -4,8 +4,13 @@ import { Message, Prisma, User } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
 import { generateErrorObj } from "../../lib/generateErrorObj";
-import { ErrorObj } from "../../types/error.types";
-import { CustomRequest, ResponseHeader, QArgs, QArgsAndPage } from "../../types/rest.types";
+import {
+  CustomRequest,
+  ResponseHeader,
+  QArgs,
+  QArgsAndPage,
+  ErrorObject,
+} from "../../types/rest.types";
 import {
   genErrorObj,
   sendError,
@@ -14,7 +19,6 @@ import {
   genLinksHeader,
   genQArgsAndPage,
 } from "../../lib/utilities";
-import { params } from "../../consts/params";
 
 /**
  * Get user profile detail
@@ -86,15 +90,11 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
   }
 }
 
-/**
- * Get all users
- * @param req
- * @param res
- */
 async function getUsers(req: Request, res: Response): Promise<void> {
   // generate args for query and page
-  const { args, page }: QArgsAndPage<Prisma.UserFindManyArgs> =
-    genQArgsAndPage(req.query);
+  const { args, page }: QArgsAndPage<Prisma.UserFindManyArgs> = genQArgsAndPage(
+    req.query
+  );
 
   try {
     // get all users
@@ -120,28 +120,29 @@ async function getUsers(req: Request, res: Response): Promise<void> {
   }
 }
 
-/**
- * Create user with firebase token
- * @param req
- * @param res
- */
-async function createUser(req: Request, res: Response): Promise<void> {
+async function createUser(req: CustomRequest, res: Response): Promise<void> {
+  const currentUser:CustomRequest["currentUser"] = req.currentUser!
+
   // get firebase token from body
   const firebaseToken: string = req.body.firebaseToken;
 
+  // Only Admin is allowed to create a user
+  if(!currentUser.isAdmin){
+    const error = genErrorObj(403,'Not allowed to create a user.')
+    res.status(error.code).json(error)
+    return;
+  }
+
   try {
     // get firebase user from firebase
-    const currentUser: DecodedIdToken | ErrorObj = await verifyToken(
+    const currentUser: DecodedIdToken | ErrorObject = await verifyToken(
       firebaseToken
     );
 
     // throw an error if currentUser has an errorCode property
-    if ("errorCode" in currentUser) {
+    if ("code" in currentUser) {
       // if the token were not authorized, it response error
-      res.status(currentUser.errorCode).json({
-        user: null,
-        errorObj: currentUser,
-      });
+      res.status(currentUser.code).json(currentUser);
       return;
     }
 
@@ -168,90 +169,62 @@ async function createUser(req: Request, res: Response): Promise<void> {
   }
 }
 
-/**
- * edit a user with currentUser.id who sent request
- * @param req
- * @param res
- */
 async function editUser(req: CustomRequest, res: Response): Promise<void> {
   const currentUser: CustomRequest["currentUser"] = req.currentUser!;
+
+  // the fields used to select of query
+  const select: QArgs["select"] = parseFields(req.query.fields);
 
   const id: Prisma.UserWhereUniqueInput["id"] = req.params.userId;
   const data: Prisma.UserUpdateInput = req.body;
 
   // if the user who sent request is not admin, it would confirm params.userId
   if (!currentUser.isAdmin || id !== currentUser.id) {
-    const error = {
-      code: 403,
-      message: "Not allowed to edit the user",
-    };
+    const error = genErrorObj(403, "Not allowed to edit the user");
     console.error(error);
-    res.status(403).json(error);
+    res.status(error.code).json(error);
     return;
   }
 
-  const editedUser: User | void = await prismaClient.user
-    .update({
+  try {
+    const editedUser: Partial<User> = await prismaClient.user.update({
       where: { id },
       data,
-    })
-    .catch((e) => {
-      console.error(e);
-      res.status(404).json({
-        user: null,
-        errorObj: generateErrorObj(404, "The User is not Found"),
-      });
+      select,
     });
 
-  if (!editUser) {
-    const error = {
-      code: 404,
-      message: "the user is not found",
-    };
-    console.error(error);
-    res.status(404).json(error);
-    return;
-  }
-
-  const header: ResponseHeader = {
-    "x-total-count": 1,
-    "x-total-page-count": 1,
-  };
-
-  res
-    .status(200)
-    .set(header)
-    .links({ next: "http://niwacan.com", prev: "http://niwacan.com/1" })
-    .json({ user: editedUser });
-}
-
-/**
- * delete a user with currentUser.id who sent request
- * @param req
- * @param res
- */
-async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
-  try {
-    let id: string | undefined = req.currentUser?.id;
-
-    // if the user who sent request is admin it would confirm params.userId
-    if (req.currentUser?.isAdmin) {
-      id = req.params.userId || req.currentUser?.id;
+    if (!editedUser) {
+      const error = genErrorObj(404, "The User is not Found");
+      console.error(error);
+      res.status(error.code).json(error);
+      return;
     }
 
-    const deletedUser: User = await prismaClient.user.delete({
+    res.status(200).json({ user: editedUser });
+  } catch (e) {
+    sendError(res, e);
+  }
+}
+
+async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
+  let id: string | undefined = req.currentUser?.id;
+
+  // if the user who sent request is admin it would confirm params.userId
+  if (req.currentUser?.isAdmin) {
+    id = req.params.userId || req.currentUser?.id;
+  }
+
+  const select: QArgs["select"] = parseFields(req.query.fields);
+
+  try {
+    const deletedUser: Partial<User> = await prismaClient.user.delete({
       where: { id },
+      select,
     });
 
     res.status(200).json({ user: deletedUser });
-
-    return;
   } catch (e) {
-    console.error(e);
-    res.status(404).json({
-      user: null,
-      errorObj: generateErrorObj(404, "the user is not found"),
-    });
+    sendError(res, e);
   }
 }
 

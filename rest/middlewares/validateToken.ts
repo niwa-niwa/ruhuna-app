@@ -1,11 +1,10 @@
-import { CustomRequest } from "../../types/rest.types";
+import { CustomRequest, ErrorObject } from "../../types/rest.types";
 import { Response, NextFunction } from "express";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { Message, User, Village } from "@prisma/client";
-import { ErrorObj } from "../../types/error.types";
-import { generateErrorObj } from "../../lib/generateErrorObj";
 import { verifyToken } from "../../lib/firebaseAdmin";
+import { genErrorObj } from "../../lib/utilities";
 
 /**
  * validate firebase token
@@ -24,41 +23,39 @@ export async function validateToken(
 
   // throw the error if headers didn't have a idToken and end
   if (!idToken) {
-    res
-      .status(400)
-      .json({ errorObj: generateErrorObj(400, "Headers has not token") });
+    const error = genErrorObj(400, "Headers has not token");
+    res.status(error.code).json(error);
     return;
   }
 
   // verify token
-  const firebaseUser: DecodedIdToken | ErrorObj = await verifyToken(
+  const firebaseUser: DecodedIdToken | ErrorObject = await verifyToken(
     idToken.replace("Bearer ", "")
   );
 
   // throw an error if token is invalid and end
-  if ("errorCode" in firebaseUser) {
-    res
-      .status(firebaseUser.errorCode)
-      .json({ currentUser: null, errorObj: firebaseUser });
+  if ("code" in firebaseUser) {
+    res.status(firebaseUser.code).json(firebaseUser);
     return;
   }
 
   // get User model based on firebase id
-  const currentUser:
+  let currentUser:
     | (User & { villages: Village[]; messages: Message[] })
     | null = await prismaClient.user.findUnique({
     where: { firebaseId: firebaseUser.uid },
     include: { villages: true, messages: true },
   });
 
-  // throw an error if currentUser is nothing and end
+  // currentUser were not found in DB, created a user with firebase token
   if (!currentUser) {
-    // if it couldn't find a user who has the firebaseId, it would response error
-    res.status(404).json({
-      currentUser: null,
-      errorObj: generateErrorObj(404, "The user by token is not found"),
+    currentUser = await prismaClient.user.create({
+      data: {
+        firebaseId: firebaseUser.uid,
+        username: firebaseUser.email || "no name",
+      },
+      include: { villages: true, messages: true },
     });
-    return;
   }
 
   // put the currentUser in req

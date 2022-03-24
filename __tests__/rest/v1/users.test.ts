@@ -74,8 +74,8 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.user).toHaveProperty("messages");
     expect(body.user).toHaveProperty("villages");
   });
-  
-  test("GET Fail /api/v1/users/:userId getUserDetail TEST : it should has error object cause wrong fields param" , async () => {
+
+  test("GET Fail /api/v1/users/:userId getUserDetail TEST : it should has error object cause wrong fields param", async () => {
     const dbUser = await prismaClient.user.findFirst();
     if (!dbUser) return;
 
@@ -87,8 +87,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
       })
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-      expect(status).toBe(400);
-
+    expect(status).toBe(400);
   });
 
   test("GET /api/v1/users/:userId getUserDetail TEST : it should receive error by wrong uid", async () => {
@@ -134,42 +133,26 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.messages[2].villageId).toBe(dbUser.messages[0].villageId);
     expect(Number(headers[params.X_TOTAL_COUNT])).toBe(dbUser.messages.length);
   });
+  
+// TODO implemented test case for createUser successfully
 
-  test("POST /api/v1/users/create createUser TEST : http status should be 200 and create a user ", async () => {
+  test("POST /api/v1/users/create createUser TEST : it should receive error because of not admin user requested ", async () => {
     const { status, body } = await request(api)
       .post(PREFIX_USERS + "/create")
       .send({ firebaseToken: "token_firebase_user" });
 
-    expect(status).toBe(200);
+      expect(status).toBe(400);
+    expect(body.code).toBe(400)
+    expect(body).toHaveProperty("message")
 
-    const dbUser: User | null = await prismaClient.user.findUnique({
-      where: { id: body.user.id },
-    });
-
-    expect(dbUser).not.toBeNull();
-
-    if (!dbUser) return;
-
-    expect(body.user.username).toEqual(firebase_user.name);
-    expect(dbUser.username).toEqual(firebase_user.name);
-    expect(body.user.firebaseId).toEqual(firebase_user.uid);
-    expect(dbUser.firebaseId).toEqual(firebase_user.uid);
-
-    expect(body.user).toHaveProperty("id");
-    expect(body.user).toHaveProperty("isAdmin");
-    expect(body.user).toHaveProperty("isActive");
-    expect(body.user).toHaveProperty("isAnonymous");
-    expect(body.user).not.toHaveProperty("password");
-    expect(body.user).not.toHaveProperty("errorObj");
   });
 
-  test("POST /api/v1/users/create creteUser TEST : should receive error", async () => {
+  test("POST /api/v1/users/create createUser TEST : should receive error", async () => {
     const { status, body } = await request(api).post(PREFIX_USERS + "/create");
 
     expect(status).toBe(400);
-    expect(body.user).toBeNull();
-    expect(body.errorObj.errorCode).toBe(400);
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body.code).toBe(400);
+    expect(body).toHaveProperty("message");
   });
 
   test("Patch /api/v1/users/:userId editUser TEST : edit user by edit_data successfully", async () => {
@@ -184,9 +167,12 @@ describe("/api/v1/users/ TEST : userController ", () => {
       isAnonymous: true,
     };
 
-    const { status, body, headers, header } = await request(api)
+    const { status, body } = await request(api)
       .patch(PREFIX_USERS + "/" + userId)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
+      .query({
+        fields: "id,username,isAdmin,isActive,isAnonymous",
+      })
       .send({ ...edit_data });
 
     const editedDbUser: User | null = await prismaClient.user.findUnique({
@@ -247,10 +233,10 @@ describe("/api/v1/users/ TEST : userController ", () => {
       .delete(PREFIX_USERS + "/delete/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(404);
-    expect(body.user).toBeNull();
-    expect(body.errorObj.errorCode).toBe(404);
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(status).toBe(400);
+    expect(body.user).toBeUndefined();
+    expect(body.code).toBe(400);
+    expect(body).toHaveProperty("message");
     expect(body.user).not.toBe("id");
   });
 
