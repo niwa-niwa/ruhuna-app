@@ -7,7 +7,7 @@ import { Response, NextFunction } from "express";
 import { genErrorObj } from "../../lib/utilities";
 import { validateToken } from "./validateToken";
 
-export async function authorizeUser(
+export async function authorization(
   req: CustomRequest,
   res: Response,
   next: NextFunction

@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { verifyToken } from "../../lib/firebaseAdmin";
-import { Message, Prisma, User } from "@prisma/client";
+import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
-import { generateErrorObj } from "../../lib/generateErrorObj";
 import {
   CustomRequest,
   ResponseHeader,
@@ -20,13 +19,9 @@ import {
   genQArgsAndPage,
 } from "../../lib/utilities";
 
+/** path parameter of user id */
 export const userId:string = "userId";
 
-/**
- * Get user profile detail
- * @param req
- * @param res
- */
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params[userId];
 
@@ -59,10 +54,7 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
   const { args, page }: QArgsAndPage<Prisma.MessageFindManyArgs> =
     genQArgsAndPage(req.query);
 
-  // the userId is searched to extract messages
-  const user_id: User["id"] = req.params[userId];
-
-  args.where = { userId:user_id };
+  args.where = { userId: req.params[userId] };
 
   try {
     // extract messages
@@ -72,7 +64,7 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
 
     // extract total records
     const count: number = await prismaClient.message.count({
-      where: { userId:user_id },
+      where: args.where,
     });
 
     // generate info of  the result
@@ -92,7 +84,43 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
   }
 }
 
-async function getUserVillages(req: CustomRequest, res:Response):Promise<void>{}
+async function getUserVillages(
+  req: CustomRequest,
+  res: Response
+): Promise<void> {
+  // the type for query argument
+  const { args, page }: QArgsAndPage<Prisma.VillageFindManyArgs> =
+    genQArgsAndPage(req.query);
+
+  args.where = { users: { some: { id: req.params[userId] } } };
+
+  try {
+    // extract messages
+    const villages: Partial<Village>[] = await prismaClient.village.findMany(
+      args
+    );
+
+    // extract total records
+    const count: number = await prismaClient.village.count({
+      where: args.where,
+    });
+
+    // generate info of  the result
+    const header: ResponseHeader = genResponseHeader(count, args.take);
+
+    // generate pagination
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header["x-total-page-count"],
+      req.url
+    );
+
+    // response
+    res.status(200).set(header).links(links).json({ villages });
+  } catch (e) {
+    sendError(res, e);
+  }
+}
 
 async function getUsers(req: Request, res: Response): Promise<void> {
   // generate args for query and page
@@ -125,51 +153,36 @@ async function getUsers(req: Request, res: Response): Promise<void> {
 }
 
 async function createUser(req: CustomRequest, res: Response): Promise<void> {
-  const currentUser:CustomRequest["currentUser"] = req.currentUser!
-
   // get firebase token from body
   const firebaseToken: string = req.body.firebaseToken;
 
-  // Only Admin is allowed to create a user
-  if(!currentUser.isAdmin){
-    const error = genErrorObj(403,'Not allowed to create a user.')
-    res.status(error.code).json(error)
+  // get firebase user from firebase
+  const currentUser: DecodedIdToken | ErrorObject = await verifyToken(
+    firebaseToken
+  );
+
+  // throw an error if currentUser has an errorCode property
+  if ("code" in currentUser) {
+    // if the token were not authorized, it response error
+    res.status(currentUser.code).json(currentUser);
     return;
   }
 
   try {
-    // get firebase user from firebase
-    const currentUser: DecodedIdToken | ErrorObject = await verifyToken(
-      firebaseToken
-    );
+    // create user
+    const createdUser: User = await prismaClient.user.create({
+      data: {
+        firebaseId: currentUser.uid,
+        username: currentUser.name,
+      },
+    });
 
-    // throw an error if currentUser has an errorCode property
-    if ("code" in currentUser) {
-      // if the token were not authorized, it response error
-      res.status(currentUser.code).json(currentUser);
-      return;
-    }
+    // response created user data
+    res.status(200).json({ user: createdUser });
 
-    if ("uid" in currentUser) {
-      // create user
-      const createdUser: User = await prismaClient.user.create({
-        data: {
-          firebaseId: currentUser.uid,
-          username: currentUser.name,
-        },
-      });
-
-      // response created user data
-      res.status(200).json({ user: createdUser });
-
-      return;
-    }
+    return;
   } catch (e) {
-    console.error(e);
-
-    res
-      .status(404)
-      .json({ errorObj: generateErrorObj(404, "Couldn't create a user") });
+    sendError(res, e);
   }
 }
 
@@ -242,5 +255,3 @@ export const userController = {
   editUser,
   deleteUser,
 };
-
-export default userController;

@@ -4,9 +4,10 @@ import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
-import { PARAMS } from "../../../consts/url";
+import { PARAMS,PATH, V1 } from "../../../consts/url";
+import { userId } from "../../../rest/controllers/userController";
 
-const PREFIX_USERS = "/api/v1/users";
+const PREFIX_USERS = V1.USERS;
 
 describe("/api/v1/users/ TEST : userController ", () => {
   test("GET /api/v1/users/ getUsers : TEST it should be status 200 and properties  ", async () => {
@@ -132,6 +133,21 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.messages[2].content).toBe(dbUser.messages[0].content);
     expect(body.messages[2].villageId).toBe(dbUser.messages[0].villageId);
     expect(Number(headers[PARAMS.X_TOTAL_COUNT])).toBe(dbUser.messages.length);
+  });
+
+  test(`GET ${V1.USERS}/:${userId}${PATH.VILLAGES} getUserVillages: Success`, async () => {
+    const dbUser = await prismaClient.user.findFirst({
+      include: { villages: true },
+    });
+    if (!dbUser) return;
+
+    const { status, body, headers } = await request(api)
+      .get(V1.USERS + "/" + dbUser.id + PATH.VILLAGES)
+      .query({})
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
+
+    expect(status).toBe(200);
+
   });
   
 // TODO implemented test case for createUser successfully

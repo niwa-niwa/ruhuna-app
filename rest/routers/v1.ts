@@ -1,5 +1,6 @@
 import { Response, Request, Router } from "express";
 import { authentication } from "../middlewares/authentication";
+import { authorization } from "../middlewares/authorization";
 import { userController, userId } from "../controllers/userController";
 import villageController from "../controllers/villageController";
 import messageController from "../controllers/messageController";
@@ -25,8 +26,8 @@ v1.use(
     .get("/", userController.getUsers)
     .get(`/:${userId}`, userController.getUserDetail)
     .get(`/:${userId}${PATH.MESSAGES}`, userController.getUserMessages)
-    .get(`/:${userId}${PATH.VILLAGES}`, userController.getUserDetail)
-    .post("/", userController.createUser)
+    .get(`/:${userId}${PATH.VILLAGES}`, userController.getUserVillages)
+    .post("/", authorization, userController.createUser)
     .patch(`/:${userId}`, userController.editUser)
     .delete(`/:${userId}`, userController.deleteUser)
 );

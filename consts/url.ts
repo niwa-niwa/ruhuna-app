@@ -1,12 +1,15 @@
 export const PATH = Object.freeze({
-  REST:"/api",
-  V1:"/v1",
-  HEALTH:"/health",
-  ME:"/me",
-  USERS:"/users",
-  VILLAGES:"/villages",
-  MESSAGES:"/messages"
-  
+  REST: "/api",
+  V1: "/v1",
+  HEALTH: "/health",
+  ME: "/me",
+  USERS: "/users",
+  VILLAGES: "/villages",
+  MESSAGES: "/messages",
+});
+
+export const V1 = Object.freeze({
+  USERS: `${PATH.REST}${PATH.V1}${PATH.USERS}`,
 });
 
 export const PARAMS = Object.freeze({
