@@ -1,5 +1,5 @@
 import { Response, Request, Router } from "express";
-import { validateToken } from "../middlewares/validateToken";
+import { authentication } from "../middlewares/authentication";
 import { userController, userId } from "../controllers/userController";
 import villageController from "../controllers/villageController";
 import messageController from "../controllers/messageController";
@@ -13,14 +13,14 @@ v1.use(
     .get(PATH.HEALTH, (req: Request, res: Response) => {
       res.status(200).json("It Works!!");
     })
-    .get(PATH.ME, validateToken, (req: CustomRequest, res: Response) =>
+    .get(PATH.ME, authentication, (req: CustomRequest, res: Response) =>
       res.status(200).json({ currentUser: req.currentUser })
     )
 );
 
 v1.use(
   PATH.USERS,
-  validateToken,
+  authentication,
   Router()
     .get("/", userController.getUsers)
     .get(`/:${userId}`, userController.getUserDetail)
@@ -33,7 +33,7 @@ v1.use(
 
 v1.use(
   PATH.VILLAGES,
-  validateToken,
+  authentication,
   Router()
     .get("/", villageController.getVillages)
     .get("/:villageId", villageController.getVillageDetail)
@@ -45,7 +45,7 @@ v1.use(
 
 v1.use(
   PATH.MESSAGES,
-  validateToken,
+  authentication,
   Router()
     .get("/", messageController.getMessages)
     .get("/:messageId", messageController.getMessageDetail)
