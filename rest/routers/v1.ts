@@ -1,42 +1,40 @@
-import express, { Response, Request, Router } from "express";
+import { Response, Request, Router } from "express";
 import { validateToken } from "../middlewares/validateToken";
-import authController from "../controllers/authController";
-import userController from "../controllers/userController";
+import { userController, userId } from "../controllers/userController";
 import villageController from "../controllers/villageController";
 import messageController from "../controllers/messageController";
+import { CustomRequest } from "../../types/rest.types";
+import { PATH } from "../../consts/url";
 
 const v1: Router = Router();
 
 v1.use(
-  "/health",
-  Router().get("/", (req: Request, res: Response) => {
-    res.status(200).json("It Works!!");
-  })
-);
-
-v1.use("/auth", validateToken, Router().get("/", authController.auth));
-
-// TODO /users validate all request and delete namespace
-v1.use(
-  "/users",
-  express
-    .Router()
-    .get("/", validateToken, userController.getUsers)
-    .get("/:userId", validateToken, userController.getUserDetail)
-    .get("/:userId/messages", validateToken, userController.getUserMessages)
-    // .get("/:userId/messages/:messageId", validateToken, userController.getUserDetail)
-    // .get("/:userId/villages", validateToken, userController.getUserDetail)
-    // .get("/:userId/villages/:villageId", validateToken, userController.getUserDetail)
-    .post("/create", validateToken, userController.createUser)
-    .patch("/:userId", validateToken, userController.editUser)
-    .delete("/delete/:userId", validateToken, userController.deleteUser)
+  Router()
+    .get(PATH.HEALTH, (req: Request, res: Response) => {
+      res.status(200).json("It Works!!");
+    })
+    .get(PATH.ME, validateToken, (req: CustomRequest, res: Response) =>
+      res.status(200).json({ currentUser: req.currentUser })
+    )
 );
 
 v1.use(
-  "/villages",
+  PATH.USERS,
   validateToken,
-  express
-    .Router()
+  Router()
+    .get("/", userController.getUsers)
+    .get(`/:${userId}`, userController.getUserDetail)
+    .get(`/:${userId}${PATH.MESSAGES}`, userController.getUserMessages)
+    .get(`/:${userId}${PATH.VILLAGES}`, userController.getUserDetail)
+    .post("/", userController.createUser)
+    .patch(`/:${userId}`, userController.editUser)
+    .delete(`/:${userId}`, userController.deleteUser)
+);
+
+v1.use(
+  PATH.VILLAGES,
+  validateToken,
+  Router()
     .get("/", villageController.getVillages)
     .get("/:villageId", villageController.getVillageDetail)
     .post("/create", villageController.createVillage)
@@ -46,10 +44,9 @@ v1.use(
 );
 
 v1.use(
-  "/messages",
+  PATH.MESSAGES,
   validateToken,
-  express
-    .Router()
+  Router()
     .get("/", messageController.getMessages)
     .get("/:messageId", messageController.getMessageDetail)
     .post("/create", messageController.createMessage)

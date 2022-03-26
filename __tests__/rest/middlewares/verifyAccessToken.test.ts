@@ -4,7 +4,7 @@ import { api } from "../../../rest";
 describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {
     const res = await request(api)
-      .get("/api/v1/auth")
+      .get("/api/v1/me")
       .set("Authorization", "Bearer token_admin_user");
 
     expect(res.status).toBe(200);
@@ -20,7 +20,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   });
 
   test("it should be fail request without token by firebase API", async () => {
-    const res = await request(api).get("/api/v1/auth");
+    const res = await request(api).get("/api/v1/me");
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe(400);
@@ -29,7 +29,7 @@ describe("TEST Middleware verifyAccessToken", () => {
 
   test("it should be fail by Prisma API", async () => {
     const res = await request(api)
-      .get("/api/v1/auth")
+      .get("/api/v1/me")
       .set("Authorization", "Bearer 123450");
 
     expect(res.status).toBe(400);

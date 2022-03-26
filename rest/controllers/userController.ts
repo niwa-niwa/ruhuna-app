@@ -20,13 +20,15 @@ import {
   genQArgsAndPage,
 } from "../../lib/utilities";
 
+export const userId:string = "userId";
+
 /**
  * Get user profile detail
  * @param req
  * @param res
  */
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
-  const id: string = req.params.userId;
+  const id: string = req.params[userId];
 
   // the fields used to select of query
   const fields: QArgs["select"] = parseFields(req.query.fields);
@@ -58,9 +60,9 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
     genQArgsAndPage(req.query);
 
   // the userId is searched to extract messages
-  const userId: User["id"] = req.params.userId;
+  const user_id: User["id"] = req.params[userId];
 
-  args.where = { userId };
+  args.where = { userId:user_id };
 
   try {
     // extract messages
@@ -70,7 +72,7 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
 
     // extract total records
     const count: number = await prismaClient.message.count({
-      where: { userId },
+      where: { userId:user_id },
     });
 
     // generate info of  the result
@@ -89,6 +91,8 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
     sendError(res, e);
   }
 }
+
+async function getUserVillages(req: CustomRequest, res:Response):Promise<void>{}
 
 async function getUsers(req: Request, res: Response): Promise<void> {
   // generate args for query and page
@@ -175,7 +179,7 @@ async function editUser(req: CustomRequest, res: Response): Promise<void> {
   // the fields used to select of query
   const select: QArgs["select"] = parseFields(req.query.fields);
 
-  const id: Prisma.UserWhereUniqueInput["id"] = req.params.userId;
+  const id: Prisma.UserWhereUniqueInput["id"] = req.params[userId];
   const data: Prisma.UserUpdateInput = req.body;
 
   // if the user who sent request is not admin, it would confirm params.userId
@@ -211,7 +215,7 @@ async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
 
   // if the user who sent request is admin it would confirm params.userId
   if (req.currentUser?.isAdmin) {
-    id = req.params.userId || req.currentUser?.id;
+    id = req.params[userId] || req.currentUser?.id;
   }
 
   const select: QArgs["select"] = parseFields(req.query.fields);
@@ -228,17 +232,12 @@ async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-const userController: {
-  getUsers: any;
-  getUserDetail: any;
-  getUserMessages: any;
-  createUser: any;
-  editUser: any;
-  deleteUser: any;
-} = {
+export const userController = {
+  userId,
   getUsers,
   getUserDetail,
   getUserMessages,
+  getUserVillages,
   createUser,
   editUser,
   deleteUser,

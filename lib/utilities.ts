@@ -4,7 +4,7 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime";
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
-import { params } from "../consts/params";
+import { PARAMS } from "../consts/url";
 
 /**
  * for response error message to frontend
@@ -77,19 +77,19 @@ export function genLinksHeader(
 ): { next: string; prev: string } {
   const next: string =
     total_page > page
-      ? url.replace(`${params.PAGE}=${page}`, `${params.PAGE}=${page + 1}`)
+      ? url.replace(`${PARAMS.PAGE}=${page}`, `${PARAMS.PAGE}=${page + 1}`)
       : "";
 
   const prev: string =
     page > 1
-      ? url.replace(`${params.PAGE}=${page}`, `${params.PAGE}=${page - 1}`)
+      ? url.replace(`${PARAMS.PAGE}=${page}`, `${PARAMS.PAGE}=${page - 1}`)
       : "";
 
   return { next, prev };
 }
 
 /**
- * separate strings-field in a request params  with separator.
+ * separate strings-field in a request PARAMS  with separator.
  * field = "id,name,createdAt"
  * return = {id:true,name:true,createdAt:true}
  * @param field
@@ -219,18 +219,18 @@ export function genQArgsAndPage(query: Request["query"]): {
   let args: QArgs = {};
 
   // extract columns
-  args.select = parseFields(query[params.FIELDS]);
+  args.select = parseFields(query[PARAMS.FIELDS]);
 
   // record should be the orderBy
-  args.orderBy = parseSort(query[params.SORT]);
+  args.orderBy = parseSort(query[PARAMS.SORT]);
 
   // how many records should be in par page
-  args.take = parsePerPage(query[params.PAR_PAGE]);
+  args.take = parsePerPage(query[PARAMS.PAR_PAGE]);
 
   // where page number should return
-  const page: number = args.take ? parsePage(query[params.PAGE]) : 1;
+  const page: number = args.take ? parsePage(query[PARAMS.PAGE]) : 1;
 
-  const offset: number | undefined = parseOffset(query[params.OFFSET]);
+  const offset: number | undefined = parseOffset(query[PARAMS.OFFSET]);
 
   // how many skip records from 0
   args.skip = calcSkipRecords(args.take, page, offset);

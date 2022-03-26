@@ -4,7 +4,7 @@ import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
 import { firebase_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
-import { params } from "../../../consts/params";
+import { PARAMS } from "../../../consts/url";
 
 const PREFIX_USERS = "/api/v1/users";
 
@@ -131,14 +131,14 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(body.messages[2].id).toBe(dbUser.messages[0].id);
     expect(body.messages[2].content).toBe(dbUser.messages[0].content);
     expect(body.messages[2].villageId).toBe(dbUser.messages[0].villageId);
-    expect(Number(headers[params.X_TOTAL_COUNT])).toBe(dbUser.messages.length);
+    expect(Number(headers[PARAMS.X_TOTAL_COUNT])).toBe(dbUser.messages.length);
   });
   
 // TODO implemented test case for createUser successfully
 
   test("POST /api/v1/users/create createUser TEST : it should receive error because of not admin user requested ", async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_USERS + "/create")
+      .post(PREFIX_USERS)
       .send({ firebaseToken: "token_firebase_user" });
 
       expect(status).toBe(400);
@@ -148,7 +148,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
   });
 
   test("POST /api/v1/users/create createUser TEST : should receive error", async () => {
-    const { status, body } = await request(api).post(PREFIX_USERS + "/create");
+    const { status, body } = await request(api).post(PREFIX_USERS);
 
     expect(status).toBe(400);
     expect(body.code).toBe(400);
@@ -230,7 +230,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     expect(dbUser).toBeNull();
 
     const { status, body } = await request(api)
-      .delete(PREFIX_USERS + "/delete/" + wrong_id)
+      .delete(PREFIX_USERS + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(400);
@@ -245,7 +245,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
     const userId = dbUsers[0].id;
 
     const { status, body } = await request(api)
-      .delete(PREFIX_USERS + "/delete/" + userId)
+      .delete(PREFIX_USERS + "/" + userId)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     const usersCount = await prismaClient.user.count();
