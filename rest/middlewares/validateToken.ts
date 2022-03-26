@@ -1,15 +1,12 @@
-import { ErrorObject } from "../../types/rest.types";
+import { ErrorObject, CurrentUser } from "../../types/rest.types";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { Message, User, Village } from "@prisma/client";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { genErrorObj } from "../../lib/utilities";
 
 export async function validateToken(
   idToken: string | undefined
-): Promise<
-  (User & { villages: Village[]; messages: Message[] }) | ErrorObject
-> {
+): Promise<CurrentUser | ErrorObject> {
   // return error if headers does not have token
   if (!idToken) return genErrorObj(400, "Headers has not token");
 
@@ -25,11 +22,12 @@ export async function validateToken(
 
   try {
     // get User model based on firebase id
-    let currentUser:
-      | (User & { villages: Village[]; messages: Message[] })
-      | null = await prismaClient.user.findUnique({
+    let currentUser: CurrentUser | null = await prismaClient.user.findUnique({
       where: { firebaseId: firebaseUser.uid },
-      include: { villages: true, messages: true },
+      include: {
+        villages: { select: { id: true } },
+        messages: { select: { id: true } },
+      },
     });
 
     // currentUser were not found, created a user with firebase token
@@ -39,7 +37,10 @@ export async function validateToken(
           firebaseId: firebaseUser.uid,
           username: firebaseUser.email || "no name",
         },
-        include: { villages: true, messages: true },
+        include: {
+          villages: { select: { id: true } },
+          messages: { select: { id: true } },
+        },
       });
     }
 

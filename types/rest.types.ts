@@ -1,11 +1,13 @@
 import { Request } from "express";
 import { Message, User, Village } from "@prisma/client";
 
+export type CurrentUser = User & {
+  messages:{id:Message["id"]}[]
+  villages:{id:Village["id"]}[]
+}
+
 export type CustomRequest = Request & {
-  currentUser?: User & {
-    villages: Village[];
-    messages: Message[];
-  };
+  currentUser?: CurrentUser
 };
 
 export type ErrorObject = {

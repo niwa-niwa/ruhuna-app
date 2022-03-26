@@ -67,7 +67,7 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
 
     // confirm the user join the village
     const isMember = req.currentUser?.villages.find(
-      (village: Village) => village.id === villageId
+      (village) => village.id === villageId
     );
 
     // throw error if the currentUser is not a member
@@ -111,7 +111,7 @@ async function editMessage(req: CustomRequest, res: Response): Promise<void> {
 
     // confirm the user has the message id
     const isOwner = req.currentUser?.messages.find(
-      (message: Message) => message.id === id
+      (message) => message.id === id
     );
 
     // throw an error if the user has not message id
@@ -154,7 +154,7 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
 
     // confirm the user has the message id
     let isOwner = req.currentUser?.messages.find(
-      (message: Message) => message.id === id
+      (message) => message.id === id
     );
 
     // throw an error if the user has not message id
@@ -180,13 +180,7 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-const messageController: {
-  getMessages: any;
-  getMessageDetail: any;
-  createMessage: any;
-  editMessage: any;
-  deleteMessage: any;
-} = {
+const messageController = {
   getMessages,
   getMessageDetail,
   createMessage,
