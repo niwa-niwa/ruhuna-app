@@ -35,7 +35,7 @@ export async function validateToken(
       currentUser = await prismaClient.user.create({
         data: {
           firebaseId: firebaseUser.uid,
-          username: firebaseUser.email || "no name",
+          username: firebaseUser.name || "no name",
         },
         include: {
           villages: { select: { id: true } },

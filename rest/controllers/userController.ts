@@ -20,7 +20,7 @@ import {
 } from "../../lib/utilities";
 
 /** path parameter of user id */
-export const userId:string = "userId";
+export const userId: string = "userId";
 
 async function getUserDetail(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params[userId];
@@ -157,14 +157,12 @@ async function createUser(req: CustomRequest, res: Response): Promise<void> {
   const firebaseToken: string = req.body.firebaseToken;
 
   // get firebase user from firebase
-  const currentUser: DecodedIdToken | ErrorObject = await verifyToken(
-    firebaseToken
-  );
+  const user: DecodedIdToken | ErrorObject = await verifyToken(firebaseToken);
 
-  // throw an error if currentUser has an errorCode property
-  if ("code" in currentUser) {
+  // throw an error if user has an errorCode property
+  if ("code" in user) {
     // if the token were not authorized, it response error
-    res.status(currentUser.code).json(currentUser);
+    res.status(user.code).json(user);
     return;
   }
 
@@ -172,14 +170,13 @@ async function createUser(req: CustomRequest, res: Response): Promise<void> {
     // create user
     const createdUser: User = await prismaClient.user.create({
       data: {
-        firebaseId: currentUser.uid,
-        username: currentUser.name,
+        firebaseId: user.uid,
+        username: user.name,
       },
     });
 
     // response created user data
     res.status(200).json({ user: createdUser });
-
     return;
   } catch (e) {
     sendError(res, e);

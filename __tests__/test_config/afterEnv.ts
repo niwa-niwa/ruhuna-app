@@ -5,6 +5,7 @@ import {
   anonymous_user,
   general_user,
   nonactive_user,
+  sub_user,
 } from "./testData";
 import { genErrorObj } from "../../lib/utilities";
 import { testTokens } from "./testData";
@@ -43,6 +44,10 @@ jest.mock("../../lib/firebaseAdmin", () => ({
 
     if (token === testTokens.nonactive_user) {
       return nonactive_user;
+    }
+
+    if (token === testTokens.sub_user) {
+      return sub_user;
     }
 
     return genErrorObj(400, "ID token has invalid signature");

@@ -2,9 +2,9 @@ import request from "supertest";
 import { api } from "../../../rest";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
-import { firebase_user } from "../../test_config/testData";
+import { sub_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
-import { PARAMS,PATH, V1 } from "../../../consts/url";
+import { PARAMS, PATH, V1 } from "../../../consts/url";
 import { userId } from "../../../rest/controllers/userController";
 
 const PREFIX_USERS = V1.USERS;
@@ -147,20 +147,45 @@ describe("/api/v1/users/ TEST : userController ", () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
-
   });
-  
-// TODO implemented test case for createUser successfully
+
+  test(`Success POST ${V1.USERS} createUser `, async () => {
+    const nullUser = await prismaClient.user.findUnique({
+      where: { firebaseId: sub_user.uid },
+    });
+
+    expect(nullUser).toBeNull();
+
+    const { status, body, header } = await request(api)
+      .post(V1.USERS)
+      .set(PARAMS.HEADER_AUTH, `Bearer ${testTokens.admin_user}`)
+      .send({ firebaseToken: testTokens.sub_user });
+
+    const dbUser = await prismaClient.user.findUnique({
+      where: { firebaseId: sub_user.uid },
+    });
+    if (!dbUser) return;
+
+    expect(status).toBe(200);
+    expect(dbUser).not.toBeNull();
+    expect(dbUser.firebaseId).toBe(sub_user.uid);
+    expect(body.user.firebaseId).toBe(sub_user.uid);
+    expect(body.user.isAdmin).toBe(dbUser.isAdmin);
+    expect(body.user.isActive).toBe(dbUser.isActive);
+    expect(body.user.isAnonymous).toBe(dbUser.isAnonymous);
+    expect(body.user.username).toBe(dbUser.username);
+    expect(body.user.messages).toBeUndefined();
+    expect(body.user.villages).toBeUndefined();
+  });
 
   test("POST /api/v1/users/create createUser TEST : it should receive error because of not admin user requested ", async () => {
     const { status, body } = await request(api)
       .post(PREFIX_USERS)
       .send({ firebaseToken: "token_firebase_user" });
 
-      expect(status).toBe(400);
-    expect(body.code).toBe(400)
-    expect(body).toHaveProperty("message")
-
+    expect(status).toBe(400);
+    expect(body.code).toBe(400);
+    expect(body).toHaveProperty("message");
   });
 
   test("POST /api/v1/users/create createUser TEST : should receive error", async () => {

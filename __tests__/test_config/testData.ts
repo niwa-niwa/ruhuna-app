@@ -1,18 +1,13 @@
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { users } from "../../prisma/seeds";
 
-export const testTokens: {
-  firebase_user: string;
-  admin_user: string;
-  general_user: string;
-  anonymous_user: string;
-  nonactive_user: string;
-} = {
+export const testTokens = {
   firebase_user: "token_firebase_user",
   admin_user: "token_admin_user",
   general_user: "token_general_user",
   anonymous_user: "token_anonymous_user",
   nonactive_user: "token_nonactive_user",
+  sub_user: "token_sub_user",
 };
 
 export const firebase_user: DecodedIdToken = {
@@ -123,4 +118,26 @@ export const nonactive_user: DecodedIdToken = {
     sign_in_provider: "google.com",
   },
   uid: users[3].firebaseId,
+};
+
+export const sub_user: DecodedIdToken = {
+  name: "sub_user_man",
+  picture: "https://lh3.googleusercontent.com/a-/A",
+  iss: "https://securetoken.google.com/ruhuna-dev",
+  aud: "ruhuna-dev",
+  auth_time: 1636553085,
+  user_id: "firebase_sub_user",
+  sub: "firebase_sub_user",
+  iat: 1637600494,
+  exp: 1637604094,
+  email: `firebase_sub_user@example.com`,
+  email_verified: true,
+  firebase: {
+    identities: {
+      "google.com": ["102752955248904445131"],
+      email: [`firebase_sub_user@example.com`],
+    },
+    sign_in_provider: "google.com",
+  },
+  uid: "firebase_sub_user",
 };

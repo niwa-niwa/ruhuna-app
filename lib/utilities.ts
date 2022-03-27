@@ -49,7 +49,7 @@ export function sendError(res: Response, e: unknown): void {
  */
 export function genResponseHeader(
   count: number,
-  par_page: number | undefined
+  par_page: ReturnType<typeof parseParPage>
 ): ResponseHeader {
   let total_pages: number = 1;
 
@@ -150,7 +150,7 @@ export function parseSort(
  * @param by_default
  * @returns
  */
-export function parsePerPage(
+export function parseParPage(
   limit: any,
   by_default: number = 10
 ): number | undefined {
@@ -194,7 +194,7 @@ export function parsePage(page: any): number {
  * @returns
  */
 export function calcSkipRecords(
-  par_page: ReturnType<typeof parsePerPage>,
+  par_page: ReturnType<typeof parseParPage>,
   page: ReturnType<typeof parsePage>,
   offset: ReturnType<typeof parseOffset>
 ): QArgs["skip"] {
@@ -225,7 +225,7 @@ export function genQArgsAndPage(query: Request["query"]): {
   args.orderBy = parseSort(query[PARAMS.SORT]);
 
   // how many records should be in par page
-  args.take = parsePerPage(query[PARAMS.PAR_PAGE]);
+  args.take = parseParPage(query[PARAMS.PAR_PAGE]);
 
   // where page number should return
   const page: number = args.take ? parsePage(query[PARAMS.PAGE]) : 1;

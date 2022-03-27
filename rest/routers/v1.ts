@@ -4,7 +4,7 @@ import { authorization } from "../middlewares/authorization";
 import { userController, userId } from "../controllers/userController";
 import villageController from "../controllers/villageController";
 import messageController from "../controllers/messageController";
-import { CustomRequest } from "../../types/rest.types";
+import { CurrentUser, CustomRequest } from "../../types/rest.types";
 import { PATH } from "../../consts/url";
 
 const v1: Router = Router();
@@ -14,9 +14,12 @@ v1.use(
     .get(PATH.HEALTH, (req: Request, res: Response) => {
       res.status(200).json("It Works!!");
     })
-    .get(PATH.ME, authentication, (req: CustomRequest, res: Response) =>
-      res.status(200).json({ currentUser: req.currentUser })
-    )
+    .get(PATH.ME, authentication, (req: CustomRequest, res: Response) => {
+      const user: Partial<CurrentUser> = req.currentUser!;
+      delete user.messages;
+      delete user.villages;
+      res.status(200).json({ user });
+    })
 );
 
 v1.use(

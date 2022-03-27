@@ -27,8 +27,9 @@ export async function authorization(
   }
 
   // send an error if currentUser were not admin
-  if (req.currentUser.isAdmin) {
+  if (!req.currentUser.isAdmin) {
     res.status(403).json(genErrorObj(403, "You are not allowed the request"));
+    return;
   }
 
   next();
