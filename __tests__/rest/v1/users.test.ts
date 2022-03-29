@@ -158,7 +158,7 @@ describe("/api/v1/users/ TEST : userController ", () => {
 
     const { status, body, header } = await request(api)
       .post(V1.USERS)
-      .set(PARAMS.HEADER_AUTH, `Bearer ${testTokens.admin_user}`)
+      .set(PARAMS.HEADER_AUTH_KEY, `Bearer ${testTokens.admin_user}`)
       .send({ firebaseToken: testTokens.sub_user });
 
     const dbUser = await prismaClient.user.findUnique({

@@ -8,7 +8,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {
     const res = await request(api)
       .get(V1.ME)
-      .set(PARAMS.HEADER_AUTH, "Bearer token_admin_user");
+      .set(PARAMS.HEADER_AUTH_KEY, "Bearer token_admin_user");
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("user");
@@ -33,7 +33,7 @@ describe("TEST Middleware verifyAccessToken", () => {
   test("it should be fail by Prisma API", async () => {
     const res = await request(api)
       .get(V1.ME)
-      .set(PARAMS.HEADER_AUTH, "Bearer 123450");
+      .set(PARAMS.HEADER_AUTH_KEY, "Bearer 123450");
 
     expect(res.status).toBe(400);
     expect(res.body.user).toBeUndefined();
@@ -55,7 +55,7 @@ describe("TEST Middleware verifyAccessToken", () => {
 
     const { status, body, header } = await request(api)
       .get(V1.ME)
-      .set(PARAMS.HEADER_AUTH, testTokens.sub_user);
+      .set(PARAMS.HEADER_AUTH_KEY, testTokens.sub_user);
 
     const dbUser2 = await prismaClient.user.findUnique({
       where: { firebaseId: sub_user.uid },
