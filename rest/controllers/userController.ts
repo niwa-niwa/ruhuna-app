@@ -1,3 +1,4 @@
+import { PARAMS } from "./../../consts/url";
 import { Request, Response } from "express";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { Message, Prisma, User, Village } from "@prisma/client";
@@ -73,7 +74,7 @@ async function getUserMessages(req: Request, res: Response): Promise<void> {
     // generate pagination
     const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
       page,
-      header["x-total-page-count"],
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
       req.url
     );
 
@@ -111,7 +112,7 @@ async function getUserVillages(
     // generate pagination
     const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
       page,
-      header["x-total-page-count"],
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
       req.url
     );
 
@@ -141,7 +142,7 @@ async function getUsers(req: Request, res: Response): Promise<void> {
     // generate pagination
     const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
       page,
-      header["x-total-page-count"],
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
       req.url
     );
 

@@ -58,8 +58,8 @@ export function genResponseHeader(
   }
 
   return {
-    "x-total-count": count,
-    "x-total-page-count": total_pages,
+    [PARAMS.X_TOTAL_COUNT]: count,
+    [PARAMS.X_TOTAL_PAGE_COUNT]: total_pages,
   };
 }
 

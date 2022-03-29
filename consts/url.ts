@@ -19,7 +19,7 @@ export const V1 = Object.freeze({
 export const PARAMS = Object.freeze({
   HEADER_AUTH: "Authorization",
   X_TOTAL_COUNT: "x-total-count",
-  X_TOTAL_PAGE_COUNT: "x-total-pages-count",
+  X_TOTAL_PAGE_COUNT: "x-total-page-count",
   FIELDS: "fields",
   SORT: "sort",
   PAR_PAGE: "par_page",

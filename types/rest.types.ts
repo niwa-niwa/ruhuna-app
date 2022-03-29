@@ -2,12 +2,12 @@ import { Request } from "express";
 import { Message, User, Village } from "@prisma/client";
 
 export type CurrentUser = User & {
-  messages:{id:Message["id"]}[]
-  villages:{id:Village["id"]}[]
-}
+  messages: { id: Message["id"] }[];
+  villages: { id: Village["id"] }[];
+};
 
 export type CustomRequest = Request & {
-  currentUser?: CurrentUser
+  currentUser?: CurrentUser;
 };
 
 export type ErrorObject = {
@@ -15,10 +15,7 @@ export type ErrorObject = {
   message: string;
 };
 
-export type ResponseHeader = {
-  "x-total-count": number;
-  "x-total-page-count": number;
-};
+export type ResponseHeader = { [key: string]: number };
 
 export type QArgs = {
   select?: { [key: string]: boolean } | undefined;
@@ -28,6 +25,6 @@ export type QArgs = {
 };
 
 export type QArgsAndPage<T> = {
-  args:T
-  page:number
-}
+  args: T;
+  page: number;
+};
