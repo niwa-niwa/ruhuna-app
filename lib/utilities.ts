@@ -75,6 +75,15 @@ export function genLinksHeader(
   total_page: number,
   url: string
 ): { next: string; prev: string } {
+  // if url had not page parameter, it would be added page parameter
+  if (url.indexOf(`${PARAMS.PAGE}=`) === -1) {
+    if(url.indexOf("?",url.lastIndexOf('/')) === -1){
+      url += `?${PARAMS.PAGE}=${page}`;
+    }else{
+      url += `&${PARAMS.PAGE}=${page}`;
+    }
+  }
+
   const next: string =
     total_page > page
       ? url.replace(`${PARAMS.PAGE}=${page}`, `${PARAMS.PAGE}=${page + 1}`)
