@@ -3,6 +3,8 @@ import {
   genErrorObj,
   genLinksHeader,
   genResponseHeader,
+  parseFields,
+  parseSort,
 } from "../../lib/utilities";
 
 describe("utilities.ts", () => {
@@ -81,4 +83,30 @@ describe("utilities.ts", () => {
       expect(result.prev).toBe("")
     });
   });
+
+  describe("parseFields", ()=>{
+    test("Success normal arguments",()=>{
+      const args = "id,name,createdAt"
+      const result = parseFields(args)
+      expect(result).toEqual({id:true,name:true,createdAt:true})
+    })
+    test("Success nothing arguments then return undefined",()=>{
+      const result = parseFields("")
+      expect(result).toBeUndefined();
+    })
+  })
+
+  describe("parseSort", ()=>{
+    test("Success", ()=>{
+      const args = "-createdAt,+updatedAt";
+      const result = parseSort(args)
+      expect(result).toEqual([{createdAt:"desc"},{updatedAt:"asc"}])
+    })
+    test("Fail arguments must add a prefix - or + otherwise slice top character",()=>{
+      const args = "-createdAt,abc";
+      const result = parseSort(args)
+      expect(result).toEqual([{createdAt:"desc"},{bc:"asc"}])
+
+    })
+  })
 });

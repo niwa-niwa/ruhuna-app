@@ -124,9 +124,9 @@ export function parseFields(
 
 /**
  * optimize sort-string for prisma.js
- * sort = "sort=-createdAt,+updatedAt"
+ * sort = sort = "-createdAt,+updatedAt"
  * Prefix means "-" = desc, "+" = asc
- * return = {createdAt:"desc",updatedAt:"asc"}
+ * return = [{createdAt:"desc"},{updatedAt:"asc"}]
  * @param sort
  * @param separator
  * @returns
