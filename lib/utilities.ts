@@ -5,6 +5,8 @@ import {
 } from "@prisma/client/runtime";
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
+import {config} from "../consts/config";
+
 
 /**
  * for response error message to frontend
@@ -156,14 +158,12 @@ export function parseSort(
  * optimize limit for prisma
  * limit should be number
  * @param limit
- * @param by_default
  * @returns
  */
-export function parseParPage(
-  limit: any,
-  by_default: number = 10
-): number | undefined {
-  if (isNaN(limit) || (limit ?? true)) return by_default;
+export function parseParPage(limit: any): number | undefined {
+  if (isNaN(limit)) return config.PAR_PAGE_DEFAULT;
+
+  if (limit === "") return config.PAR_PAGE_DEFAULT;
 
   // That's mean all records
   if (Number(limit) === 0) return undefined;

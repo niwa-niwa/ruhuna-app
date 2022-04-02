@@ -4,8 +4,10 @@ import {
   genLinksHeader,
   genResponseHeader,
   parseFields,
+  parseParPage,
   parseSort,
 } from "../../lib/utilities";
+import { config } from "../../consts/config";
 
 describe("utilities.ts", () => {
   describe("genErrorObj", () => {
@@ -52,8 +54,8 @@ describe("utilities.ts", () => {
       const total_page = 100;
       const url = `/aaa/bbb/ccc?page=${page}`;
       const result = genLinksHeader(page, total_page, url);
-      expect(result.next).toBe('/aaa/bbb/ccc?page=31')
-      expect(result.prev).toBe('/aaa/bbb/ccc?page=29')
+      expect(result.next).toBe("/aaa/bbb/ccc?page=31");
+      expect(result.prev).toBe("/aaa/bbb/ccc?page=29");
     });
 
     test("Success : request has other param", () => {
@@ -61,8 +63,8 @@ describe("utilities.ts", () => {
       const total_page = 100;
       const url = "/aaa/bbb/ccc?user_id=1";
       const result = genLinksHeader(page, total_page, url);
-      expect(result.next).toBe('/aaa/bbb/ccc?user_id=1&page=31')
-      expect(result.prev).toBe('/aaa/bbb/ccc?user_id=1&page=29')
+      expect(result.next).toBe("/aaa/bbb/ccc?user_id=1&page=31");
+      expect(result.prev).toBe("/aaa/bbb/ccc?user_id=1&page=29");
     });
 
     test("Success : request has not a param", () => {
@@ -70,8 +72,8 @@ describe("utilities.ts", () => {
       const total_page = 100;
       const url = "/aaa/bbb/ccc";
       const result = genLinksHeader(page, total_page, url);
-      expect(result.next).toBe('/aaa/bbb/ccc?page=31')
-      expect(result.prev).toBe('/aaa/bbb/ccc?page=29')
+      expect(result.next).toBe("/aaa/bbb/ccc?page=31");
+      expect(result.prev).toBe("/aaa/bbb/ccc?page=29");
     });
 
     test("Success : link header should be empty ", () => {
@@ -79,34 +81,76 @@ describe("utilities.ts", () => {
       const total_page = 1;
       const url = "/aaa/bbb/ccc";
       const result = genLinksHeader(page, total_page, url);
-      expect(result.next).toBe("")
-      expect(result.prev).toBe("")
+      expect(result.next).toBe("");
+      expect(result.prev).toBe("");
     });
   });
 
-  describe("parseFields", ()=>{
-    test("Success normal arguments",()=>{
-      const args = "id,name,createdAt"
-      const result = parseFields(args)
-      expect(result).toEqual({id:true,name:true,createdAt:true})
-    })
-    test("Success nothing arguments then return undefined",()=>{
-      const result = parseFields("")
+  describe("parseFields", () => {
+    test("Success normal arguments", () => {
+      const args = "id,name,createdAt";
+      const result = parseFields(args);
+      expect(result).toEqual({ id: true, name: true, createdAt: true });
+    });
+    test("Success nothing arguments then return undefined", () => {
+      const result = parseFields("");
       expect(result).toBeUndefined();
-    })
-  })
+    });
+  });
 
-  describe("parseSort", ()=>{
-    test("Success", ()=>{
+  describe("parseSort", () => {
+    test("Success", () => {
       const args = "-createdAt,+updatedAt";
-      const result = parseSort(args)
-      expect(result).toEqual([{createdAt:"desc"},{updatedAt:"asc"}])
-    })
-    test("Fail arguments must add a prefix - or + otherwise slice top character",()=>{
+      const result = parseSort(args);
+      expect(result).toEqual([{ createdAt: "desc" }, { updatedAt: "asc" }]);
+    });
+    test("Fail arguments must add a prefix - or + otherwise slice top character", () => {
       const args = "-createdAt,abc";
-      const result = parseSort(args)
-      expect(result).toEqual([{createdAt:"desc"},{bc:"asc"}])
+      const result = parseSort(args);
+      expect(result).toEqual([{ createdAt: "desc" }, { bc: "asc" }]);
+    });
+  });
 
-    })
-  })
+  describe("parseParPage", () => {
+    test("Success  argument = 20 return 20", () => {
+      const result = parseParPage(20);
+      expect(result).toBe(20);
+    });
+
+    test("argument = '20' return 20", () => {
+      const result = parseParPage("20");
+      expect(result).toBe(20);
+    });
+
+    test("argument = 'test' return PAR_PAGE_DEFAULT", () => {
+      const result = parseParPage("test");
+      expect(result).toBe(config.PAR_PAGE_DEFAULT);
+    });
+
+    test("argument = '' return PAR_PAGE_DEFAULT", () => {
+      const result = parseParPage("");
+      expect(result).toBe(config.PAR_PAGE_DEFAULT);
+    });
+
+    test("parseParPage argument = undefined return PAR_PAGE_DEFAULT", () => {
+      const result = parseParPage(undefined);
+      expect(result).toBe(config.PAR_PAGE_DEFAULT);
+      const result_2 = parseParPage(null)
+      expect(result).toBe(config.PAR_PAGE_DEFAULT)
+    });
+
+    test("parseParPage argument = 0 return undefined", () => {
+      const result = parseParPage(0);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("just test", () => {
+    test("Success", () => {
+      const text: any = "fafd";
+      if (isNaN(text)) {
+        console.log("test");
+      }
+    });
+  });
 });
