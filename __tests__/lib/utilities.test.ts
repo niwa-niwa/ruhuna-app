@@ -1,10 +1,12 @@
 import { PARAMS } from "./../../consts/url";
 import {
+  calcSkipRecords,
   genErrorObj,
   genLinksHeader,
   genResponseHeader,
   parseFields,
   parseOffset,
+  parsePage,
   parseParPage,
   parseSort,
 } from "../../lib/utilities";
@@ -136,13 +138,13 @@ describe("utilities.ts", () => {
     test("argument = undefined return PAR_PAGE_DEFAULT", () => {
       const result = parseParPage(undefined);
       expect(result).toBe(config.PAR_PAGE_DEFAULT);
-      const result_2 = parseParPage(null)
-      expect(result).toBe(config.PAR_PAGE_DEFAULT)
+      const result_2 = parseParPage(null);
+      expect(result).toBe(config.PAR_PAGE_DEFAULT);
     });
 
     test("argument = null return PAR_PAGE_DEFAULT", () => {
-      const result = parseParPage(null)
-      expect(result).toBe(config.PAR_PAGE_DEFAULT)
+      const result = parseParPage(null);
+      expect(result).toBe(config.PAR_PAGE_DEFAULT);
     });
 
     test("argument = '0' return undefined", () => {
@@ -161,32 +163,137 @@ describe("utilities.ts", () => {
     });
   });
 
-  describe("parseOffset",()=>{
-    test("argument = 10 , return = 10",()=>{
-      const result = parseOffset(1)
-      expect(result).toBe(1)
-    })
+  describe("parseOffset", () => {
+    test("argument = 10 , return = 10", () => {
+      const result = parseOffset(1);
+      expect(result).toBe(1);
+    });
 
-    test("argument = '10',return = 10 ",()=>{
+    test("argument = '10',return = 10 ", () => {
       const result = parseOffset("10");
-      expect(result).toBe(10)
-    })
+      expect(result).toBe(10);
+    });
 
-    test("argument = 'text', result = undefined",()=>{
-      const result = parseOffset("text")
-      expect(result).toBeUndefined()
-    } )
-
-    test("argument = undefined, result = undefined",()=>{
-      const result = parseOffset(undefined)
+    test("argument = 'text', result = undefined", () => {
+      const result = parseOffset("text");
       expect(result).toBeUndefined();
-    })
+    });
 
-    test("argument = null, result = null",()=>{
-      const result = parseOffset(null)
+    test("argument = undefined, result = undefined", () => {
+      const result = parseOffset(undefined);
       expect(result).toBeUndefined();
-    })
-  })
+    });
+
+    test("argument = null, result = null", () => {
+      const result = parseOffset(null);
+      expect(result).toBeUndefined();
+    });
+
+    test("argument = 1, result = 1", () => {
+      const result = parseOffset(1);
+      expect(result).toBe(1);
+    });
+
+    test("argument = 0, result = 0", () => {
+      const result = parseOffset(0);
+      expect(result).toBe(undefined);
+    });
+  });
+
+  describe("parsePage", () => {
+    test("argument = 21, return = 21", () => {
+      const result = parsePage(21);
+      expect(result).toBe(21);
+    });
+
+    test("argument = '21', return = 21", () => {
+      const result = parsePage("21");
+      expect(result).toBe(21);
+    });
+
+    test("argument = 'text', return = 1", () => {
+      const result = parsePage("text");
+      expect(result).toBe(1);
+    });
+
+    test("argument = null, return = 1", () => {
+      const result = parsePage(null);
+      expect(result).toBe(1);
+    });
+
+    test("argument = undefined, return = 1", () => {
+      const result = parsePage(undefined);
+      expect(result).toBe(1);
+    });
+
+    test("argument = 1, return = 1", () => {
+      const result = parsePage(1);
+      expect(result).toBe(1);
+    });
+
+    test("argument = 0, return = 1", () => {
+      const result = parsePage(0);
+      expect(result).toBe(1);
+    });
+  });
+
+  describe("calcSkipRecords", () => {
+    test("argument pattern 1 ", () => {
+      const par_page = 1;
+      const page = 1;
+      const offset = 0;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(0);
+    });
+
+    test("argument pattern 2 ", () => {
+      const par_page = 5;
+      const page = 1;
+      const offset = 0;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(0);
+    });
+
+    test("argument pattern 3 ", () => {
+      const par_page = 5;
+      const page = 1;
+      const offset = 2;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(2);
+    });
+
+    test("argument pattern 4 ", () => {
+      const par_page = 5;
+      const page = 3;
+      const offset = 2;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(12);
+    });
+
+    test("argument pattern 5", () => {
+      const par_page = undefined;
+      const page = 3;
+      const offset = 2;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(2);
+    });
+
+    test("argument pattern 5", () => {
+      const par_page = 0;
+      const page = 3;
+      const offset = 2;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(2);
+    });
+
+    test("argument pattern 5", () => {
+      const par_page = 10;
+      const page = 3;
+      const offset = 0;
+      const result = calcSkipRecords(par_page, page, offset);
+      expect(result).toBe(20);
+    });
+  });
 
   describe("just test", () => {
     test("Success", () => {

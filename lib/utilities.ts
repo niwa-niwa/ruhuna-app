@@ -5,9 +5,8 @@ import {
 } from "@prisma/client/runtime";
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
-import {config} from "../consts/config";
+import { config } from "../consts/config";
 import { off } from "process";
-
 
 /**
  * for response error message to frontend
@@ -80,9 +79,9 @@ export function genLinksHeader(
 ): { next: string; prev: string } {
   // if url had not page parameter, it would be added page parameter
   if (url.indexOf(`${PARAMS.PAGE}=`) === -1) {
-    if(url.indexOf("?",url.lastIndexOf('/')) === -1){
+    if (url.indexOf("?", url.lastIndexOf("/")) === -1) {
       url += `?${PARAMS.PAGE}=${page}`;
-    }else{
+    } else {
       url += `&${PARAMS.PAGE}=${page}`;
     }
   }
@@ -179,7 +178,7 @@ export function parseParPage(limit: any): number | undefined {
  * @param offset
  * @returns
  */
-export function parseOffset(offset: any): number |undefined{
+export function parseOffset(offset: any): number | undefined {
   if (isNaN(offset) || !offset) return undefined;
 
   return Number(offset);
