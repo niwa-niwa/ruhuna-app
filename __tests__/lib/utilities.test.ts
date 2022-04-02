@@ -4,6 +4,7 @@ import {
   genLinksHeader,
   genResponseHeader,
   parseFields,
+  parseOffset,
   parseParPage,
   parseSort,
 } from "../../lib/utilities";
@@ -132,23 +133,65 @@ describe("utilities.ts", () => {
       expect(result).toBe(config.PAR_PAGE_DEFAULT);
     });
 
-    test("parseParPage argument = undefined return PAR_PAGE_DEFAULT", () => {
+    test("argument = undefined return PAR_PAGE_DEFAULT", () => {
       const result = parseParPage(undefined);
       expect(result).toBe(config.PAR_PAGE_DEFAULT);
       const result_2 = parseParPage(null)
       expect(result).toBe(config.PAR_PAGE_DEFAULT)
     });
 
-    test("parseParPage argument = 0 return undefined", () => {
+    test("argument = null return PAR_PAGE_DEFAULT", () => {
+      const result = parseParPage(null)
+      expect(result).toBe(config.PAR_PAGE_DEFAULT)
+    });
+
+    test("argument = '0' return undefined", () => {
+      const result = parseParPage("0");
+      expect(result).toBeUndefined();
+    });
+
+    test("argument = 0 return undefined", () => {
       const result = parseParPage(0);
       expect(result).toBeUndefined();
     });
+
+    test("argument = 1 return 1", () => {
+      const result = parseParPage(1);
+      expect(result).toBe(1);
+    });
   });
+
+  describe("parseOffset",()=>{
+    test("argument = 10 , return = 10",()=>{
+      const result = parseOffset(1)
+      expect(result).toBe(1)
+    })
+
+    test("argument = '10',return = 10 ",()=>{
+      const result = parseOffset("10");
+      expect(result).toBe(10)
+    })
+
+    test("argument = 'text', result = undefined",()=>{
+      const result = parseOffset("text")
+      expect(result).toBeUndefined()
+    } )
+
+    test("argument = undefined, result = undefined",()=>{
+      const result = parseOffset(undefined)
+      expect(result).toBeUndefined();
+    })
+
+    test("argument = null, result = null",()=>{
+      const result = parseOffset(null)
+      expect(result).toBeUndefined();
+    })
+  })
 
   describe("just test", () => {
     test("Success", () => {
-      const text: any = "fafd";
-      if (isNaN(text)) {
+      const text: any = "";
+      if (Number.isNaN(text)) {
         console.log("test");
       }
     });

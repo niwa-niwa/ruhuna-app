@@ -6,6 +6,7 @@ import {
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import {config} from "../consts/config";
+import { off } from "process";
 
 
 /**
@@ -161,14 +162,16 @@ export function parseSort(
  * @returns
  */
 export function parseParPage(limit: any): number | undefined {
-  if (isNaN(limit)) return config.PAR_PAGE_DEFAULT;
+  if (limit === 0) return undefined;
 
-  if (limit === "") return config.PAR_PAGE_DEFAULT;
+  if (!limit) return config.PAR_PAGE_DEFAULT;
 
-  // That's mean all records
-  if (Number(limit) === 0) return undefined;
+  if (!isNaN(limit)) {
+    if (Number(limit) === 0) return undefined;
+    return Number(limit);
+  }
 
-  return Number(limit);
+  return config.PAR_PAGE_DEFAULT;
 }
 
 /**
@@ -176,8 +179,8 @@ export function parseParPage(limit: any): number | undefined {
  * @param offset
  * @returns
  */
-export function parseOffset(offset: any): number {
-  if (isNaN(offset) || !offset) return 0;
+export function parseOffset(offset: any): number |undefined{
+  if (isNaN(offset) || !offset) return undefined;
 
   return Number(offset);
 }
