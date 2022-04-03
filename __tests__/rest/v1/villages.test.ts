@@ -66,7 +66,7 @@ describe("/api/v1/villages TEST villageController ", () => {
 
   test("POST /api/v1/villages/create createVillage : TEST Create a village", async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_VILLAGES + "/create")
+      .post(PREFIX_VILLAGES )
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ name: "HellO", description: "村の説明" });
 
@@ -90,7 +90,7 @@ describe("/api/v1/villages TEST villageController ", () => {
 
   test("POST /api/v1/villages/create createVillage : TEST error handling bad request by missing require properties", async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_VILLAGES + "/create")
+      .post(PREFIX_VILLAGES )
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ description: "村の説明2" });
 
@@ -117,7 +117,7 @@ describe("/api/v1/villages TEST villageController ", () => {
     const dbVillage = dbVillages[0];
 
     const { status, body } = await request(api)
-      .put(PREFIX_VILLAGES + "/edit/" + dbVillage.id)
+      .patch(PREFIX_VILLAGES + "/" + dbVillage.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({
         name: "happy",
@@ -144,7 +144,7 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(dbVillage).toBeNull();
 
     const { status, body } = await request(api)
-      .put(PREFIX_VILLAGES + "/edit/" + wrong_id)
+      .patch(PREFIX_VILLAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({
         name: "happy",
@@ -166,7 +166,7 @@ describe("/api/v1/villages TEST villageController ", () => {
     const dbVillage = dbVillages[0];
 
     const { status, body } = await request(api)
-      .delete(PREFIX_VILLAGES + "/delete/" + dbVillage.id)
+      .delete(PREFIX_VILLAGES + "/" + dbVillage.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     const countVillages = await prismaClient.village.count();
@@ -187,7 +187,7 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(dbVillage).toBeNull();
 
     const { status, body } = await request(api)
-      .delete(PREFIX_VILLAGES + "/delete/" + wrong_id)
+      .delete(PREFIX_VILLAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(400);
@@ -214,7 +214,7 @@ describe("/api/v1/villages TEST villageController ", () => {
       expect.arrayContaining([_admin_user])
     );
 
-    const {status, body} = await request(api).put(PREFIX_VILLAGES + "/leave/"+_edited_village.id).set("Authorization", `Bearer ${testTokens.admin_user}`);
+    const {status, body} = await request(api).patch(PREFIX_VILLAGES + "/leave/"+_edited_village.id).set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200)
     expect(body).toHaveProperty("village")

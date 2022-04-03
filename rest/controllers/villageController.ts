@@ -5,6 +5,8 @@ import { CustomRequest } from "../../types/rest.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket } from "../../sockets/chatSocket";
 
+/** path parameter of village id */
+export const villageId: string = "villageId"
 /**
  * get all villages
  * @param req
@@ -42,6 +44,9 @@ async function getVillageDetail(
   return;
 }
 
+async function getVillageUsers(req: CustomRequest, res: Response): Promise<void>{}
+
+async function getVillageMessages(req: CustomRequest, res: Response): Promise<void>{}
 /**
  * create a village
  * @param req
@@ -170,16 +175,12 @@ async function leaveVillage(req: CustomRequest, res: Response) {
   res.status(200).json({ village });
 }
 
-const villageController: {
-  getVillages: any;
-  getVillageDetail: any;
-  createVillage: any;
-  editVillage: any;
-  deleteVillage: any;
-  leaveVillage: any;
-} = {
+const villageController = {
+  villageId,
   getVillages,
   getVillageDetail,
+  getVillageUsers,
+  getVillageMessages,
   createVillage,
   editVillage,
   deleteVillage,

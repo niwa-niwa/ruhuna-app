@@ -243,7 +243,7 @@ async function deleteUser(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-export const userController = {
+const userController = {
   userId,
   getUsers,
   getUserDetail,
@@ -253,3 +253,5 @@ export const userController = {
   editUser,
   deleteUser,
 };
+
+export default userController;

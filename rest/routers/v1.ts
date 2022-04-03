@@ -1,11 +1,12 @@
 import { Response, Request, Router } from "express";
 import { authentication } from "../middlewares/authentication";
 import { authorization } from "../middlewares/authorization";
-import { userController, userId } from "../controllers/userController";
-import villageController from "../controllers/villageController";
+import userController, { userId } from "../controllers/userController";
+import villageController, { villageId } from "../controllers/villageController";
 import messageController from "../controllers/messageController";
 import { CurrentUser, CustomRequest } from "../../types/rest.types";
 import { PATH } from "../../consts/url";
+import path from "path";
 
 const v1: Router = Router();
 
@@ -28,8 +29,14 @@ v1.use(
   Router()
     .get("/", userController.getUsers)
     .get(`/:${userId}`, userController.getUserDetail)
-    .get(`/:${userId}${PATH.MESSAGES}`, userController.getUserMessages)
-    .get(`/:${userId}${PATH.VILLAGES}`, userController.getUserVillages)
+    .get(
+      path.join(`/:${userId}`, PATH.MESSAGES),
+      userController.getUserMessages
+    )
+    .get(
+      path.join(`/:${userId}`, PATH.VILLAGES),
+      userController.getUserVillages
+    )
     .post("/", authorization, userController.createUser)
     .patch(`/:${userId}`, userController.editUser)
     .delete(`/:${userId}`, userController.deleteUser)
@@ -40,11 +47,19 @@ v1.use(
   authentication,
   Router()
     .get("/", villageController.getVillages)
-    .get("/:villageId", villageController.getVillageDetail)
-    .post("/create", villageController.createVillage)
-    .put("/edit/:villageId", villageController.editVillage)
-    .put("/leave/:villageId", villageController.leaveVillage)
-    .delete("/delete/:villageId", villageController.deleteVillage)
+    .get(`/:${villageId}`, villageController.getVillageDetail)
+    .get(
+      path.join(`/:${villageId}`, PATH.USERS),
+      villageController.getVillageUsers
+    )
+    .get(
+      path.join(`/:${villageId}`, PATH.MESSAGES),
+      villageController.getVillageMessages
+    )
+    .post("/", villageController.createVillage)
+    .patch(`/:${villageId}`, villageController.editVillage)
+    .patch(`/leave/:${villageId}`, villageController.leaveVillage)
+    .delete(`/:${villageId}`, villageController.deleteVillage)
 );
 
 v1.use(
