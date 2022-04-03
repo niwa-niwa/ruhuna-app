@@ -19,8 +19,6 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(body.villages[0]).toHaveProperty("id");
     expect(body.villages[0]).toHaveProperty("name");
     expect(body.villages[0]).toHaveProperty("description");
-    expect(body.villages[0]).toHaveProperty("users");
-    expect(body.villages[0]).toHaveProperty("messages");
   });
 
   test("GET /api/v1/villages/:villageId getVillageDetail it should has properties", async () => {
@@ -39,8 +37,6 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(body.village.id).toBe(dbVillage.id);
     expect(body.village.name).toBe(dbVillage.name);
     expect(body.village.description).toBe(dbVillage.description);
-    expect(body.village.users.length).toBe(dbVillage.users.length);
-    expect(body.village.messages.length).toBe(dbVillage.messages.length);
   });
 
   test("GET /api/v1/villages/:villageId getVillageDetail : TEST error handling that the village is not found by wrong id", async () => {
@@ -57,11 +53,9 @@ describe("/api/v1/villages TEST villageController ", () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
-    expect(body).toHaveProperty("village");
-    expect(body.village).toBeNull();
-    expect(body).toHaveProperty("errorObj");
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body.village).toBeUndefined();
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test("POST /api/v1/villages/create createVillage : TEST Create a village", async () => {
@@ -84,8 +78,6 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(body.village.id).toBe(dbVillage.id);
     expect(body.village.name).toBe(dbVillage.name);
     expect(body.village.description).toBe(dbVillage.description);
-    expect(body.village.users.length).toBe(dbVillage.users.length);
-    expect(body.village.messages.length).toBe(dbVillage.messages.length);
   });
 
   test("POST /api/v1/villages/create createVillage : TEST error handling bad request by missing require properties", async () => {
@@ -95,11 +87,9 @@ describe("/api/v1/villages TEST villageController ", () => {
       .send({ description: "村の説明2" });
 
     expect(status).toBe(400);
-    expect(body).toHaveProperty("village");
-    expect(body.village).toBeNull();
-    expect(body).toHaveProperty("errorObj");
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body.village).toBeUndefined();
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test("PUT /api/v1/villages/edit/:villageId editVillage : TEST edit a village data", async () => {
@@ -130,8 +120,6 @@ describe("/api/v1/villages TEST villageController ", () => {
     expect(body.village.id).toBe(dbVillage.id);
     expect(body.village.name).not.toBe(dbVillage.name);
     expect(body.village.description).not.toBe(dbVillage.description);
-    expect(body.village.users[0].id).toBe(dbVillage.users[0].id);
-    expect(body.village.messages[0].id).toBe(dbVillage.messages[0].id);
   });
 
   test("PUT /api/v1/villages/edit/:villageId editVillage : TEST error handling  ", async () => {
@@ -153,11 +141,9 @@ describe("/api/v1/villages TEST villageController ", () => {
       });
 
     expect(status).toBe(400);
-    expect(body).toHaveProperty("village");
-    expect(body).toHaveProperty("errorObj");
-    expect(body.village).toBeNull();
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body.village).toBeUndefined();
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test("DELETE /api/v1/villages/delete/:villageId deleteVillage TEST : delete a village", async () => {
