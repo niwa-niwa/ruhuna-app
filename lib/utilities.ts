@@ -6,7 +6,6 @@ import {
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import { config } from "../consts/config";
-import { off } from "process";
 
 /**
  * for response error message to frontend

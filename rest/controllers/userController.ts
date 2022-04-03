@@ -147,7 +147,7 @@ async function getUsers(req: Request, res: Response): Promise<void> {
     );
 
     // response all user data
-    res.status(200).json({ users: users });
+    res.status(200).set(header).links(links).json({ users });
   } catch (e) {
     sendError(res, e);
   }
