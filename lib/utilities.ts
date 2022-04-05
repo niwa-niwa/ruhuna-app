@@ -6,6 +6,7 @@ import {
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import { config } from "../consts/config";
+import { User, Village } from "@prisma/client";
 
 /**
  * for response error message to frontend
@@ -246,4 +247,26 @@ export function genQArgsAndPage(query: Request["query"]): {
   args.skip = calcSkipRecords(args.take, page, offset);
 
   return { args, page };
+}
+
+export function isVillager(
+  user: Partial<User> & { villages: { id: Village["id"] }[] },
+  the_village: { id: Village["id"] }
+): boolean {
+  const result = user.villages.find(
+    (village: { id: Village["id"] }) => village.id === the_village.id
+  );
+
+  return !!result;
+}
+
+export function isOwner(
+  user: Partial<User> & { ownVillages: { id: Village["id"] }[] },
+  the_village: { id: Village["id"] }
+): boolean {
+  const result = user.ownVillages.find(
+    (ownVillage: { id: Village["id"] }) => the_village.id === ownVillage.id
+  );
+
+  return !!result;
 }

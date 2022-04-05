@@ -10,20 +10,6 @@ import { PARAMS } from "../../consts/url";
 /** path parameter of village id */
 export const villageId: string = "villageId"
 
-function isVillager(
-  user: Partial<User> & { villages: { id: Village["id"] }[] },
-  village: {id:Village["id"]}
-): boolean {
-  const result = user.villages.find(
-    (u_village: { id: Village["id"] }) => u_village.id === village.id
-  );
-
-  return !!result;
-}
-
-// TODO implement this function after modified schema 
-function isOwner(){}
-
 async function getVillages(req: CustomRequest, res: Response): Promise<void> {
   // generate args for query and page
   const { args, page }: QArgsAndPage<Prisma.VillageFindManyArgs> =
