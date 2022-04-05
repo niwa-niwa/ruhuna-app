@@ -1,5 +1,5 @@
 import { prismaClient } from "../../lib/prismaClient";
-import { users, villages } from "../../prisma/seeds";
+import { users } from "../../prisma/seeds";
 
 export async function testSeeds() {
   const user_a = await prismaClient.user.create({ data: users[0] });
@@ -9,18 +9,45 @@ export async function testSeeds() {
   const user_e = await prismaClient.user.create({ data: users[4] });
 
   const village_a = await prismaClient.village.create({
-    data: { ...villages[0], users: { connect: { id: user_a.id } } },
+    data: {
+      name: "village_A",
+      description: "desc_village_A",
+      users: { connect: { id: user_a.id } },
+      owner: { connect: { id: user_a.id } },
+    },
   });
   const village_b = await prismaClient.village.create({
-    data: { ...villages[1], users: { connect: { id: user_b.id } } },
+    data: {
+      name: "village_B",
+      description: "desc_village_B",
+      users: { connect: { id: user_b.id } },
+      owner: { connect: { id: user_b.id } },
+    },
   });
   const village_c = await prismaClient.village.create({
-    data: { ...villages[2], users: { connect: { id: user_a.id } } },
+    data: {
+      name: "village_C",
+      description: "desc_village_C",
+      users: { connect: { id: user_a.id } },
+      owner: { connect: { id: user_a.id } },
+    },
   });
   const village_d = await prismaClient.village.create({
-    data: { ...villages[3], users: { connect: { id: user_d.id } } },
+    data: {
+      name: "village_D",
+      description: "desc_village_D",
+      users: { connect: { id: user_d.id } },
+      owner: { connect: { id: user_d.id } },
+    },
   });
-  const village_e = await prismaClient.village.create({ data: villages[4] });
+  const village_e = await prismaClient.village.create({
+    data: {
+      name: "village_E",
+      description: "desc_village_E",
+      users: { connect: { id: user_d.id } },
+      owner: { connect: { id: user_d.id } },
+    },
+  });
 
   await prismaClient.message.create({
     data: {

@@ -1,4 +1,3 @@
-import { villages } from './../../prisma/seeds';
 import { Response } from "express";
 import { Prisma, User, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
@@ -95,6 +94,7 @@ async function createVillage(req: CustomRequest, res: Response): Promise<void> {
         name,
         description,
         users: { connect: { id: userId } },
+        owner: { connect: { id: userId } }
       }
     });
 
@@ -105,7 +105,6 @@ async function createVillage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-// TODO modified village schema to add owner column 
 // TODO implement test-case
 async function editVillage(req: CustomRequest, res: Response): Promise<void> {
 
