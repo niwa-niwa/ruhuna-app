@@ -64,6 +64,7 @@ async function createVillage(
         description,
         isPublic: isPublic || undefined,
         users: { connect: { id: currentUser.id } },
+        owner: { connect: { id: currentUser.id } },
       },
       include: { users: true, messages: true },
     })

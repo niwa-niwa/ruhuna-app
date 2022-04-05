@@ -34,7 +34,7 @@ model Village {
   users       User[]
   messages    Message[]
   userId      String
-  owner       User      @relation(name: "ownVillage", fields: [userId], references: [id])
+  owner       User      @relation(name: "ownVillage", fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 

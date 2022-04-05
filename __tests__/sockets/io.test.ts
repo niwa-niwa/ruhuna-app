@@ -41,6 +41,7 @@ describe("TEST Web Socket io", () => {
         name: "chat village A",
         description: "chat village des",
         users: { connect: { id: adminUser?.id } },
+        owner: {connect: {id: adminUser?.id}}
       },
     });
 
@@ -49,6 +50,8 @@ describe("TEST Web Socket io", () => {
         name: "chat village B",
         description: "chat village des",
         isPublic: true,
+        users: { connect: { id: adminUser?.id } },
+        owner: {connect: {id: adminUser?.id}}
       },
     });
   });
@@ -117,7 +120,7 @@ describe("TEST Web Socket io", () => {
         include: { users: true },
       })
       .then((village) => {
-        expect(village?.users).toHaveLength(0);
+        expect(village?.users).toHaveLength(1);
 
         clientSocket.on(EV_CHAT_SOCKET.SUBSCRIBE, (data: any) => {
           expect(data).toHaveProperty("village");
