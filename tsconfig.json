@@ -17,6 +17,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "__tests__/lib/utilities.test.ts.ignore"],
   "exclude": ["node_modules", "__tests__", "rest", "graphql", "sockets"]
 }
