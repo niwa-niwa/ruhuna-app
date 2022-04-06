@@ -1,4 +1,4 @@
-import { prismaClient } from './../../lib/prismaClient';
+import { prismaClient } from "./../../lib/prismaClient";
 import { PARAMS } from "./../../consts/url";
 import {
   calcSkipRecords,
@@ -298,57 +298,62 @@ describe("utilities.ts", () => {
     });
   });
 
-  describe("isVillager", ()=>{
-    test("Success",async ()=>{
-      const user = await prismaClient.user.findFirst({include:{villages:true}});
-      if(!user)return
+  describe("isVillager", () => {
+    test("Success", async () => {
+      const user = await prismaClient.user.findFirst({
+        include: { villages: true },
+      });
+      if (!user) return;
 
       const village = await prismaClient.village.findFirst();
-      if(!village)return 
+      if (!village) return;
 
-      const result = isVillager(user, village)
-      expect(result).toBeTruthy()
-    })
-    test("Fail", async ()=>{
-      const user = await prismaClient.user.findFirst({include:{villages:true}});
-      if(!user)return
+      const result = isVillager(user, village);
+      expect(result).toBeTruthy();
+    });
+    test("Fail", async () => {
+      const user = await prismaClient.user.findFirst({
+        include: { villages: true },
+      });
+      if (!user) return;
 
       const village = await prismaClient.village.findFirst({
-        where:{name:"village_B"},
-        });
-      if(!village)return 
+        where: { name: "village_B" },
+      });
+      if (!village) return;
 
-      const result = isVillager(user, village)
-      expect(result).toBeFalsy()
+      const result = isVillager(user, village);
+      expect(result).toBeFalsy();
+    });
+  });
 
-    })
-  })
-
-  describe("isOwner",()=>{
-    test("Success",async()=>{
-      const user = await prismaClient.user.findFirst({include:{ownVillages:true}});
-      if(!user)return
-
+  describe("isOwner", () => {
+    test("Success", async () => {
+      const user = await prismaClient.user.findFirst({
+        include: { ownVillages: { select: { id: true } } },
+      });
+      if (!user) return;
       const village = await prismaClient.village.findFirst();
-      if(!village)return 
+      if (!village) return;
 
-      const result = isOwner(user, village)
-      expect(result).toBeTruthy()
-    })
-    test("Fail", async ()=>{
-      const user = await prismaClient.user.findFirst({include:{ownVillages:true}});
-      if(!user)return
+      const result = isOwner(user, village);
+      expect(result).toBeTruthy();
+    });
+    test("Fail", async () => {
+      const user = await prismaClient.user.findFirst({
+        include: { ownVillages: { select: { id: true } } },
+      });
+      if (!user) return;
 
       const village = await prismaClient.village.findFirst({
-        where:{name:"village_B"},
-        });
-      if(!village)return 
+        where: { name: "village_B" },
+      });
+      if (!village) return;
 
-      const result = isOwner(user, village)
-      expect(result).toBeFalsy()
-
-    })
-  })
+      const result = isOwner(user, village);
+      expect(result).toBeFalsy();
+    });
+  });
   describe("just test", () => {
     test("Success", () => {
       const text: any = "";
@@ -357,5 +362,4 @@ describe("utilities.ts", () => {
       }
     });
   });
-
 });

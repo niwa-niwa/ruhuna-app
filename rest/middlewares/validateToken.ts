@@ -25,8 +25,9 @@ export async function validateToken(
     let currentUser: CurrentUser | null = await prismaClient.user.findUnique({
       where: { firebaseId: firebaseUser.uid },
       include: {
-        villages: { select: { id: true } },
         messages: { select: { id: true } },
+        villages: { select: { id: true } },
+        ownVillages: { select: { id: true } },
       },
     });
 
@@ -38,8 +39,9 @@ export async function validateToken(
           username: firebaseUser.name || "no name",
         },
         include: {
-          villages: { select: { id: true } },
           messages: { select: { id: true } },
+          villages: { select: { id: true } },
+          ownVillages: { select: { id: true } },
         },
       });
     }

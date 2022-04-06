@@ -4,6 +4,7 @@ import { Message, User, Village } from "@prisma/client";
 export type CurrentUser = User & {
   messages: { id: Message["id"] }[];
   villages: { id: Village["id"] }[];
+  ownVillages: { id: Village["id"] }[];
 };
 
 export type CustomRequest = Request & {
