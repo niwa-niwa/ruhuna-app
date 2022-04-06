@@ -100,11 +100,11 @@ describe("/api/v1/villages TEST villageController ", () => {
 
     if (!dbUser) return;
 
-    const dbVillages = await prismaClient.village.findMany({
+    const dbVillage = await prismaClient.village.findFirst({
       include: { users: true, messages: true },
     });
 
-    const dbVillage = dbVillages[0];
+    if(!dbVillage) return;
 
     const { status, body } = await request(api)
       .patch(PREFIX_VILLAGES + "/" + dbVillage.id)
@@ -140,7 +140,7 @@ describe("/api/v1/villages TEST villageController ", () => {
         users: { connect: { id: "aaaa" } },
       });
 
-    expect(status).toBe(400);
+    expect(status).toBe(404);
     expect(body.village).toBeUndefined();
     expect(body).toHaveProperty("code");
     expect(body).toHaveProperty("message");

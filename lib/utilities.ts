@@ -265,7 +265,7 @@ export function isOwner(
   the_village: { id: Village["id"] }
 ): boolean {
   const result = user.ownVillages.find(
-    (ownVillage: { id: Village["id"] }) => the_village.id === ownVillage.id
+    (village: { id: Village["id"] }) => the_village.id === village.id
   );
 
   return !!result;
