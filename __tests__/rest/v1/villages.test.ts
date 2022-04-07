@@ -2,6 +2,8 @@ import { prismaClient } from "../../../lib/prismaClient";
 import request from "supertest";
 import { api } from "../../../rest";
 import { testTokens, admin_user } from "../../test_config/testData";
+import { PARAMS, PATH, V1 } from "../../../consts/url";
+import { join } from "path";
 
 const PREFIX_VILLAGES = "/api/v1/villages";
 
@@ -60,7 +62,7 @@ describe("/api/v1/villages TEST villageController ", () => {
 
   test("POST /api/v1/villages/create createVillage : TEST Create a village", async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_VILLAGES )
+      .post(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ name: "HellO", description: "村の説明" });
 
@@ -82,7 +84,7 @@ describe("/api/v1/villages TEST villageController ", () => {
 
   test("POST /api/v1/villages/create createVillage : TEST error handling bad request by missing require properties", async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_VILLAGES )
+      .post(PREFIX_VILLAGES)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ description: "村の説明2" });
 
@@ -104,7 +106,7 @@ describe("/api/v1/villages TEST villageController ", () => {
       include: { users: true, messages: true },
     });
 
-    if(!dbVillage) return;
+    if (!dbVillage) return;
 
     const { status, body } = await request(api)
       .patch(PREFIX_VILLAGES + "/" + dbVillage.id)
@@ -184,7 +186,9 @@ describe("/api/v1/villages TEST villageController ", () => {
   });
 
   test("PUT /api/v1/villages/leave/:villageId leaveVillage TEST : a user leave a village", async () => {
-    const _village = await prismaClient.village.findFirst({include:{users:true}});
+    const _village = await prismaClient.village.findFirst({
+      include: { users: true },
+    });
 
     const _admin_user = await prismaClient.user.findUnique({
       where: { firebaseId: admin_user.uid },
@@ -200,12 +204,52 @@ describe("/api/v1/villages TEST villageController ", () => {
       expect.arrayContaining([_admin_user])
     );
 
-    const {status, body} = await request(api).patch(PREFIX_VILLAGES + "/leave/"+_edited_village.id).set("Authorization", `Bearer ${testTokens.admin_user}`);
+    const { status, body } = await request(api)
+      .patch(PREFIX_VILLAGES + "/leave/" + _edited_village.id)
+      .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(200)
-    expect(body).toHaveProperty("village")
-    expect(body.village.users.length).toBe(_edited_village?.users.length-1)
-
+    expect(status).toBe(200);
+    expect(body).toHaveProperty("village");
+    expect(body.village.users.length).toBe(_edited_village?.users.length - 1);
   });
 
+  describe("GET /api/v1/villages/:villageId/users", () => {
+    test("Success", async () => {
+      const dbVillage = await prismaClient.village.findFirst({
+        include: { users: true },
+      });
+      if (!dbVillage) return;
+
+      const { status, body, headers } = await request(api)
+        .get(join(PREFIX_VILLAGES, dbVillage.id, "users"))
+        .query({ fields: "id,username" })
+        .set(PARAMS.HEADER_AUTH_KEY, `Bearer ${testTokens.admin_user}`);
+
+      expect(status).toBe(200);
+      expect(dbVillage.users.length).toBe(body.users.length);
+      expect(headers).toHaveProperty(PARAMS.X_TOTAL_COUNT);
+      expect(headers).toHaveProperty(PARAMS.X_TOTAL_PAGE_COUNT);
+      expect(headers).toHaveProperty("link");
+    });
+  });
+
+  describe("GET /api/v1/villages/:villageId/messages", () => {
+    test("Success", async () => {
+      const dbVillage = await prismaClient.village.findFirst({
+        include: { messages: true },
+      });
+      if (!dbVillage) return;
+
+      const { status, body, headers } = await request(api)
+        .get(join(V1.VILLAGES, dbVillage.id, PATH.MESSAGES))
+        .query({ fields: "" })
+        .set(PARAMS.HEADER_AUTH_KEY, `Bearer ${testTokens.admin_user}`);
+
+      expect(status).toBe(200);
+      expect(dbVillage.messages.length).toBe(body.messages.length);
+      expect(headers).toHaveProperty(PARAMS.X_TOTAL_COUNT);
+      expect(headers).toHaveProperty(PARAMS.X_TOTAL_PAGE_COUNT);
+      expect(headers).toHaveProperty("link");
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { Prisma, Village } from "@prisma/client";
+import { Prisma, User, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import {
   CurrentUser,
@@ -21,6 +21,8 @@ import {
 } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 
+// TODO executes CRUD by only member or admin
+//
 /** path parameter of village id */
 export const villageId: string = "villageId";
 
@@ -78,17 +80,76 @@ async function getVillageDetail(
   }
 }
 
-// TODO implement
 async function getVillageUsers(
   req: CustomRequest,
   res: Response
-): Promise<void> {}
+): Promise<void> {
+  const { args, page }: QArgsAndPage<Prisma.UserFindManyArgs> = genQArgsAndPage(
+    req.query
+  );
 
-// TODO implement
+  args.where = { villages: { some: { id: req.params[villageId] } } };
+
+  try {
+    // extract users
+    const users: Partial<User>[] = await prismaClient.user.findMany(args);
+
+    // extract total records
+    const count: number = await prismaClient.user.count({
+      where: args.where,
+    });
+
+    // generate info of  the result
+    const header: ResponseHeader = genResponseHeader(count, args.take);
+
+    // generate pagination
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
+      req.url
+    );
+
+    // response
+    res.status(200).set(header).links(links).json({ users });
+  } catch (e) {
+    sendError(res, e);
+  }
+}
+
 async function getVillageMessages(
   req: CustomRequest,
   res: Response
-): Promise<void> {}
+): Promise<void> {
+  const { args, page }: QArgsAndPage<Prisma.MessageFindManyArgs> =
+    genQArgsAndPage(req.query);
+
+  args.where = { villageId: req.params[villageId] };
+
+  try {
+    // extract users
+    const messages: Partial<User>[] = await prismaClient.message.findMany(args);
+
+    // extract total records
+    const count: number = await prismaClient.message.count({
+      where: args.where,
+    });
+
+    // generate info of  the result
+    const header: ResponseHeader = genResponseHeader(count, args.take);
+
+    // generate pagination
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
+      req.url
+    );
+
+    // response
+    res.status(200).set(header).links(links).json({ messages });
+  } catch (e) {
+    sendError(res, e);
+  }
+}
 
 async function createVillage(req: CustomRequest, res: Response): Promise<void> {
   const userId: string | undefined = req.currentUser?.id;
@@ -149,11 +210,6 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-/**
- * delete a village
- * @param req
- * @param res
- */
 async function deleteVillage(req: CustomRequest, res: Response): Promise<void> {
   const id: string = req.params.villageId;
 
@@ -173,12 +229,6 @@ async function deleteVillage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-/**
- * Leave a village to reject relation of a user between a village
- *
- * @param req
- * @param res
- */
 async function leaveVillage(req: CustomRequest, res: Response) {
   // get village id from params
   const villageId: string = req.params.villageId;
