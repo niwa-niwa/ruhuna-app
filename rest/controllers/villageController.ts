@@ -22,10 +22,52 @@ import {
 } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 
-// TODO executes CRUD by only member or admin
-
 /** path parameter of village id */
 export const villageId: string = "villageId";
+
+async function isReadable(
+  user: CurrentUser,
+  villageId: Village["id"]
+): Promise<boolean> {
+  if (user.isAdmin) return true;
+
+  try {
+    const village: Pick<Village, "isPublic"> | null =
+      await prismaClient.village.findUnique({
+        where: { id: villageId },
+        select: { isPublic: true },
+      });
+
+    if (!village) return false;
+
+    if (village.isPublic) return true;
+
+    return isVillager(user, { id: villageId });
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function isEditable(
+  user: CurrentUser,
+  villageId: Village["id"]
+): Promise<boolean> {
+  try {
+    const village: Pick<Village, "id"> | null =
+      await prismaClient.village.findUnique({
+        where: { id: villageId },
+        select: { id: true },
+      });
+
+    if (!village) return false;
+
+    if (!user.isAdmin && !isOwner(user, village)) return false;
+
+    return true;
+  } catch (e) {
+    throw e;
+  }
+}
 
 async function getPublicVillages(
   req: CustomRequest,
@@ -69,25 +111,16 @@ async function getVillageDetail(
 ): Promise<void> {
   const where: Prisma.VillageWhereUniqueInput = { id: req.params[villageId] };
 
-  const validate:boolean = await(async()=>{
-    if(req.currentUser!.isAdmin)return true
-    
-    const village: Pick<Village, 'isPublic'>|null = await prismaClient.village.findUnique({
-      where,
-      select:{isPublic:true},
-    });
-
-    if(!village) return false;
-
-    if(village.isPublic) return true;
-
-    return isVillager(req.currentUser!, {id: req.params[villageId]})
-  })();
-
   // the fields used to select of query
   const select: QArgs["select"] = parseFields(req.query.fields);
 
   try {
+    // is request user allowed
+    const validate: boolean = await isReadable(
+      req.currentUser!,
+      req.params[villageId]
+    );
+
     const village: Partial<Village> | null =
       await prismaClient.village.findUnique({
         where,
@@ -99,11 +132,11 @@ async function getVillageDetail(
       return;
     }
 
-    if(!validate){
+    if (!validate) {
       res.status(404).json(genErrorObj(404, "The village is not found."));
       return;
     }
-    
+
     res.status(200).json({ village });
   } catch (e) {
     sendError(res, e);
@@ -121,6 +154,16 @@ async function getVillageUsers(
   args.where = { villages: { some: { id: req.params[villageId] } } };
 
   try {
+    const validate: boolean = await isReadable(
+      req.currentUser!,
+      req.params[villageId]
+    );
+
+    if (!validate) {
+      res.status(404).json(genErrorObj(404, "The village is not found."));
+      return;
+    }
+
     // extract users
     const users: Partial<User>[] = await prismaClient.user.findMany(args);
 
@@ -156,6 +199,16 @@ async function getVillageMessages(
   args.where = { villageId: req.params[villageId] };
 
   try {
+    const validate: boolean = await isReadable(
+      req.currentUser!,
+      req.params[villageId]
+    );
+
+    if (!validate) {
+      res.status(404).json(genErrorObj(404, "The village is not found."));
+      return;
+    }
+
     // extract users
     const messages: Partial<User>[] = await prismaClient.message.findMany(args);
 
@@ -212,19 +265,8 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void> {
   const data: Prisma.VillageUpdateInput = req.body;
 
   try {
-    const village: Pick<Village, "id"> | null =
-      await prismaClient.village.findUnique({
-        where: { id },
-        select: { id: true },
-      });
-
-    if (!village) {
-      res.status(404).json(genErrorObj(404, "Not Found The Village"));
-      return;
-    }
-
-    if (!isOwner(currentUser, village)) {
-      res.status(404).json(genErrorObj(403, "Not Allow You to edit the user"));
+    if (!(await isEditable(currentUser, id))) {
+      res.status(404).json(genErrorObj(404, "Not found the village"));
       return;
     }
 
@@ -241,21 +283,21 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void> {
 }
 
 async function deleteVillage(req: CustomRequest, res: Response): Promise<void> {
-  const id: string = req.params.villageId;
+  const id: string = req.params[villageId];
 
   try {
+    if (!(await isEditable(req.currentUser!, id))) {
+      res.status(404).json(genErrorObj(404, "Not found the village"));
+      return;
+    }
+
     const village: Village = await prismaClient.village.delete({
       where: { id },
     });
 
     res.status(200).json({ village });
   } catch (e) {
-    console.error(e);
-
-    res.status(400).json({
-      village: null,
-      errorObj: generateErrorObj(400, "couldn't delete a village"),
-    });
+    sendError(res, e);
   }
 }
 

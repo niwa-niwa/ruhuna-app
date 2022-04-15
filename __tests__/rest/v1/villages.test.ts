@@ -9,7 +9,9 @@ const PREFIX_VILLAGES = "/api/v1/villages";
 
 describe("/api/v1/villages TEST villageController ", () => {
   test("GET /api/v1/villages/ getVillages : TEST it should be total villages same as db data and has properties", async () => {
-    const countVillages = await prismaClient.village.count({where:{isPublic:true}});
+    const countVillages = await prismaClient.village.count({
+      where: { isPublic: true },
+    });
 
     const { status, body } = await request(api)
       .get(PREFIX_VILLAGES)
@@ -27,39 +29,25 @@ describe("/api/v1/villages TEST villageController ", () => {
     testTokens.admin_user,
     testTokens.general_user,
     testTokens.sub_user,
-  ])(`user $user`, async (user) => {
-    const dbVillage = await prismaClient.village.findFirst({where:{name:"village_B"}});
+  ])(`getVillageDetail request user = %s`, async (user) => {
+    const dbVillage = await prismaClient.village.findFirst({
+      where: { name: "village_B" },
+    });
     if (!dbVillage) return;
 
     const { status, body } = await request(api)
       .get(PREFIX_VILLAGES + "/" + dbVillage.id)
       .set("Authorization", `Bearer ${user}`);
-    console.log(body);
-    if(user === testTokens.sub_user){
-      
-      expect(status).toBe(404)
-    }else{
+
+    if (user === testTokens.sub_user) {
+      expect(status).toBe(404);
+    } else {
       expect(status).toBe(200);
       expect(body).toHaveProperty("village");
       expect(body.village.id).toBe(dbVillage.id);
       expect(body.village.name).toBe(dbVillage.name);
       expect(body.village.description).toBe(dbVillage.description);
     }
-  });
-
-  test("GET /api/v1/villages/:villageId getVillageDetail it should has properties", async () => {
-    const dbVillage = await prismaClient.village.findFirst();
-    if(!dbVillage) return ;
-
-    const { status, body } = await request(api)
-      .get(PREFIX_VILLAGES + "/" + dbVillage.id)
-      .set("Authorization", `Bearer ${testTokens.admin_user}`);
-console.log(body)
-    expect(status).toBe(200);
-    expect(body).toHaveProperty("village");
-    expect(body.village.id).toBe(dbVillage.id);
-    expect(body.village.name).toBe(dbVillage.name);
-    expect(body.village.description).toBe(dbVillage.description);
   });
 
   test("GET /api/v1/villages/:villageId getVillageDetail : TEST error handling that the village is not found by wrong id", async () => {
@@ -199,11 +187,9 @@ console.log(body)
       .delete(PREFIX_VILLAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(400);
-    expect(body.village).toBeNull();
-    expect(body).toHaveProperty("errorObj");
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(status).toBe(404);
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test("PUT /api/v1/villages/leave/:villageId leaveVillage TEST : a user leave a village", async () => {
