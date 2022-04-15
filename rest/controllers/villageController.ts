@@ -16,26 +16,36 @@ import {
   genQArgsAndPage,
   genResponseHeader,
   isOwner,
+  isVillager,
   parseFields,
   sendError,
 } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 
 // TODO executes CRUD by only member or admin
-//
+
 /** path parameter of village id */
 export const villageId: string = "villageId";
 
-async function getVillages(req: CustomRequest, res: Response): Promise<void> {
+async function getPublicVillages(
+  req: CustomRequest,
+  res: Response
+): Promise<void> {
   // generate args for query and page
   const { args, page }: QArgsAndPage<Prisma.VillageFindManyArgs> =
     genQArgsAndPage(req.query);
 
+  // should be public villages
+  args.where = { ...args.where, isPublic: true };
+
   try {
     // get villages
     const villages: Village[] = await prismaClient.village.findMany(args);
+
     // total count of users
-    const count: number = await prismaClient.village.count();
+    const count: number = await prismaClient.village.count({
+      where: args.where,
+    });
 
     // generate info of  the result
     const header: ResponseHeader = genResponseHeader(count, args.take);
@@ -59,6 +69,21 @@ async function getVillageDetail(
 ): Promise<void> {
   const where: Prisma.VillageWhereUniqueInput = { id: req.params[villageId] };
 
+  const validate:boolean = await(async()=>{
+    if(req.currentUser!.isAdmin)return true
+    
+    const village: Pick<Village, 'isPublic'>|null = await prismaClient.village.findUnique({
+      where,
+      select:{isPublic:true},
+    });
+
+    if(!village) return false;
+
+    if(village.isPublic) return true;
+
+    return isVillager(req.currentUser!, {id: req.params[villageId]})
+  })();
+
   // the fields used to select of query
   const select: QArgs["select"] = parseFields(req.query.fields);
 
@@ -70,10 +95,15 @@ async function getVillageDetail(
       });
 
     if (village === null) {
-      res.status(404).json(genErrorObj(404, "The user is not found."));
+      res.status(404).json(genErrorObj(404, "The village is not found."));
       return;
     }
 
+    if(!validate){
+      res.status(404).json(genErrorObj(404, "The village is not found."));
+      return;
+    }
+    
     res.status(200).json({ village });
   } catch (e) {
     sendError(res, e);
@@ -193,7 +223,7 @@ async function editVillage(req: CustomRequest, res: Response): Promise<void> {
       return;
     }
 
-    if (!isOwner(currentUser, village!)) {
+    if (!isOwner(currentUser, village)) {
       res.status(404).json(genErrorObj(403, "Not Allow You to edit the user"));
       return;
     }
@@ -264,7 +294,7 @@ async function leaveVillage(req: CustomRequest, res: Response) {
 
 const villageController = {
   villageId,
-  getVillages,
+  getPublicVillages,
   getVillageDetail,
   getVillageUsers,
   getVillageMessages,

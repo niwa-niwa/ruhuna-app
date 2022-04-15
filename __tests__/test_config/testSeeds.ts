@@ -28,6 +28,7 @@ export async function testSeeds() {
     data: {
       name: "village_C",
       description: "desc_village_C",
+      isPublic:true,
       users: { connect: { id: user_a.id } },
       owner: { connect: { id: user_a.id } },
     },
@@ -44,6 +45,7 @@ export async function testSeeds() {
     data: {
       name: "village_E",
       description: "desc_village_E",
+      isPublic:true,
       users: { connect: { id: user_d.id } },
       owner: { connect: { id: user_d.id } },
     },

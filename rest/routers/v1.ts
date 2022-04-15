@@ -46,7 +46,7 @@ v1.use(
   PATH.VILLAGES,
   authentication,
   Router()
-    .get("/", villageController.getVillages)
+    .get("/", villageController.getPublicVillages)
     .get(`/:${villageId}`, villageController.getVillageDetail)
     .get(
       path.join(`/:${villageId}`, PATH.USERS),
