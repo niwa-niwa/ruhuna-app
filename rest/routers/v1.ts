@@ -58,7 +58,6 @@ v1.use(
     )
     .post("/", villageController.createVillage)
     .patch(`/:${villageId}`, villageController.editVillage)
-    .patch(`/leave/:${villageId}`, villageController.leaveVillage)
     .delete(`/:${villageId}`, villageController.deleteVillage)
 );
 
