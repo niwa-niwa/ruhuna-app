@@ -1,4 +1,3 @@
-import { prismaClient } from "../../lib/prismaClient";
 import {
   firebase_user,
   admin_user,
@@ -9,20 +8,9 @@ import {
 } from "./testData";
 import { genErrorObj } from "../../lib/utilities";
 import { testTokens } from "./testData";
-import { testSeeds } from "./testSeeds";
+import initDB from "./initDB";
 
-beforeEach(async () => {
-  await testSeeds();
-  await prismaClient.$disconnect();
-});
-
-afterEach(async () => {
-  const deleteUsers = prismaClient.user.deleteMany();
-  const deleteVillages = prismaClient.village.deleteMany();
-  const deleteMessage = prismaClient.message.deleteMany();
-  await prismaClient.$transaction([deleteUsers, deleteVillages, deleteMessage]);
-  await prismaClient.$disconnect();
-});
+beforeAll(async () => await initDB());
 
 jest.mock("../../lib/firebaseAdmin", () => ({
   verifyToken: (token: string) => {

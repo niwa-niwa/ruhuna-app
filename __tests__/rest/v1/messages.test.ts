@@ -4,6 +4,9 @@ import { User } from "@prisma/client";
 import request from "supertest";
 import { api } from "../../../rest";
 import { testTokens } from "../../test_config/testData";
+import initDB from "../../test_config/initDB";
+
+beforeEach(async () => await initDB());
 
 const PREFIX_MESSAGES = "/api/v1/messages";
 

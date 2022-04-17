@@ -6,6 +6,9 @@ import { prismaClient } from "../../lib/prismaClient";
 import { User, Village } from "@prisma/client";
 import request from "supertest";
 import { api } from "../../rest";
+import initDB from "../test_config/initDB";
+
+beforeEach(async () => await initDB());
 
 describe("TEST Web Socket io", () => {
   const port: string = process.env.PORT || "3000";

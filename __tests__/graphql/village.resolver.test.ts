@@ -10,6 +10,9 @@ import {
   MutationDeleteVillageArgs,
   MutationEditVillageArgs,
 } from "../../types/types.d";
+import initDB from "../test_config/initDB";
+
+beforeEach(async () => await initDB());
 
 const gql_endpoint: string = "/graphql";
 

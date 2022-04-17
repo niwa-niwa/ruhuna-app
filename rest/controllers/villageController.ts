@@ -119,18 +119,14 @@ async function getVillageDetail(
       req.params[villageId]
     );
 
+    // get a village
     const village: Partial<Village> | null =
       await prismaClient.village.findUnique({
         where,
         select,
       });
 
-    if (village === null) {
-      res.status(404).json(genErrorObj(404, "The village is not found."));
-      return;
-    }
-
-    if (!validate) {
+    if (!validate || !village) {
       res.status(404).json(genErrorObj(404, "The village is not found."));
       return;
     }

@@ -4,6 +4,9 @@ import { prismaClient } from "../../lib/prismaClient";
 import { User, Message, Village } from "@prisma/client";
 import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
+import initDB from "../test_config/initDB";
+
+beforeEach(async () => await initDB());
 
 const gql_endpoint: string = "/graphql";
 

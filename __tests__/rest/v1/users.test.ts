@@ -6,6 +6,9 @@ import { sub_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
 import { PARAMS, PATH, V1 } from "../../../consts/url";
 import { userId } from "../../../rest/controllers/userController";
+import initDB from "../../test_config/initDB";
+
+beforeEach(async () => await initDB());
 
 const PREFIX_USERS = V1.USERS;
 
