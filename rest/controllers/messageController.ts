@@ -1,15 +1,12 @@
 import { Response } from "express";
-import { Message, Prisma, Village } from "@prisma/client";
+import { Message, Prisma } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest } from "../../types/rest.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 
-/**
- * Get all messages
- * @param req
- * @param res
- */
+export const messageId:string = "messageId";
+
 async function getMessages(req: CustomRequest, res: Response): Promise<void> {
   const messages: Message[] = await prismaClient.message.findMany({
     include: { user: true, village: true },
@@ -20,12 +17,6 @@ async function getMessages(req: CustomRequest, res: Response): Promise<void> {
   return;
 }
 
-/**
- * Get a message detail
- * @param req
- * @param res
- * @returns
- */
 async function getMessageDetail(
   req: CustomRequest,
   res: Response
@@ -54,12 +45,10 @@ async function getMessageDetail(
   return;
 }
 
-/**
- * Create a message
- * @param req
- * @param res
- * @returns
- */
+async function getMessageUser(req:CustomRequest, res:Response){}
+
+async function getMessageVillage(req:CustomRequest, res:Response){}
+
 async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get data from request body
@@ -99,11 +88,6 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-/**
- * Edit a message
- * @param req
- * @param res
- */
 async function editMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get message id from params
@@ -142,11 +126,6 @@ async function editMessage(req: CustomRequest, res: Response): Promise<void> {
   }
 }
 
-/**
- * Delete a message
- * @param req
- * @param res
- */
 async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
     // get message id from params
@@ -181,8 +160,11 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
 }
 
 const messageController = {
+  messageId,
   getMessages,
   getMessageDetail,
+  getMessageUser,
+  getMessageVillage,
   createMessage,
   editMessage,
   deleteMessage,

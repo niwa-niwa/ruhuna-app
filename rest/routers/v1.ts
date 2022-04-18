@@ -3,7 +3,7 @@ import { authentication } from "../middlewares/authentication";
 import { authorization } from "../middlewares/authorization";
 import userController, { userId } from "../controllers/userController";
 import villageController, { villageId } from "../controllers/villageController";
-import messageController from "../controllers/messageController";
+import messageController, { messageId } from "../controllers/messageController";
 import { CurrentUser, CustomRequest } from "../../types/rest.types";
 import { PATH } from "../../consts/url";
 import path from "path";
@@ -66,10 +66,18 @@ v1.use(
   authentication,
   Router()
     .get("/", messageController.getMessages)
-    .get("/:messageId", messageController.getMessageDetail)
-    .post("/create", messageController.createMessage)
-    .put("/edit/:messageId", messageController.editMessage)
-    .delete("/delete/:messageId", messageController.deleteMessage)
+    .get(`/:${messageId}`, messageController.getMessageDetail)
+    .get(
+      path.join(`/:${messageId}`, PATH.USERS),
+      messageController.getMessageUser
+    )
+    .get(
+      path.join(`/:${villageId}`, PATH.VILLAGES),
+      messageController.getMessageVillage
+    )
+    .post("/", messageController.createMessage)
+    .patch(`/:${messageId}`, messageController.editMessage)
+    .delete(`/:${messageId}`, messageController.deleteMessage)
 );
 
 export { v1 };

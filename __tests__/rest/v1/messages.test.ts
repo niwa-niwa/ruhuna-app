@@ -1,3 +1,4 @@
+import { V1 } from './../../../consts/url';
 import { Message, Village } from "@prisma/client";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
@@ -8,10 +9,10 @@ import initDB from "../../test_config/initDB";
 
 beforeEach(async () => await initDB());
 
-const PREFIX_MESSAGES = "/api/v1/messages";
+const PREFIX_MESSAGES = V1.MESSAGES;
 
 describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
-  test(`POST ${PREFIX_MESSAGES}/create createMessage`, async () => {
+  test(`POST ${PREFIX_MESSAGES}/ createMessage`, async () => {
     const user: User | null = await prismaClient.user.findFirst();
 
     expect(user).not.toBeNull();
@@ -23,7 +24,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     const the_content = "story content 1";
 
     const { status, body } = await request(api)
-      .post(PREFIX_MESSAGES + "/create")
+      .post(PREFIX_MESSAGES + "/")
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: the_content, userId: user?.id, villageId: village?.id });
 
@@ -49,9 +50,9 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(the_message?.userId).toBe(user?.id);
   });
 
-  test(`POST ${PREFIX_MESSAGES}/create createMessage TEST : handling error`, async () => {
+  test(`POST ${PREFIX_MESSAGES}/ createMessage TEST : handling error`, async () => {
     const { status, body } = await request(api)
-      .post(PREFIX_MESSAGES + "/create")
+      .post(PREFIX_MESSAGES + "/")
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: "" });
 
@@ -110,14 +111,14 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(body.errorObj).toHaveProperty("errorMessage");
   });
 
-  test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage`, async () => {
+  test(`PATCH ${PREFIX_MESSAGES}/:messageId editMessage`, async () => {
     const dbMessage: Message | null = await prismaClient.message.findFirst();
 
     expect(dbMessage).not.toBeNull();
 
     const the_content = "story 2";
     const { status, body } = await request(api)
-      .put(PREFIX_MESSAGES + "/edit/" + dbMessage?.id)
+      .patch(PREFIX_MESSAGES + "/" + dbMessage?.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: the_content });
 
@@ -129,10 +130,10 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(body.message.villageId).toBe(dbMessage?.villageId);
   });
 
-  test(`PUT ${PREFIX_MESSAGES}/edit/:messageId editMessage : TEST error handling by wrong id`, async () => {
+  test(`PATCH ${PREFIX_MESSAGES}/:messageId editMessage : TEST error handling by wrong id`, async () => {
     const wrong_id = "aaa";
     const { status, body } = await request(api)
-      .put(PREFIX_MESSAGES + "/edit/" + wrong_id)
+      .patch(PREFIX_MESSAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: "the_content" });
 
@@ -148,12 +149,12 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(dbMessage).toBeNull();
   });
 
-  test(`Delete ${PREFIX_MESSAGES}/delete/:messageId deleteMessage`, async () => {
+  test(`Delete ${PREFIX_MESSAGES}/:messageId deleteMessage`, async () => {
     const dbMessage: Message | null = await prismaClient.message.findFirst();
     expect(dbMessage).not.toBeNull();
 
     const { status, body } = await request(api)
-      .delete(PREFIX_MESSAGES + "/delete/" + dbMessage?.id)
+      .delete(PREFIX_MESSAGES + "/" + dbMessage?.id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(200);
@@ -167,11 +168,11 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(deletedMessage).toBeNull();
   });
 
-  test(`Delete ${PREFIX_MESSAGES}/delete/:messageId deleteMessage : TEST error handling`, async () => {
+  test(`Delete ${PREFIX_MESSAGES}/:messageId deleteMessage : TEST error handling`, async () => {
     const wrong_id = "aaa";
 
     const { status, body } = await request(api)
-      .delete(PREFIX_MESSAGES + "/delete/" + wrong_id)
+      .delete(PREFIX_MESSAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
