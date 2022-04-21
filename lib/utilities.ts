@@ -249,6 +249,12 @@ export function genQArgsAndPage(query: Request["query"]): {
   return { args, page };
 }
 
+/**
+ * confirm the user who is a member at the village
+ * @param user 
+ * @param the_village 
+ * @returns 
+ */
 export function isVillager(
   user: Partial<User> & { villages: { id: Village["id"] }[] },
   the_village: { id: Village["id"] }
@@ -260,6 +266,12 @@ export function isVillager(
   return !!result;
 }
 
+/**
+ * confirm the user who is a owner at the village
+ * @param user 
+ * @param the_village 
+ * @returns 
+ */
 export function isOwner(
   user: Partial<User> & { ownVillages: { id: Village["id"] }[] },
   the_village: { id: Village["id"] }

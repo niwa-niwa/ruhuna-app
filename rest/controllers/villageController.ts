@@ -82,7 +82,7 @@ async function getPublicVillages(
     // get villages
     const villages: Village[] = await prismaClient.village.findMany(args);
 
-    // total count of users
+    // total count of village
     const count: number = await prismaClient.village.count({
       where: args.where,
     });

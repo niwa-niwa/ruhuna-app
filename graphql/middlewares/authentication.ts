@@ -31,7 +31,7 @@ export async function authentication(
       include: { villages: true, messages: true },
     });
 
-  // TODO create a user with firebase token
+  // create a user with firebase token
   if (!currentUser) throw new AuthenticationError("You are wrong.");
 
   return currentUser;
