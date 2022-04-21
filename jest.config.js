@@ -17,7 +17,8 @@ module.exports = {
   testPathIgnorePatterns: [
     "/node_modules/",
     "/__tests__/test_config/",
-    "/__tests__/graphql/"
+    "/__tests__/graphql/",
+    "/__tests__/sockets/io.test.ts"
   ],
   modulePaths: ["/__tests__/"],
 };
