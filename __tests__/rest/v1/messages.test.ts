@@ -1,4 +1,4 @@
-import { V1 } from './../../../consts/url';
+import { PARAMS, V1 } from './../../../consts/url';
 import { Message, Village } from "@prisma/client";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
@@ -63,20 +63,18 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
   });
 
   test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {
-    const { status, body } = await request(api)
+    const { status, body, header } = await request(api)
       .get(PREFIX_MESSAGES)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(200);
+      expect(status).toBe(200);
     expect(body).toHaveProperty("messages");
     expect(body.messages[0]).toHaveProperty("id");
     expect(body.messages[0]).toHaveProperty("content");
-    expect(body.messages[0]).toHaveProperty("user");
-    expect(body.messages[0]).toHaveProperty("village");
 
     const countMessage: number = await prismaClient.message.count();
 
-    expect(body.messages.length).toBe(countMessage);
+    expect(Number(header[PARAMS.X_TOTAL_COUNT])).toBe(countMessage);
   });
 
   test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail`, async () => {
@@ -93,8 +91,6 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     expect(body.message.content).toBe(dbMessage?.content);
     expect(body.message.villageId).toBe(dbMessage?.villageId);
     expect(body.message.userId).toBe(dbMessage?.userId);
-    expect(body.message).toHaveProperty("village");
-    expect(body.message).toHaveProperty("user");
   });
 
   test(`GET ${PREFIX_MESSAGES}/:messageId getMessageDetail : TEST handling error cause wrong message id`, async () => {
@@ -105,10 +101,8 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
     expect(status).toBe(404);
-    expect(body.message).toBeNull();
-    expect(body).toHaveProperty("errorObj");
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test(`PATCH ${PREFIX_MESSAGES}/:messageId editMessage`, async () => {

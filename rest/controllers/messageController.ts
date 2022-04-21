@@ -1,20 +1,40 @@
 import { Response } from "express";
 import { Message, Prisma } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import { CustomRequest } from "../../types/rest.types";
+import { CustomRequest, QArgs, QArgsAndPage, ResponseHeader } from "../../types/rest.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
+import { genErrorObj, genLinksHeader, genQArgsAndPage, genResponseHeader, parseFields, sendError } from "../../lib/utilities";
+import { PARAMS } from "../../consts/url";
 
 export const messageId:string = "messageId";
 
 async function getMessages(req: CustomRequest, res: Response): Promise<void> {
-  const messages: Message[] = await prismaClient.message.findMany({
-    include: { user: true, village: true },
-  });
+  const { args, page }: QArgsAndPage<Prisma.MessageFindManyArgs> =
+    genQArgsAndPage(req.query);
 
-  res.status(200).json({ messages });
+  try {
+    const messages: Message[] = await prismaClient.message.findMany(args);
 
-  return;
+    // total count of message
+    const count: number = await prismaClient.message.count({
+      where: args.where,
+    });
+
+    // generate info of  the result
+    const header: ResponseHeader = genResponseHeader(count, args.take);
+
+    // generate pagination
+    const links: ReturnType<typeof genLinksHeader> = genLinksHeader(
+      page,
+      header[PARAMS.X_TOTAL_PAGE_COUNT],
+      req.url
+    );
+
+    res.status(200).set(header).links(links).json({ messages });
+  } catch (e) {
+    sendError(res, e);
+  }
 }
 
 async function getMessageDetail(
@@ -24,28 +44,31 @@ async function getMessageDetail(
   // get message id from params
   const id: string = req.params.messageId;
 
-  // get model of message from DB
-  const message: Message | null = await prismaClient.message.findUnique({
-    where: { id },
-    include: { user: true, village: true },
-  });
+  // the fields used to select of query
+  const select: QArgs["select"] = parseFields(req.query.fields);
 
-  // throw an error if the message is null
-  if (message === null) {
-    res.status(404).json({
-      message: null,
-      errorObj: generateErrorObj(404, "couldn't find the message"),
-    });
-    return;
+  try {
+    // get model of message from DB
+    const message: Partial<Message> | null =
+      await prismaClient.message.findUnique({
+        where: { id },
+        select,
+      });
+
+    // throw an error if the message is null
+    if (message === null) {
+      res.status(404).json(genErrorObj(404, "couldn't find the message"));
+      return;
+    }
+
+    // response the message
+    res.status(200).json({ message });
+  } catch (e) {
+    sendError(res, e);
   }
-
-  // response the message
-  res.status(200).json({ message });
-
-  return;
 }
 
-async function getMessageUser(req:CustomRequest, res:Response){}
+async function getMessageUser(req: CustomRequest, res: Response) {}
 
 async function getMessageVillage(req:CustomRequest, res:Response){}
 
