@@ -54,12 +54,11 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
     const { status, body } = await request(api)
       .post(PREFIX_MESSAGES + "/")
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
-      .send({ content: "" });
+      .send({ content: "aaa" });
 
-    expect(status).toBe(400);
-    expect(body.message).toBeNull();
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+      expect(status).toBe(400);
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
   });
 
   test(`GET ${PREFIX_MESSAGES} getMessages`, async () => {

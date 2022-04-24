@@ -7,6 +7,7 @@ import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 import { genErrorObj, genLinksHeader, genQArgsAndPage, genResponseHeader, isVillager, parseFields, sendError } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
+import { CustomError } from '../../classes/CustomError';
 
 export const messageId:string = "messageId";
 
@@ -75,19 +76,26 @@ async function getMessageVillage(req:CustomRequest, res:Response){}
 
 async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
-    if(!req.currentUser) throw new Error
-    
+    if (!req.currentUser)
+      throw new CustomError(500, "request current user is not found");
+
     // get data from request body
     const { content, villageId }: Prisma.MessageCreateManyInput = req.body;
 
+    // the fields used to select of query
+    const select: QArgs["select"] = parseFields(req.query.fields);
+
     // throw error if the currentUser is not a member
-    if (!isVillager(req.currentUser, {id:villageId}))
-      throw new Error("the currentUser is not a member of the village");
+    if (!isVillager(req.currentUser, { id: villageId }))
+      throw new CustomError(
+        400,
+        "the currentUser is not a member of the village"
+      );
 
     // insert the message to DB
-    const message: Message = await prismaClient.message.create({
+    const message: Partial<Message> = await prismaClient.message.create({
       data: { content, userId: req.currentUser?.id, villageId },
-      include: { user: true, village: true },
+      select,
     });
 
     // send message in the village as room
@@ -100,8 +108,7 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
 
     return;
   } catch (e) {
-    console.log(e)
-    sendError(res,e)
+    sendError(res, e);
   }
 }
 
