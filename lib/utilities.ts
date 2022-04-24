@@ -7,6 +7,7 @@ import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import { config } from "../consts/config";
 import { User, Village } from "@prisma/client";
+import { CustomError } from "../classes/CustomError";
 
 /**
  * for response error message to frontend
@@ -27,6 +28,11 @@ export function genErrorObj(
 export function sendError(res: Response, e: unknown): void {
   console.error(e);
   // console.log(e); // for testing
+
+  if (e instanceof CustomError) {
+    res.status(e.code).json(genErrorObj(e.code, e.message));
+    return;
+  }
 
   if (e instanceof PrismaClientValidationError) {
     res.status(400).json(genErrorObj(400, "Incorrect your request."));
@@ -251,9 +257,9 @@ export function genQArgsAndPage(query: Request["query"]): {
 
 /**
  * confirm the user who is a member at the village
- * @param user 
- * @param the_village 
- * @returns 
+ * @param user
+ * @param the_village
+ * @returns
  */
 export function isVillager(
   user: Partial<User> & { villages: { id: Village["id"] }[] },
@@ -268,9 +274,9 @@ export function isVillager(
 
 /**
  * confirm the user who is a owner at the village
- * @param user 
- * @param the_village 
- * @returns 
+ * @param user
+ * @param the_village
+ * @returns
  */
 export function isOwner(
   user: Partial<User> & { ownVillages: { id: Village["id"] }[] },
