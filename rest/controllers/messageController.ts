@@ -1,10 +1,11 @@
+import { villageId } from './villageController';
 import { Response } from "express";
 import { Message, Prisma } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
 import { CustomRequest, QArgs, QArgsAndPage, ResponseHeader } from "../../types/rest.types";
 import { generateErrorObj } from "../../lib/generateErrorObj";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
-import { genErrorObj, genLinksHeader, genQArgsAndPage, genResponseHeader, parseFields, sendError } from "../../lib/utilities";
+import { genErrorObj, genLinksHeader, genQArgsAndPage, genResponseHeader, isVillager, parseFields, sendError } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 
 export const messageId:string = "messageId";
@@ -74,16 +75,13 @@ async function getMessageVillage(req:CustomRequest, res:Response){}
 
 async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
+    if(!req.currentUser) throw new Error
+    
     // get data from request body
     const { content, villageId }: Prisma.MessageCreateManyInput = req.body;
 
-    // confirm the user join the village
-    const isMember = req.currentUser?.villages.find(
-      (village) => village.id === villageId
-    );
-
     // throw error if the currentUser is not a member
-    if (!isMember)
+    if (!isVillager(req.currentUser, {id:villageId}))
       throw new Error("the currentUser is not a member of the village");
 
     // insert the message to DB
@@ -102,12 +100,8 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
 
     return;
   } catch (e) {
-    console.error(e);
-
-    res.status(400).json({
-      message: null,
-      errorObj: generateErrorObj(400, "Couldn't create the message"),
-    });
+    console.log(e)
+    sendError(res,e)
   }
 }
 
