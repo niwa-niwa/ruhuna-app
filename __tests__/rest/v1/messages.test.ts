@@ -1,4 +1,6 @@
-import { PARAMS, V1 } from './../../../consts/url';
+import { userId } from './../../../rest/controllers/userController';
+import { join } from 'path';
+import { PARAMS, V1,PATH } from './../../../consts/url';
 import { Message, Village } from "@prisma/client";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
@@ -56,7 +58,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: "aaa" });
 
-      expect(status).toBe(400);
+    expect(status).toBe(400);
     expect(body).toHaveProperty("code");
     expect(body).toHaveProperty("message");
   });
@@ -66,7 +68,7 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       .get(PREFIX_MESSAGES)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-      expect(status).toBe(200);
+    expect(status).toBe(200);
     expect(body).toHaveProperty("messages");
     expect(body.messages[0]).toHaveProperty("id");
     expect(body.messages[0]).toHaveProperty("content");
@@ -130,10 +132,9 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       .set("Authorization", `Bearer ${testTokens.admin_user}`)
       .send({ content: "the_content" });
 
-    expect(status).toBe(404);
-    expect(body.message).toBeNull();
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(status).toBe(400);
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
 
     const dbMessage: Message | null = await prismaClient.message.findUnique({
       where: { id: wrong_id },
@@ -168,14 +169,29 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
       .delete(PREFIX_MESSAGES + "/" + wrong_id)
       .set("Authorization", `Bearer ${testTokens.admin_user}`);
 
-    expect(status).toBe(404);
-    expect(body.message).toBeNull();
-    expect(body.errorObj).toHaveProperty("errorCode");
-    expect(body.errorObj).toHaveProperty("errorMessage");
+    expect(status).toBe(400);
+    expect(body).toHaveProperty("code");
+    expect(body).toHaveProperty("message");
 
     const dbMessage: Message | null = await prismaClient.message.findUnique({
       where: { id: wrong_id },
     });
     expect(dbMessage).toBeNull();
+  });
+
+  describe(`GET a user of message`, () => {
+    test(`GET a user successfully`, async () => {
+      const dbMessage = await prismaClient.message.findFirst({
+        include: { user: true },
+      });
+      if (!dbMessage) return;
+
+      const { status, body } = await request(api)
+        .get(join(PREFIX_MESSAGES, dbMessage.id, PATH.USERS))
+        .set(PARAMS.HEADER_AUTH_KEY, `Bearer ${testTokens.admin_user}`);
+
+      expect(status).toBe(200);
+      expect(dbMessage.user?.id).toBe(body.user.id);
+    });
   });
 });

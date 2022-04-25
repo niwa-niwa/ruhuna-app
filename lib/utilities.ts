@@ -6,7 +6,7 @@ import {
 import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import { config } from "../consts/config";
-import { User, Village } from "@prisma/client";
+import { Message, User, Village } from "@prisma/client";
 import { CustomError } from "../classes/CustomError";
 
 /**
@@ -265,7 +265,7 @@ export function isVillager(
   user: Partial<User> & { villages: { id: Village["id"] }[] },
   the_village: { id: Village["id"] }
 ): boolean {
-  const result = user.villages.find(
+  const result: { id: string } | undefined = user.villages.find(
     (village: { id: Village["id"] }) => village.id === the_village.id
   );
 
@@ -282,8 +282,19 @@ export function isOwner(
   user: Partial<User> & { ownVillages: { id: Village["id"] }[] },
   the_village: { id: Village["id"] }
 ): boolean {
-  const result = user.ownVillages.find(
+  const result: { id: string } | undefined = user.ownVillages.find(
     (village: { id: Village["id"] }) => the_village.id === village.id
+  );
+
+  return !!result;
+}
+
+export function isMine(
+  user: Partial<User> & { messages: { id: Message["id"] }[] },
+  the_message: { id: Message["id"] }
+): boolean {
+  const result: { id: string } | undefined = user.messages.find(
+    (message) => message.id === the_message.id
   );
 
   return !!result;

@@ -1,15 +1,28 @@
-import { villageId } from './villageController';
+import { userId } from './userController';
 import { Response } from "express";
-import { Message, Prisma } from "@prisma/client";
+import { Message, Prisma, User } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import { CustomRequest, QArgs, QArgsAndPage, ResponseHeader } from "../../types/rest.types";
-import { generateErrorObj } from "../../lib/generateErrorObj";
+import {
+  CustomRequest,
+  QArgs,
+  QArgsAndPage,
+  ResponseHeader,
+} from "../../types/rest.types";
 import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
-import { genErrorObj, genLinksHeader, genQArgsAndPage, genResponseHeader, isVillager, parseFields, sendError } from "../../lib/utilities";
+import {
+  genErrorObj,
+  genLinksHeader,
+  genQArgsAndPage,
+  genResponseHeader,
+  isMine,
+  isVillager,
+  parseFields,
+  sendError,
+} from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
-import { CustomError } from '../../classes/CustomError';
+import { CustomError } from "../../classes/CustomError";
 
-export const messageId:string = "messageId";
+export const messageId: string = "messageId";
 
 async function getMessages(req: CustomRequest, res: Response): Promise<void> {
   const { args, page }: QArgsAndPage<Prisma.MessageFindManyArgs> =
@@ -70,9 +83,45 @@ async function getMessageDetail(
   }
 }
 
-async function getMessageUser(req: CustomRequest, res: Response) {}
+async function getMessageUser(req: CustomRequest, res: Response) {
+  // the type for query argument
+  const select: QArgs["select"] = parseFields(req.query.fields);
 
-async function getMessageVillage(req:CustomRequest, res:Response){}
+  try {
+    // extract a user of the message
+    const user: { userId: string | null } | null =
+      await prismaClient.message.findUnique({
+        where: { id: req.params[messageId] },
+        select: { userId: true },
+      });
+
+    if (!user) throw new CustomError(400, "Not found the message");
+
+    if (!user.userId) {
+      res.status(200).json({ user: null });
+      return;
+    }
+
+    const the_user: Partial<User> | null = await prismaClient.user.findUnique({
+      where: { id: user.userId },
+      select,
+    });
+
+    if (!the_user) {
+      res.status(200).json({ user: null });
+      return;
+    }
+
+    // response
+    res.status(200).json({ user: the_user });
+
+    return;
+  } catch (e) {
+    sendError(res, e);
+  }
+}
+
+async function getMessageVillage(req: CustomRequest, res: Response) {}
 
 async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
@@ -114,26 +163,30 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
 
 async function editMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
+    if (!req.currentUser)
+      throw new CustomError(500, "request current user is not found");
+
     // get message id from params
     const id: string = req.params.messageId;
 
+    // the fields used to select of query
+    const select: QArgs["select"] = parseFields(req.query.fields);
+
     // confirm the user has the message id
-    const isOwner = req.currentUser?.messages.find(
-      (message) => message.id === id
-    );
+    const isOwner = isMine(req.currentUser, { id });
 
     // throw an error if the user has not message id
-    if (!req.currentUser?.isAdmin && !isOwner)
-      throw new Error("the user is not owner of the message");
+    if (!req.currentUser.isAdmin && !isOwner)
+      throw new CustomError(403, "the user is not owner of the message");
 
     // get a content from request body
     const { content } = req.body;
 
     // get message model by the message id
-    const message: Message = await prismaClient.message.update({
+    const message: Partial<Message> = await prismaClient.message.update({
       where: { id },
       data: { content },
-      include: { user: true, village: true },
+      select,
     });
 
     // response updated the message
@@ -141,28 +194,24 @@ async function editMessage(req: CustomRequest, res: Response): Promise<void> {
 
     return;
   } catch (e) {
-    console.error(e);
-
-    res.status(404).json({
-      message: null,
-      errorObj: generateErrorObj(404, "Couldn't edit the message"),
-    });
+    sendError(res, e);
   }
 }
 
 async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
+    if (!req.currentUser)
+      throw new CustomError(500, "request current user is not found");
+
     // get message id from params
     const id: string = req.params.messageId;
 
     // confirm the user has the message id
-    let isOwner = req.currentUser?.messages.find(
-      (message) => message.id === id
-    );
+    const isOwner = isMine(req.currentUser, { id });
 
     // throw an error if the user has not message id
-    if (!req.currentUser?.isAdmin && !isOwner)
-      throw new Error("the user is not owner of the message");
+    if (!req.currentUser.isAdmin && !isOwner)
+      throw new CustomError(403, "the user is not owner of the message");
 
     // delete the message
     const message: Message | null = await prismaClient.message.delete({
@@ -174,12 +223,7 @@ async function deleteMessage(req: CustomRequest, res: Response): Promise<void> {
 
     return;
   } catch (e) {
-    console.error(e);
-
-    res.status(404).json({
-      message: null,
-      errorObj: generateErrorObj(404, "the message is not found"),
-    });
+    sendError(res, e);
   }
 }
 
