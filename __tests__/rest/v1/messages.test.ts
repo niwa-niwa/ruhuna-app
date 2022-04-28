@@ -1,6 +1,6 @@
-import { userId } from './../../../rest/controllers/userController';
-import { join } from 'path';
-import { PARAMS, V1,PATH } from './../../../consts/url';
+import { userId } from "./../../../rest/controllers/userController";
+import { join } from "path";
+import { PARAMS, V1, PATH } from "./../../../consts/url";
 import { Message, Village } from "@prisma/client";
 import { prismaClient } from "../../../lib/prismaClient";
 import { User } from "@prisma/client";
@@ -192,6 +192,22 @@ describe(`${PREFIX_MESSAGES} TEST messageController`, () => {
 
       expect(status).toBe(200);
       expect(dbMessage.user?.id).toBe(body.user.id);
+    });
+  });
+
+  describe(`GET a village of message`, () => {
+    test(`GET a village successfully`, async () => {
+      const dbMessage = await prismaClient.message.findFirst({
+        include: { village: true },
+      });
+      if (!dbMessage) return;
+
+      const { status, body } = await request(api)
+        .get(join(PREFIX_MESSAGES, dbMessage.id, PATH.VILLAGES))
+        .set(PARAMS.HEADER_AUTH_KEY, `Bearer ${testTokens.admin_user}`);
+
+      expect(status).toBe(200);
+      expect(dbMessage.village.id).toBe(body.village.id);
     });
   });
 });

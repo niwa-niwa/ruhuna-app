@@ -72,7 +72,7 @@ v1.use(
       messageController.getMessageUser
     )
     .get(
-      path.join(`/:${villageId}`, PATH.VILLAGES),
+      path.join(`/:${messageId}`, PATH.VILLAGES),
       messageController.getMessageVillage
     )
     .post("/", messageController.createMessage)

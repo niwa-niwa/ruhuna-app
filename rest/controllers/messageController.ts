@@ -1,4 +1,3 @@
-import { userId } from './userController';
 import { Response } from "express";
 import { Message, Prisma, User } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
@@ -121,7 +120,44 @@ async function getMessageUser(req: CustomRequest, res: Response) {
   }
 }
 
-async function getMessageVillage(req: CustomRequest, res: Response) {}
+async function getMessageVillage(req: CustomRequest, res: Response) {
+  // the type for query argument
+  const select: QArgs["select"] = parseFields(req.query.fields);
+
+  try {
+    // extract a user of the message
+    const village: { villageId: string | null } | null =
+      await prismaClient.message.findUnique({
+        where: { id: req.params[messageId] },
+        select: { villageId: true },
+      });
+
+    if (!village) throw new CustomError(400, "Not found the message");
+
+    if (!village.villageId) {
+      res.status(200).json({ village: null });
+      return;
+    }
+
+    const the_village: Partial<User> | null =
+      await prismaClient.village.findUnique({
+        where: { id: village.villageId },
+        select,
+      });
+
+    if (!the_village) {
+      res.status(200).json({ village: null });
+      return;
+    }
+
+    // response
+    res.status(200).json({ village: the_village });
+
+    return;
+  } catch (e) {
+    sendError(res, e);
+  }
+}
 
 async function createMessage(req: CustomRequest, res: Response): Promise<void> {
   try {
