@@ -1,5 +1,5 @@
 *.ignore
-*.todo
+TODO
 ruhuna-dev-firebase-adminsdk-*.json
 *.env.*
 dist

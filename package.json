@@ -18,6 +18,9 @@
     "migration@create-only": "dotenv -e .env -- npx prisma migrate dev --create-only"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.8.8",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
     "@graphql-tools/graphql-file-loader": "^7.3.3",
     "@graphql-tools/load-files": "^6.5.3",
     "@graphql-tools/merge": "^8.2.2",
@@ -29,10 +32,12 @@
     "express": "^4.17.1",
     "firebase": "^9.6.0",
     "firebase-admin": "^10.0.0",
+    "framer-motion": "^6.3.3",
     "graphql": "^16.3.0",
     "next": "^12.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-hook-form": "^7.30.0",
     "socket.io": "^4.4.0",
     "socket.io-client": "^4.4.0"
   },
