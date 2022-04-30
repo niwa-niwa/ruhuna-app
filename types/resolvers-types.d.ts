@@ -15,6 +15,19 @@ export type Scalars = {
   Date: any;
 };
 
+export type Connection = {
+  edges: Array<Edge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type Edge = {
+  cursor: Scalars['String'];
+  node?: Maybe<EdgeTypes>;
+};
+
+export type EdgeTypes = Message | User | Village;
+
 export type Message = {
   __typename?: 'Message';
   content: Scalars['String'];
@@ -100,6 +113,25 @@ export type MutationLeaveVillageArgs = {
   villageId?: InputMaybe<Scalars['ID']>;
 };
 
+export type Node = {
+  id: Scalars['ID'];
+};
+
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['String']>;
+  hasNextPage: Scalars['Boolean'];
+  hasPreviousPage: Scalars['Boolean'];
+  startCursor?: Maybe<Scalars['String']>;
+};
+
+export type PaginationArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   connect?: Maybe<Scalars['String']>;
@@ -110,6 +142,9 @@ export type Query = {
   getUsers?: Maybe<Array<User>>;
   getVillageDetail?: Maybe<Village>;
   getVillages?: Maybe<Array<Village>>;
+  me: User;
+  user: UserEdge;
+  users: UserConnection;
 };
 
 
@@ -127,7 +162,17 @@ export type QueryGetVillageDetailArgs = {
   villageId: Scalars['ID'];
 };
 
-export type User = {
+
+export type QueryUserArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryUsersArgs = {
+  input?: InputMaybe<PaginationArgs>;
+};
+
+export type User = Node & {
   __typename?: 'User';
   createdAt: Scalars['Date'];
   firebaseId: Scalars['String'];
@@ -139,6 +184,19 @@ export type User = {
   updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
   villages?: Maybe<Array<Village>>;
+};
+
+export type UserConnection = {
+  __typename?: 'UserConnection';
+  edges?: Maybe<Array<Maybe<UserEdge>>>;
+  pageInfo?: Maybe<PageInfo>;
+  totalCount: Scalars['Int'];
+};
+
+export type UserEdge = Edge & {
+  __typename?: 'UserEdge';
+  cursor: Scalars['String'];
+  node?: Maybe<User>;
 };
 
 export type Village = {
@@ -224,32 +282,67 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Connection: never;
   Date: ResolverTypeWrapper<Scalars['Date']>;
+  Edge: ResolversTypes['UserEdge'];
+  EdgeTypes: ResolversTypes['Message'] | ResolversTypes['User'] | ResolversTypes['Village'];
   ID: ResolverTypeWrapper<Scalars['ID']>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
   Message: ResolverTypeWrapper<Message>;
   Mutation: ResolverTypeWrapper<{}>;
+  Node: ResolversTypes['User'];
+  PageInfo: ResolverTypeWrapper<PageInfo>;
+  PaginationArgs: PaginationArgs;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   User: ResolverTypeWrapper<User>;
+  UserConnection: ResolverTypeWrapper<UserConnection>;
+  UserEdge: ResolverTypeWrapper<UserEdge>;
   Village: ResolverTypeWrapper<Village>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
+  Connection: never;
   Date: Scalars['Date'];
+  Edge: ResolversParentTypes['UserEdge'];
+  EdgeTypes: ResolversParentTypes['Message'] | ResolversParentTypes['User'] | ResolversParentTypes['Village'];
   ID: Scalars['ID'];
+  Int: Scalars['Int'];
   Message: Message;
   Mutation: {};
+  Node: ResolversParentTypes['User'];
+  PageInfo: PageInfo;
+  PaginationArgs: PaginationArgs;
   Query: {};
   String: Scalars['String'];
   User: User;
+  UserConnection: UserConnection;
+  UserEdge: UserEdge;
   Village: Village;
+}>;
+
+export type ConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Connection'] = ResolversParentTypes['Connection']> = ResolversObject<{
+  __resolveType: TypeResolveFn<null, ParentType, ContextType>;
+  edges?: Resolver<Array<ResolversTypes['Edge']>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date';
 }
+
+export type EdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Edge'] = ResolversParentTypes['Edge']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'UserEdge', ParentType, ContextType>;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['EdgeTypes']>, ParentType, ContextType>;
+}>;
+
+export type EdgeTypesResolvers<ContextType = any, ParentType extends ResolversParentTypes['EdgeTypes'] = ResolversParentTypes['EdgeTypes']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'Message' | 'User' | 'Village', ParentType, ContextType>;
+}>;
 
 export type MessageResolvers<ContextType = any, ParentType extends ResolversParentTypes['Message'] = ResolversParentTypes['Message']> = ResolversObject<{
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -274,6 +367,19 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   leaveVillage?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, Partial<MutationLeaveVillageArgs>>;
 }>;
 
+export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'User', ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+}>;
+
+export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
+  endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  hasPreviousPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  startCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   connect?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   getMe?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
@@ -283,6 +389,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getUsers?: Resolver<Maybe<Array<ResolversTypes['User']>>, ParentType, ContextType>;
   getVillageDetail?: Resolver<Maybe<ResolversTypes['Village']>, ParentType, ContextType, RequireFields<QueryGetVillageDetailArgs, 'villageId'>>;
   getVillages?: Resolver<Maybe<Array<ResolversTypes['Village']>>, ParentType, ContextType>;
+  me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes['UserEdge'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  users?: Resolver<ResolversTypes['UserConnection'], ParentType, ContextType, Partial<QueryUsersArgs>>;
 }>;
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
@@ -299,6 +408,19 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type UserConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserConnection'] = ResolversParentTypes['UserConnection']> = ResolversObject<{
+  edges?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserEdge']>>>, ParentType, ContextType>;
+  pageInfo?: Resolver<Maybe<ResolversTypes['PageInfo']>, ParentType, ContextType>;
+  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type UserEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserEdge'] = ResolversParentTypes['UserEdge']> = ResolversObject<{
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type VillageResolvers<ContextType = any, ParentType extends ResolversParentTypes['Village'] = ResolversParentTypes['Village']> = ResolversObject<{
   createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -312,11 +434,18 @@ export type VillageResolvers<ContextType = any, ParentType extends ResolversPare
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
+  Connection?: ConnectionResolvers<ContextType>;
   Date?: GraphQLScalarType;
+  Edge?: EdgeResolvers<ContextType>;
+  EdgeTypes?: EdgeTypesResolvers<ContextType>;
   Message?: MessageResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  Node?: NodeResolvers<ContextType>;
+  PageInfo?: PageInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  UserConnection?: UserConnectionResolvers<ContextType>;
+  UserEdge?: UserEdgeResolvers<ContextType>;
   Village?: VillageResolvers<ContextType>;
 }>;
 

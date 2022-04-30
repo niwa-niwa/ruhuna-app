@@ -1,4 +1,5 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
@@ -17,7 +18,6 @@ module.exports = {
   testPathIgnorePatterns: [
     "/node_modules/",
     "/__tests__/test_config/",
-    "/__tests__/graphql/",
     "/__tests__/sockets/io.test.ts"
   ],
   modulePaths: ["/__tests__/"],

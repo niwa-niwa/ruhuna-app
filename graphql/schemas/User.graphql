@@ -1,6 +1,6 @@
 scalar Date
 
-type User {
+type User implements Node {
   id:ID!
   firebaseId:String!
   isAdmin:Boolean!
@@ -13,10 +13,24 @@ type User {
   updatedAt:Date
 }
 
+type UserEdge implements Edge {
+  node:User
+  cursor: String!
+}
+
+type UserConnection {
+  totalCount: Int!
+  edges: [UserEdge]
+  pageInfo: PageInfo
+}
+
 type Query  {
   getUserDetail(id:ID!):User
   getUsers:[User!]
   getMe:User
+  users(input: PaginationArgs):UserConnection!
+  user(id:ID!):UserEdge!
+  me:User!
 }
 
 type Mutation {

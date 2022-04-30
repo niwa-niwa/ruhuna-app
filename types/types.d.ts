@@ -14,6 +14,19 @@ export type Scalars = {
   Date: any;
 };
 
+export type Connection = {
+  edges: Array<Edge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type Edge = {
+  cursor: Scalars['String'];
+  node?: Maybe<EdgeTypes>;
+};
+
+export type EdgeTypes = Message | User | Village;
+
 export type Message = {
   __typename?: 'Message';
   content: Scalars['String'];
@@ -99,6 +112,25 @@ export type MutationLeaveVillageArgs = {
   villageId?: InputMaybe<Scalars['ID']>;
 };
 
+export type Node = {
+  id: Scalars['ID'];
+};
+
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['String']>;
+  hasNextPage: Scalars['Boolean'];
+  hasPreviousPage: Scalars['Boolean'];
+  startCursor?: Maybe<Scalars['String']>;
+};
+
+export type PaginationArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   connect?: Maybe<Scalars['String']>;
@@ -109,6 +141,9 @@ export type Query = {
   getUsers?: Maybe<Array<User>>;
   getVillageDetail?: Maybe<Village>;
   getVillages?: Maybe<Array<Village>>;
+  me: User;
+  user: UserEdge;
+  users: UserConnection;
 };
 
 
@@ -126,7 +161,17 @@ export type QueryGetVillageDetailArgs = {
   villageId: Scalars['ID'];
 };
 
-export type User = {
+
+export type QueryUserArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryUsersArgs = {
+  input?: InputMaybe<PaginationArgs>;
+};
+
+export type User = Node & {
   __typename?: 'User';
   createdAt: Scalars['Date'];
   firebaseId: Scalars['String'];
@@ -138,6 +183,19 @@ export type User = {
   updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
   villages?: Maybe<Array<Village>>;
+};
+
+export type UserConnection = {
+  __typename?: 'UserConnection';
+  edges?: Maybe<Array<Maybe<UserEdge>>>;
+  pageInfo?: Maybe<PageInfo>;
+  totalCount: Scalars['Int'];
+};
+
+export type UserEdge = Edge & {
+  __typename?: 'UserEdge';
+  cursor: Scalars['String'];
+  node?: Maybe<User>;
 };
 
 export type Village = {

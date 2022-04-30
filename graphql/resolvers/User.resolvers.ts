@@ -15,6 +15,10 @@ import {
   QueryResolvers,
   MutationResolvers,
   UserResolvers,
+  UserConnection,
+  QueryUsersArgs,
+  QueryUserArgs,
+  UserEdge,
 } from "../../types/resolvers-types.d";
 import { ErrorObject } from "../../types/rest.types";
 
@@ -154,6 +158,66 @@ async function deleteUser(
   return deletedUser;
 }
 
+async function users(
+  parent: any,
+  input: QueryUsersArgs,
+  { prisma, currentUser }: CContext,
+  info: any
+): Promise<UserConnection> {
+  const users: User[] | null = await prisma.user.findMany();
+
+  if (!users) throw new Error("error");
+
+  return {
+    totalCount: 1,
+    edges: [
+      {
+        node: users[0],
+        cursor: "aaa",
+      },
+    ],
+    pageInfo: {
+      startCursor: "startCursor",
+      endCursor: "endCursor",
+      hasNextPage: true,
+      hasPreviousPage: false,
+    },
+  };
+}
+
+async function user(
+  parent: any,
+  { id }: QueryUserArgs,
+  { prisma, currentUser }: CContext,
+  info: any
+): Promise<UserEdge> {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  // throw an error if user is null
+  if (!user) {
+    throw new UserInputError("bad parameter request");
+  }
+
+  return { node: user, cursor: "" };
+}
+
+async function me(
+  parent: any,
+  {},
+  { prisma, currentUser }: CContext,
+  info: any
+) {
+  const user: User | null = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+  });
+
+  if (!user) throw new Error("Internal Server Error");
+
+  return user;
+}
+
 const User = {
   messages: async (
     user: any,
@@ -202,6 +266,9 @@ const userResolvers: {
     getMe: QueryResolvers["getMe"];
     getUsers: QueryResolvers["getUsers"];
     getUserDetail: QueryResolvers["getUserDetail"];
+    users: QueryResolvers["users"];
+    user: QueryResolvers["user"];
+    me: QueryResolvers["me"];
   };
   Mutation: {
     createUser: MutationResolvers["createUser"];
@@ -214,6 +281,9 @@ const userResolvers: {
     getMe,
     getUsers,
     getUserDetail,
+    users,
+    user,
+    me,
   },
   Mutation: {
     createUser,
