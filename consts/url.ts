@@ -1,4 +1,5 @@
 export const PATH = Object.freeze({
+  GQL: "/graphql",
   REST: "/api",
   V1: "/v1",
   ME: "/me",

@@ -18,7 +18,6 @@ import {
   UserConnection,
   QueryUsersArgs,
   QueryUserArgs,
-  UserEdge,
 } from "../../types/resolvers-types.d";
 import { ErrorObject } from "../../types/rest.types";
 
@@ -176,6 +175,7 @@ async function users(
         cursor: "aaa",
       },
     ],
+    nodes: [users[1], users[2]],
     pageInfo: {
       startCursor: "startCursor",
       endCursor: "endCursor",
@@ -190,7 +190,7 @@ async function user(
   { id }: QueryUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<UserEdge> {
+): Promise<User> {
   const user = await prisma.user.findUnique({
     where: { id },
   });
@@ -200,7 +200,7 @@ async function user(
     throw new UserInputError("bad parameter request");
   }
 
-  return { node: user, cursor: "" };
+  return user;
 }
 
 async function me(

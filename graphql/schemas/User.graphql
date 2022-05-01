@@ -14,22 +14,31 @@ type User implements Node {
 }
 
 type UserEdge implements Edge {
-  node:User
+  node:User!
   cursor: String!
 }
 
-type UserConnection {
+type UserConnection implements Connection {
   totalCount: Int!
-  edges: [UserEdge]
-  pageInfo: PageInfo
+  edges: [UserEdge!]!
+  nodes: [User!]!
+  pageInfo: PageInfo!
 }
 
-type Query  {
+type Query {
   getUserDetail(id:ID!):User
   getUsers:[User!]
   getMe:User
-  users(input: PaginationArgs):UserConnection!
-  user(id:ID!):UserEdge!
+  users(
+    after:String,
+    before:String,
+    first:Int,
+    last:Int,
+    query:String,
+    reverse:Boolean,
+    sortKey:UserSortKeys
+  ):UserConnection!
+  user(id:ID!):User!
   me:User!
 }
 
@@ -37,4 +46,10 @@ type Mutation {
   createUser(firebaseToken:String!):User
   editUser(id:ID!, isAdmin:Boolean, isActive:Boolean, isAnonymous:Boolean, username:String):User
   deleteUser(id:ID!):User
+}
+
+enum UserSortKeys {
+  username
+  updatedAt
+  createdAt
 }

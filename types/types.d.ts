@@ -142,7 +142,7 @@ export type Query = {
   getVillageDetail?: Maybe<Village>;
   getVillages?: Maybe<Array<Village>>;
   me: User;
-  user: UserEdge;
+  user: User;
   users: UserConnection;
 };
 
@@ -168,7 +168,13 @@ export type QueryUserArgs = {
 
 
 export type QueryUsersArgs = {
-  input?: InputMaybe<PaginationArgs>;
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<UserSortKeys>;
 };
 
 export type User = Node & {
@@ -185,18 +191,25 @@ export type User = Node & {
   villages?: Maybe<Array<Village>>;
 };
 
-export type UserConnection = {
+export type UserConnection = Connection & {
   __typename?: 'UserConnection';
-  edges?: Maybe<Array<Maybe<UserEdge>>>;
-  pageInfo?: Maybe<PageInfo>;
+  edges: Array<UserEdge>;
+  nodes: Array<User>;
+  pageInfo: PageInfo;
   totalCount: Scalars['Int'];
 };
 
 export type UserEdge = Edge & {
   __typename?: 'UserEdge';
   cursor: Scalars['String'];
-  node?: Maybe<User>;
+  node: User;
 };
+
+export enum UserSortKeys {
+  CreatedAt = 'createdAt',
+  UpdatedAt = 'updatedAt',
+  Username = 'username'
+}
 
 export type Village = {
   __typename?: 'Village';
