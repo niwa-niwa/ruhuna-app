@@ -1,3 +1,4 @@
+import { prismaClient } from './../../lib/prismaClient';
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
@@ -19,6 +20,7 @@ import {
   QueryUsersArgs,
   QueryUserArgs,
 } from "../../types/resolvers-types.d";
+import { Pagination } from "../lib/classes/Pagination";
 import { ErrorObject } from "../../types/rest.types";
 
 async function getMe(
@@ -159,7 +161,7 @@ async function deleteUser(
 
 async function users(
   parent: any,
-  input: QueryUsersArgs,
+  {after, before, first, last, query, reverse,sortKey}: QueryUsersArgs,
   { prisma, currentUser }: CContext,
   info: any
 ): Promise<UserConnection> {

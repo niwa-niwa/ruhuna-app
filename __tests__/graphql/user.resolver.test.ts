@@ -5,7 +5,8 @@ import { User, Message, Village } from "@prisma/client";
 import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
 import initDB from "../test_config/initDB";
-import { PATH } from '../../consts/url'
+import { PATH } from "../../consts/url";
+import { Pagination } from "../../graphql/lib/classes/Pagination";
 
 const gql_endpoint: string = PATH.GQL;
 
@@ -16,6 +17,27 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     app = express();
     await apolloServer.start();
     apolloServer.applyMiddleware({ app, path: PATH.GQL });
+  });
+
+  describe("UserPagination", () => {
+    beforeAll(async () => async () => await initDB());
+
+    // TODO need more test case for pagination
+    test("OK Pagination", async () => {
+      const users = await prismaClient.user.findMany();
+
+      const user_pagination = new Pagination(prismaClient.user);
+
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pagination.getConnection({
+          before: users[1].id,
+          last: 2,
+          reverse: false,
+          sortKey: "username",
+        });
+
+      expect(totalCount).toBe(5);
+    });
   });
 
   describe("User Queries", () => {
@@ -67,7 +89,51 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       expect(result).toHaveProperty("updatedAt");
     });
 
-    
+    test("OK user", async () => {
+      const func = "users";
+      const args = "";
+      const query = `{
+        result:${func}${args}{
+          totalCount
+          edges{
+              node{
+                  id
+                  firebaseId
+                  isAdmin
+                  isActive
+                  isAnonymous
+                  username
+                  createdAt
+                  updatedAt
+              }
+              cursor
+          }
+          pageInfo{
+              startCursor
+              endCursor
+              hasNextPage
+              hasPreviousPage
+          }
+        }
+      }`;
+
+      const {
+        status,
+        body: {
+          data: { result, errors },
+        },
+      } = await request(app)
+        .post(PATH.GQL)
+        .set("Authorization", `Bearer ${testTokens.admin_user}`)
+        .send({ query });
+
+      const dbUser:
+        | (User & { messages: Message[]; villages: Village[] })[]
+        | null = await prismaClient.user.findMany({
+        include: { messages: true, villages: true },
+      });
+      expect(status).toBe(200);
+    });
   });
 
   describe("test old user", () => {

@@ -1,0 +1,155 @@
+import { Prisma } from "@prisma/client";
+import { User, UserEdge } from "../../../types/types";
+
+type GetConnectionArgs = {
+  after?: string | undefined;
+  before?: string | undefined;
+  first?: number | undefined;
+  last?: number | undefined;
+  query?: string | undefined;
+  reverse?: boolean;
+  sortKey?: string;
+};
+
+// TODO this class become general
+export class Pagination {
+  constructor(
+    private readonly client: Prisma.UserDelegate<
+      Prisma.RejectOnNotFound | Prisma.RejectPerOperation
+    >
+  ) {}
+
+  public async getConnection({
+    after = undefined,
+    before = undefined,
+    first = undefined,
+    last = undefined,
+    query = undefined,
+    reverse = false,
+    sortKey = "updatedAt",
+  }: GetConnectionArgs) {
+    if (first !== undefined && last !== undefined) {
+      throw new Error(
+        "Passing both `first` and `last` to paginate the connection is not supported."
+      );
+    }
+
+    // default variable, if first & last are empty
+    if (first === undefined && last === undefined) {
+      first = 10;
+    }
+
+    const {
+      orderBy,
+      cursor,
+      take,
+      skip,
+    }: {
+      orderBy: { [key: string]: string };
+      cursor: { [key: string]: string } | undefined;
+      take: number;
+      skip: number | undefined;
+    } = (() => {
+      const skip: number | undefined = after || before ? 1 : undefined;
+
+      if (first !== undefined) {
+        const orderBy: { [key: string]: string } = {
+          [sortKey]: reverse ? "desc" : "asc",
+        };
+
+        const cursor: { [key: string]: string } | undefined = after
+          ? { id: after }
+          : undefined;
+
+        const take: number = first;
+
+        return { orderBy, cursor, take, skip };
+      }
+
+      if (last !== undefined) {
+        // it's purposely, the array will be reversed order after extracting
+        const orderBy: { [key: string]: string } = {
+          [sortKey]: reverse ? "asc" : "desc",
+        };
+
+        const cursor: { [key: string]: string } | undefined = before
+          ? { id: before }
+          : undefined;
+
+        const take: number = last;
+
+        return { orderBy, cursor, take, skip };
+      }
+
+      throw new Error("The request is illegally parameters");
+    })();
+
+    const {
+      nodes,
+      hasNextPage,
+      hasPreviousPage,
+    }: {
+      nodes: User[];
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    } = await (async () => {
+      try {
+        const nodes: User[] = await this.client.findMany({
+          take: take + 1, // confirm next page exist
+          skip,
+          cursor,
+          orderBy,
+        });
+
+        const hasPreviousPage: boolean = !!skip;
+
+        const hasNextPage: boolean = nodes.length <= take ? false : true;
+
+        // remove last value because increase array length to confirm next page exist
+        if (hasNextPage) nodes.pop();
+
+        // respect request orderBy
+        if (last) nodes.reverse();
+
+        return {
+          nodes,
+          hasNextPage,
+          hasPreviousPage,
+        };
+      } catch (e) {
+        console.log("エラーです", e);
+      }
+
+      return {
+        nodes: [],
+        hasNextPage: false,
+        hasPreviousPage: false,
+      };
+    })();
+
+    const totalCount: number = await this.client.count({});
+
+    const edges: UserEdge[] = nodes.map((user) => {
+      return {
+        node: user,
+        cursor: user.id,
+      };
+    });
+
+    const startCursor: string | null = nodes[0]?.id ?? null;
+
+    const endCursor: string | null = nodes[nodes.length - 1]?.id ?? null;
+
+    return {
+      totalCount,
+      nodes,
+      edges,
+      pageInfo: {
+        startCursor,
+        endCursor,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
+  }
+}
