@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { User, UserEdge } from "../../../types/types";
+import { User, UserConnection, UserEdge } from "../../../types/types";
 
 type GetConnectionArgs = {
   after?: string | undefined;
@@ -27,7 +27,7 @@ export class Pagination {
     query = undefined,
     reverse = false,
     sortKey = "updatedAt",
-  }: GetConnectionArgs) {
+  }: GetConnectionArgs): Promise<UserConnection> {
     if (first !== undefined && last !== undefined) {
       throw new Error(
         "Passing both `first` and `last` to paginate the connection is not supported."
@@ -39,17 +39,24 @@ export class Pagination {
       first = 10;
     }
 
+    // parse arguments for PrismaJS
     const {
+      where,
       orderBy,
       cursor,
       take,
       skip,
     }: {
+      where: { [key: string | number]: string | number } | undefined;
       orderBy: { [key: string]: string };
       cursor: { [key: string]: string } | undefined;
       take: number;
       skip: number | undefined;
     } = (() => {
+      const where: { [key: string | number]: string | number } | undefined =
+        query ? JSON.parse(query) : undefined;
+
+      // for excepting the cursor
       const skip: number | undefined = after || before ? 1 : undefined;
 
       if (first !== undefined) {
@@ -63,7 +70,7 @@ export class Pagination {
 
         const take: number = first;
 
-        return { orderBy, cursor, take, skip };
+        return { where, orderBy, cursor, take, skip };
       }
 
       if (last !== undefined) {
@@ -78,12 +85,13 @@ export class Pagination {
 
         const take: number = last;
 
-        return { orderBy, cursor, take, skip };
+        return { where, orderBy, cursor, take, skip };
       }
 
       throw new Error("The request is illegally parameters");
     })();
 
+    // extract and generate response values
     const {
       nodes,
       hasNextPage,
@@ -95,6 +103,7 @@ export class Pagination {
     } = await (async () => {
       try {
         const nodes: User[] = await this.client.findMany({
+          where,
           take: take + 1, // confirm next page exist
           skip,
           cursor,
@@ -117,17 +126,12 @@ export class Pagination {
           hasPreviousPage,
         };
       } catch (e) {
-        console.log("エラーです", e);
+        console.error(e);
+        throw new Error("Something is wrong");
       }
-
-      return {
-        nodes: [],
-        hasNextPage: false,
-        hasPreviousPage: false,
-      };
     })();
 
-    const totalCount: number = await this.client.count({});
+    const totalCount: number = await this.client.count({ where });
 
     const edges: UserEdge[] = nodes.map((user) => {
       return {
