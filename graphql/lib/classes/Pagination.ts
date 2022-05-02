@@ -1,15 +1,10 @@
 import { Prisma } from "@prisma/client";
-import { User, UserConnection, UserEdge } from "../../../types/types";
-
-type GetConnectionArgs = {
-  after?: string | undefined;
-  before?: string | undefined;
-  first?: number | undefined;
-  last?: number | undefined;
-  query?: string | undefined;
-  reverse?: boolean;
-  sortKey?: string;
-};
+import {
+  QueryUsersArgs,
+  User,
+  UserConnection,
+  UserEdge,
+} from "../../../types/types.d";
 
 // TODO this class become general
 export class Pagination {
@@ -27,7 +22,7 @@ export class Pagination {
     query = undefined,
     reverse = false,
     sortKey = "updatedAt",
-  }: GetConnectionArgs): Promise<UserConnection> {
+  }: QueryUsersArgs): Promise<UserConnection> {
     if (first !== undefined && last !== undefined) {
       throw new Error(
         "Passing both `first` and `last` to paginate the connection is not supported."
@@ -58,17 +53,16 @@ export class Pagination {
 
       // for excepting the cursor
       const skip: number | undefined = after || before ? 1 : undefined;
-
       if (first !== undefined) {
         const orderBy: { [key: string]: string } = {
-          [sortKey]: reverse ? "desc" : "asc",
+          [sortKey + ""]: reverse ? "desc" : "asc",
         };
 
         const cursor: { [key: string]: string } | undefined = after
           ? { id: after }
           : undefined;
 
-        const take: number = first;
+        const take: number = first ?? 10;
 
         return { where, orderBy, cursor, take, skip };
       }
@@ -76,14 +70,14 @@ export class Pagination {
       if (last !== undefined) {
         // it's purposely, the array will be reversed order after extracting
         const orderBy: { [key: string]: string } = {
-          [sortKey]: reverse ? "asc" : "desc",
+          [sortKey + ""]: reverse ? "asc" : "desc",
         };
 
         const cursor: { [key: string]: string } | undefined = before
           ? { id: before }
           : undefined;
 
-        const take: number = last;
+        const take: number = last ?? 10;
 
         return { where, orderBy, cursor, take, skip };
       }

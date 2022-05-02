@@ -1,4 +1,4 @@
-import { prismaClient } from './../../lib/prismaClient';
+import { prismaClient } from "./../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
@@ -161,30 +161,23 @@ async function deleteUser(
 
 async function users(
   parent: any,
-  {after, before, first, last, query, reverse,sortKey}: QueryUsersArgs,
+  { after, before, first, last, query, reverse, sortKey }: QueryUsersArgs,
   { prisma, currentUser }: CContext,
   info: any
 ): Promise<UserConnection> {
-  const users: User[] | null = await prisma.user.findMany();
+  const result: UserConnection = await new Pagination(
+    prismaClient.user
+  ).getConnection({
+    after,
+    before,
+    first,
+    last,
+    query,
+    reverse,
+    sortKey,
+  });
 
-  if (!users) throw new Error("error");
-
-  return {
-    totalCount: 1,
-    edges: [
-      {
-        node: users[0],
-        cursor: "aaa",
-      },
-    ],
-    nodes: [users[1], users[2]],
-    pageInfo: {
-      startCursor: "startCursor",
-      endCursor: "endCursor",
-      hasNextPage: true,
-      hasPreviousPage: false,
-    },
-  };
+  return result;
 }
 
 async function user(

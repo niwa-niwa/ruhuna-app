@@ -174,7 +174,7 @@ export type QueryUsersArgs = {
   last?: InputMaybe<Scalars['Int']>;
   query?: InputMaybe<Scalars['String']>;
   reverse?: InputMaybe<Scalars['Boolean']>;
-  sortKey?: InputMaybe<UserSortKeys>;
+  sortKey?: InputMaybe<Scalars['String']>;
 };
 
 export type User = Node & {
@@ -204,12 +204,6 @@ export type UserEdge = Edge & {
   cursor: Scalars['String'];
   node: User;
 };
-
-export enum UserSortKeys {
-  CreatedAt = 'createdAt',
-  UpdatedAt = 'updatedAt',
-  Username = 'username'
-}
 
 export type Village = {
   __typename?: 'Village';

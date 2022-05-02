@@ -36,7 +36,7 @@ type Query {
     last:Int,
     query:String,
     reverse:Boolean,
-    sortKey:UserSortKeys
+    sortKey:String
   ):UserConnection!
   user(id:ID!):User!
   me:User!
@@ -46,10 +46,4 @@ type Mutation {
   createUser(firebaseToken:String!):User
   editUser(id:ID!, isAdmin:Boolean, isActive:Boolean, isAnonymous:Boolean, username:String):User
   deleteUser(id:ID!):User
-}
-
-enum UserSortKeys {
-  username
-  updatedAt
-  createdAt
 }
