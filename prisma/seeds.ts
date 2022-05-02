@@ -5,14 +5,13 @@ export const users = [
     isAdmin: true,
   },
   {
+    firebaseId: "firebaseId_E",
+    username: "User_E",
+  },
+  {
     firebaseId: "firebaseId_B",
     username: "User_B",
     isAdmin: false,
-  },
-  {
-    firebaseId: "firebaseId_C",
-    username: "User_C",
-    isAnonymous: true,
   },
   {
     firebaseId: "firebaseId_D",
@@ -20,7 +19,8 @@ export const users = [
     isActive: false,
   },
   {
-    firebaseId: "firebaseId_E",
-    username: "User_E",
+    firebaseId: "firebaseId_C",
+    username: "User_C",
+    isAnonymous: true,
   },
 ];

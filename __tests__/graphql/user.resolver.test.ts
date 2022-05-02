@@ -1,7 +1,7 @@
 import request from "supertest";
 import express, { Express } from "express";
 import { prismaClient } from "../../lib/prismaClient";
-import { User, Message, Village } from "@prisma/client";
+import { User, Message, Village, PrismaPromise } from "@prisma/client";
 import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
 import initDB from "../test_config/initDB";
@@ -22,21 +22,214 @@ describe("TEST User of resolvers in GraphQL cases", () => {
   describe("UserPagination", () => {
     beforeAll(async () => async () => await initDB());
 
-    // TODO need more test case for pagination
-    test("OK Pagination", async () => {
-      const users = await prismaClient.user.findMany();
+    const user_pgn: Pagination = new Pagination(prismaClient.user);
 
-      const user_pagination = new Pagination(prismaClient.user);
+    const users: () => PrismaPromise<User[]> = () =>
+      prismaClient.user.findMany();
 
+    test("OK Pagination : first:10 all users", async () => {
+      const db_users = await users();
       const { totalCount, nodes, edges, pageInfo } =
-        await user_pagination.getConnection({
-          before: users[1].id,
+        await user_pgn.getConnection({
+          first: 10,
+        });
+
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes).toEqual(db_users);
+      expect(nodes[0].id).toBe(edges[0].cursor);
+      expect(db_users[0].id).toBe(pageInfo.startCursor);
+      expect(db_users[db_users.length - 1].id).toBe(pageInfo.endCursor);
+      expect(false).toBe(pageInfo.hasNextPage);
+      expect(false).toBe(pageInfo.hasPreviousPage);
+    });
+
+    test("OK Pagination : last:10 all users", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          first: 10,
+        });
+
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes).toEqual(db_users);
+      expect(nodes[0].id).toBe(edges[0].cursor);
+      expect(db_users[0].id).toBe(pageInfo.startCursor);
+      expect(db_users[db_users.length - 1].id).toBe(pageInfo.endCursor);
+      expect(false).toBe(pageInfo.hasNextPage);
+      expect(false).toBe(pageInfo.hasPreviousPage);
+    });
+
+    test("OK Pagination : first:2", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          first: 2,
+        });
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes[0]).toEqual(db_users.shift());
+      expect(nodes[1]).toEqual(db_users.shift());
+
+      expect(true).toBe(pageInfo.hasNextPage);
+      expect(true).not.toBe(pageInfo.hasPreviousPage);
+    });
+
+    test("OK Pagination : last:2", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
           last: 2,
-          reverse: false,
+        });
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes[1]).toEqual(db_users.pop());
+      expect(nodes[0]).toEqual(db_users.pop());
+
+      expect(true).toBe(pageInfo.hasNextPage);
+      expect(true).not.toBe(pageInfo.hasPreviousPage);
+    });
+
+    test("OK Pagination : last:2", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          last: 2,
+        });
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes[1]).toEqual(db_users.pop());
+      expect(nodes[0]).toEqual(db_users.pop());
+    });
+
+    test("OK Pagination : first:10 with query id", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          first: 10,
+          query: `{"id":"${db_users[2].id}"}`,
+        });
+
+      expect(totalCount).toBe(1);
+      expect(nodes[0]).toEqual(db_users[2]);
+      expect(nodes[0].id).toBe(edges[0].cursor);
+      expect(db_users[2].id).toBe(pageInfo.startCursor);
+      expect(pageInfo.endCursor).toBe(db_users[2].id);
+      expect(pageInfo.hasNextPage).toBeFalsy();
+      expect(pageInfo.hasPreviousPage).toBeFalsy();
+    });
+
+    test("OK Pagination : last:10 with query id", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          last: 10,
+          query: `{"id":"${db_users[2].id}"}`,
+        });
+
+      expect(totalCount).toBe(1);
+      expect(nodes[0]).toEqual(db_users[2]);
+      expect(nodes[0].id).toBe(edges[0].cursor);
+      expect(db_users[2].id).toBe(pageInfo.startCursor);
+      expect(pageInfo.endCursor).toBe(db_users[2].id);
+      expect(pageInfo.hasNextPage).toBeFalsy();
+      expect(pageInfo.hasPreviousPage).toBeFalsy();
+    });
+
+    test("OK Pagination : first:10 with orderBy username and reverse", async () => {
+      const db_users = await prismaClient.user.findMany({
+        orderBy: { username: "desc" },
+      });
+      const users_slice = db_users.slice(0, 3);
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          first: 3,
           sortKey: "username",
+          reverse: true,
         });
 
       expect(totalCount).toBe(5);
+      expect(nodes).toEqual(users_slice);
+      expect(pageInfo.startCursor).toBe(users_slice[0].id);
+      expect(pageInfo.endCursor).toBe(users_slice[2].id);
+      expect(pageInfo.hasNextPage).toBeTruthy();
+      expect(pageInfo.hasPreviousPage).toBeFalsy();
+    });
+
+    test("OK Pagination : last:10 with orderBy username and reverse", async () => {
+      const db_users = await prismaClient.user.findMany({
+        orderBy: { username: "desc" },
+      });
+      const users_slice = db_users.slice(-3);
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          last: 3,
+          sortKey: "username",
+          reverse: true,
+        });
+
+      expect(totalCount).toBe(5);
+      expect(nodes).toEqual(users_slice);
+      expect(pageInfo.startCursor).toBe(users_slice[0].id);
+      expect(pageInfo.endCursor).toBe(users_slice[2].id);
+      expect(pageInfo.hasNextPage).toBeTruthy();
+      expect(pageInfo.hasPreviousPage).toBeFalsy();
+    });
+
+    test("OK Pagination : first:10 after", async () => {
+      const db_users = await users();
+      const users_slice = db_users.slice(3);
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          first: 3,
+          after: db_users[2].id,
+        });
+      expect(totalCount).toBe(5);
+      expect(nodes).toEqual(users_slice);
+      expect(pageInfo.startCursor).toBe(users_slice[0].id);
+      expect(pageInfo.endCursor).toBe(users_slice[1].id);
+      expect(pageInfo.hasNextPage).toBeFalsy();
+      expect(pageInfo.hasPreviousPage).toBeTruthy();
+    });
+
+    test("OK Pagination : last:10 before", async () => {
+      const db_users = await users();
+      const users_slice = db_users.slice(0, 2);
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({
+          last: 3,
+          before: db_users[2].id,
+        });
+      expect(totalCount).toBe(5);
+      expect(nodes).toEqual(users_slice);
+      expect(pageInfo.startCursor).toBe(users_slice[0].id);
+      expect(pageInfo.endCursor).toBe(users_slice[1].id);
+      expect(pageInfo.hasNextPage).toBeFalsy();
+      expect(pageInfo.hasPreviousPage).toBeTruthy();
+    });
+
+    test("OK Pagination : nothing argument but return first 10", async () => {
+      const db_users = await users();
+      const { totalCount, nodes, edges, pageInfo } =
+        await user_pgn.getConnection({});
+
+      expect(totalCount).toBe(db_users.length);
+      expect(nodes).toEqual(db_users);
+      expect(nodes[0].id).toBe(edges[0].cursor);
+      expect(db_users[0].id).toBe(pageInfo.startCursor);
+      expect(db_users[db_users.length - 1].id).toBe(pageInfo.endCursor);
+      expect(false).toBe(pageInfo.hasNextPage);
+      expect(false).toBe(pageInfo.hasPreviousPage);
+    });
+
+    test("NG Pagination : both argument first last ", async () => {
+      await expect(
+        user_pgn.getConnection({ first: 10, last: 10 })
+      ).rejects.toThrowError(
+        "Passing both `first` and `last` to paginate the connection is not supported."
+      );
+    });
+
+    test("NG Pagination : both argument first:251 ", async () => {
+      await expect(user_pgn.getConnection({ first: 251 })).rejects.toThrowError(
+        "an array have a maximum size of 250"
+      );
     });
   });
 
@@ -89,11 +282,26 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       expect(result).toHaveProperty("updatedAt");
     });
 
-    test("OK user", async () => {
+    // TODO implement test-case
+    describe("users", () => {
       const func = "users";
-      const args = "";
-      const query = `{
-        result:${func}${args}{
+      const args = `first:3`;
+
+      const client = async (
+        query: string,
+        user_token = testTokens.admin_user
+      ) => {
+        const result = await request(app)
+          .post(PATH.GQL)
+          .set("Authorization", `Bearer ${user_token}`)
+          .send({ query });
+
+        return result;
+      };
+
+      test("OK users", async () => {
+        const query = `{
+        result:${func}(${args}){
           totalCount
           edges{
               node{
@@ -117,22 +325,16 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         }
       }`;
 
-      const {
-        status,
-        body: {
-          data: { result, errors },
-        },
-      } = await request(app)
-        .post(PATH.GQL)
-        .set("Authorization", `Bearer ${testTokens.admin_user}`)
-        .send({ query });
+        const { status, body } = await client(query);
 
-      const dbUser:
-        | (User & { messages: Message[]; villages: Village[] })[]
-        | null = await prismaClient.user.findMany({
-        include: { messages: true, villages: true },
+        const dbUser:
+          | (User & { messages: Message[]; villages: Village[] })[]
+          | null = await prismaClient.user.findMany({
+          include: { messages: true, villages: true },
+        });
+
+        expect(status).toBe(200);
       });
-      expect(status).toBe(200);
     });
   });
 

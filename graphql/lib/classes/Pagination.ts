@@ -8,6 +8,8 @@ import {
 
 // TODO this class become general
 export class Pagination {
+  readonly MAX_ITEMS: number = 250;
+
   constructor(
     private readonly client: Prisma.UserDelegate<
       Prisma.RejectOnNotFound | Prisma.RejectPerOperation
@@ -62,7 +64,7 @@ export class Pagination {
           ? { id: after }
           : undefined;
 
-        const take: number = first ?? 10;
+        const take: number = first || 10;
 
         return { where, orderBy, cursor, take, skip };
       }
@@ -77,13 +79,16 @@ export class Pagination {
           ? { id: before }
           : undefined;
 
-        const take: number = last ?? 10;
+        const take: number = last || 10;
 
         return { where, orderBy, cursor, take, skip };
       }
 
       throw new Error("The request is illegally parameters");
     })();
+
+    if (take > this.MAX_ITEMS)
+      throw new Error("an array have a maximum size of 250");
 
     // extract and generate response values
     const {
