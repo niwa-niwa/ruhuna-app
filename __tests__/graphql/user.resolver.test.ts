@@ -234,6 +234,15 @@ describe("TEST User of resolvers in GraphQL cases", () => {
   });
 
   describe("User Queries", () => {
+    function prismaString(result: {}): { [key: string | number]: string }[] {
+      /**
+       * convert result of PrismaJS to {[key:string|number]:string} for compare graphql result
+       * @param result
+       * @returns {[key:string|number]:string}
+       */
+      return JSON.parse(JSON.stringify(result));
+    }
+
     beforeAll(async () => async () => await initDB());
 
     test("OK me ", async () => {
@@ -285,7 +294,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     // TODO implement test-case
     describe("users", () => {
       const func = "users";
-      const args = `first:3`;
+      const alias = "result";
 
       const client = async (
         query: string,
@@ -300,40 +309,65 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       };
 
       test("OK users", async () => {
-        const query = `{
-        result:${func}(${args}){
-          totalCount
-          edges{
-              node{
-                  id
-                  firebaseId
-                  isAdmin
-                  isActive
-                  isAnonymous
-                  username
-                  createdAt
-                  updatedAt
-              }
-              cursor
-          }
-          pageInfo{
-              startCursor
-              endCursor
-              hasNextPage
-              hasPreviousPage
-          }
-        }
-      }`;
+        const args = `first:3`;
 
-        const { status, body } = await client(query);
+        const query = `
+        {
+          ${alias}:${func}(${args}){
+            totalCount
+            nodes{
+              id
+              firebaseId
+              isAdmin
+              isActive
+              isAnonymous
+              username
+              createdAt
+              updatedAt
+            }
+            edges{
+                node{
+                    id
+                    firebaseId
+                    isAdmin
+                    isActive
+                    isAnonymous
+                    username
+                    createdAt
+                    updatedAt
+                }
+                cursor
+            }
+            pageInfo{
+                startCursor
+                endCursor
+                hasNextPage
+                hasPreviousPage
+            }
+          }
+        }`;
 
-        const dbUser:
-          | (User & { messages: Message[]; villages: Village[] })[]
-          | null = await prismaClient.user.findMany({
-          include: { messages: true, villages: true },
-        });
+        const {
+          status,
+          body: { data, errors },
+        } = await client(query);
+
+        const dbUsers: User[] = await prismaClient.user.findMany();
+
+        const users_slice = prismaString(dbUsers.slice(0, 3));
 
         expect(status).toBe(200);
+        expect(data.result.totalCount).toBe(5);
+        expect(data.result.nodes.length).toBe(3);
+        expect(data.result.edges.length).toBe(3);
+        expect(data[alias].nodes).toEqual(users_slice);
+        expect(data[alias].edges[0].node).toEqual(users_slice[0]);
+        expect(data[alias].pageInfo.startCursor).toBe(users_slice[0].id);
+        expect(data[alias].pageInfo.endCursor).toBe(
+          users_slice[users_slice.length - 1].id
+        );
+        expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
+        expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
       });
     });
   });
