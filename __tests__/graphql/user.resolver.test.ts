@@ -291,7 +291,6 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       expect(result).toHaveProperty("updatedAt");
     });
 
-    // TODO implement test-case
     describe("users", () => {
       const func = "users";
       const alias = "result";
