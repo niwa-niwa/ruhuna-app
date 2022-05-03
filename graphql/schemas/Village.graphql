@@ -1,6 +1,7 @@
 scalar Date
+scalar Base64
 
-type Village {
+type Village implements Node {
   id:ID!
   name:String!
   description:String
@@ -9,6 +10,18 @@ type Village {
   messages:[Message!]
   createdAt:Date!
   updatedAt:Date
+}
+
+type VillageEdge implements Edge {
+  node:Village!
+  cursor: Base64!
+}
+
+type VillageConnection implements Connection {
+  totalCount: Int!
+  edges: [VillageEdge!]!
+  nodes: [Village!]!
+  pageInfo: PageInfo!
 }
 
 type Query {

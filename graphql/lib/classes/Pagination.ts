@@ -1,19 +1,10 @@
-import { Prisma } from "@prisma/client";
-import {
-  QueryUsersArgs,
-  User,
-  UserConnection,
-  UserEdge,
-} from "../../../types/types.d";
+import { Connection, Edge, Node, NodesArgs } from "../../../types/types.d";
 
-// TODO this class become general
 export class Pagination {
-  readonly MAX_ITEMS: number = 250;
+  protected readonly MAX_ITEMS: number = 250;
 
   constructor(
-    private readonly client: Prisma.UserDelegate<
-      Prisma.RejectOnNotFound | Prisma.RejectPerOperation
-    >
+    protected readonly client: { findMany: Function; count: Function }
   ) {}
 
   public async getConnection({
@@ -24,7 +15,7 @@ export class Pagination {
     query = undefined,
     reverse = false,
     sortKey = "updatedAt",
-  }: QueryUsersArgs): Promise<UserConnection> {
+  }: NodesArgs): Promise<Connection> {
     if (first !== undefined && last !== undefined) {
       throw new Error(
         "Passing both `first` and `last` to paginate the connection is not supported."
@@ -96,12 +87,12 @@ export class Pagination {
       hasNextPage,
       hasPreviousPage,
     }: {
-      nodes: User[];
+      nodes: Node[];
       hasNextPage: boolean;
       hasPreviousPage: boolean;
     } = await (async () => {
       try {
-        const nodes: User[] = await this.client.findMany({
+        const nodes: Node[] = await this.client.findMany({
           where,
           take: take + 1, // confirm next page exist
           skip,
@@ -132,10 +123,10 @@ export class Pagination {
 
     const totalCount: number = await this.client.count({ where });
 
-    const edges: UserEdge[] = nodes.map((user) => {
+    const edges: Edge[] = nodes.map((node: Node) => {
       return {
-        node: user,
-        cursor: user.id,
+        node: node,
+        cursor: node.id,
       };
     });
 

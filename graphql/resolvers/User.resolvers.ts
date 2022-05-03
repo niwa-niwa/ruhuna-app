@@ -11,6 +11,8 @@ import {
   MutationCreateUserArgs,
   MutationEditUserArgs,
   MutationDeleteUserArgs,
+  Connection,
+  VillageConnection
 } from "../../types/types.d";
 import {
   QueryResolvers,
@@ -165,7 +167,7 @@ async function users(
   { prisma, currentUser }: CContext,
   info: any
 ): Promise<UserConnection> {
-  const result: UserConnection = await new Pagination(
+  const result: Connection = await new Pagination(
     prismaClient.user
   ).getConnection({
     after,
@@ -177,7 +179,7 @@ async function users(
     sortKey,
   });
 
-  return result;
+  return result as UserConnection;
 }
 
 async function user(
@@ -232,6 +234,17 @@ const User = {
     return messages;
   },
 
+  // TODO comment out after implemented villageConnection & messageConnection
+  // villages: async (
+  //   user: any,
+  //   args: any,
+  //   { prisma, currentUser }: CContext
+  // ): Promise<VillageConnection> => {
+  //   const result = await new Pagination(prismaClient.village).getConnection({})
+  //     console.log("village = ",result)
+    
+  //   return result as VillageConnection
+  // },
   villages: async (
     user: any,
     args: any,

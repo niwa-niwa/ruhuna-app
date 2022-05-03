@@ -4,8 +4,6 @@ interface Node {
   id: ID!
 }
 
-union EdgeTypes = User | Village | Message
-
 type PageInfo {
   startCursor: Base64
   endCursor: Base64
@@ -14,14 +12,25 @@ type PageInfo {
 }
 
 interface Edge {
-  node: EdgeTypes
+  node: Node
   cursor: Base64!
 }
 
 interface Connection {
   totalCount: Int!
   edges: [Edge!]!
+  nodes: [Node!]!
   pageInfo:PageInfo!
+}
+
+type NodesArgs {
+  after:Base64
+  before:Base64
+  first:Int
+  last:Int
+  query:String
+  reverse:Boolean
+  sortKey:String
 }
 
 type Query {

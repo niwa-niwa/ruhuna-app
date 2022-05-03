@@ -27,7 +27,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     const users: () => PrismaPromise<User[]> = () =>
       prismaClient.user.findMany();
 
-    test("OK Pagination : first:10 all users", async () => {
+    test("OK Pagination : first:10 all users", async () => {      
       const db_users = await users();
       const { totalCount, nodes, edges, pageInfo } =
         await user_pgn.getConnection({

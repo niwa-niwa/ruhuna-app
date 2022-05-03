@@ -17,16 +17,15 @@ export type Scalars = {
 
 export type Connection = {
   edges: Array<Edge>;
+  nodes: Array<Node>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
 };
 
 export type Edge = {
   cursor: Scalars['Base64'];
-  node?: Maybe<EdgeTypes>;
+  node?: Maybe<Node>;
 };
-
-export type EdgeTypes = Message | User | Village;
 
 export type Message = {
   __typename?: 'Message';
@@ -117,6 +116,17 @@ export type Node = {
   id: Scalars['ID'];
 };
 
+export type NodesArgs = {
+  __typename?: 'NodesArgs';
+  after?: Maybe<Scalars['Base64']>;
+  before?: Maybe<Scalars['Base64']>;
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  query?: Maybe<Scalars['String']>;
+  reverse?: Maybe<Scalars['Boolean']>;
+  sortKey?: Maybe<Scalars['String']>;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['Base64']>;
@@ -199,7 +209,7 @@ export type UserEdge = Edge & {
   node: User;
 };
 
-export type Village = {
+export type Village = Node & {
   __typename?: 'Village';
   createdAt: Scalars['Date'];
   description?: Maybe<Scalars['String']>;
@@ -209,4 +219,18 @@ export type Village = {
   name: Scalars['String'];
   updatedAt?: Maybe<Scalars['Date']>;
   users?: Maybe<Array<User>>;
+};
+
+export type VillageConnection = Connection & {
+  __typename?: 'VillageConnection';
+  edges: Array<VillageEdge>;
+  nodes: Array<Village>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type VillageEdge = Edge & {
+  __typename?: 'VillageEdge';
+  cursor: Scalars['Base64'];
+  node: Village;
 };
