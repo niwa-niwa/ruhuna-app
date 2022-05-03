@@ -12,6 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Base64: any;
   Date: any;
 };
 
@@ -22,7 +23,7 @@ export type Connection = {
 };
 
 export type Edge = {
-  cursor: Scalars['String'];
+  cursor: Scalars['Base64'];
   node?: Maybe<EdgeTypes>;
 };
 
@@ -119,17 +120,10 @@ export type Node = {
 
 export type PageInfo = {
   __typename?: 'PageInfo';
-  endCursor?: Maybe<Scalars['String']>;
+  endCursor?: Maybe<Scalars['Base64']>;
   hasNextPage: Scalars['Boolean'];
   hasPreviousPage: Scalars['Boolean'];
-  startCursor?: Maybe<Scalars['String']>;
-};
-
-export type PaginationArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
+  startCursor?: Maybe<Scalars['Base64']>;
 };
 
 export type Query = {
@@ -169,8 +163,8 @@ export type QueryUserArgs = {
 
 
 export type QueryUsersArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   query?: InputMaybe<Scalars['String']>;
@@ -202,7 +196,7 @@ export type UserConnection = Connection & {
 
 export type UserEdge = Edge & {
   __typename?: 'UserEdge';
-  cursor: Scalars['String'];
+  cursor: Scalars['Base64'];
   node: User;
 };
 
@@ -288,6 +282,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  Base64: ResolverTypeWrapper<Scalars['Base64']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Connection: ResolversTypes['UserConnection'];
   Date: ResolverTypeWrapper<Scalars['Date']>;
@@ -299,7 +294,6 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   Node: ResolversTypes['User'];
   PageInfo: ResolverTypeWrapper<PageInfo>;
-  PaginationArgs: PaginationArgs;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   User: ResolverTypeWrapper<User>;
@@ -310,6 +304,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  Base64: Scalars['Base64'];
   Boolean: Scalars['Boolean'];
   Connection: ResolversParentTypes['UserConnection'];
   Date: Scalars['Date'];
@@ -321,7 +316,6 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   Node: ResolversParentTypes['User'];
   PageInfo: PageInfo;
-  PaginationArgs: PaginationArgs;
   Query: {};
   String: Scalars['String'];
   User: User;
@@ -329,6 +323,10 @@ export type ResolversParentTypes = ResolversObject<{
   UserEdge: UserEdge;
   Village: Village;
 }>;
+
+export interface Base64ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Base64'], any> {
+  name: 'Base64';
+}
 
 export type ConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Connection'] = ResolversParentTypes['Connection']> = ResolversObject<{
   __resolveType: TypeResolveFn<'UserConnection', ParentType, ContextType>;
@@ -343,7 +341,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 
 export type EdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Edge'] = ResolversParentTypes['Edge']> = ResolversObject<{
   __resolveType: TypeResolveFn<'UserEdge', ParentType, ContextType>;
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  cursor?: Resolver<ResolversTypes['Base64'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['EdgeTypes']>, ParentType, ContextType>;
 }>;
 
@@ -380,10 +378,10 @@ export type NodeResolvers<ContextType = any, ParentType extends ResolversParentT
 }>;
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
-  endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  endCursor?: Resolver<Maybe<ResolversTypes['Base64']>, ParentType, ContextType>;
   hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   hasPreviousPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  startCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  startCursor?: Resolver<Maybe<ResolversTypes['Base64']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -424,7 +422,7 @@ export type UserConnectionResolvers<ContextType = any, ParentType extends Resolv
 }>;
 
 export type UserEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserEdge'] = ResolversParentTypes['UserEdge']> = ResolversObject<{
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  cursor?: Resolver<ResolversTypes['Base64'], ParentType, ContextType>;
   node?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -442,6 +440,7 @@ export type VillageResolvers<ContextType = any, ParentType extends ResolversPare
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
+  Base64?: GraphQLScalarType;
   Connection?: ConnectionResolvers<ContextType>;
   Date?: GraphQLScalarType;
   Edge?: EdgeResolvers<ContextType>;

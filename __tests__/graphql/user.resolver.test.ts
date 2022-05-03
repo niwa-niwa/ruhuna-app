@@ -361,12 +361,93 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         expect(data.result.edges.length).toBe(3);
         expect(data[alias].nodes).toEqual(users_slice);
         expect(data[alias].edges[0].node).toEqual(users_slice[0]);
-        expect(data[alias].pageInfo.startCursor).toBe(users_slice[0].id);
-        expect(data[alias].pageInfo.endCursor).toBe(
+        expect(data[alias].pageInfo.startCursor).not.toBe(users_slice[0].id);
+        expect(data[alias].pageInfo.endCursor).not.toBe(
           users_slice[users_slice.length - 1].id
         );
         expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
         expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
+      });
+
+      test("OK users with after variable", async () => {
+        let args = `first:3`;
+
+        const pre_query = `
+        {
+          ${alias}:${func}(${args}){
+            pageInfo{
+                startCursor
+                endCursor
+                hasNextPage
+                hasPreviousPage
+            }
+          }
+        }`;
+
+        const pre = await client(pre_query);
+
+        expect(pre.status).toBe(200);
+
+        const cursor = pre.body.data.result.pageInfo.endCursor;
+
+        args = `first:3 after:"${cursor}"`;
+
+        const query = `
+        {
+          ${alias}:${func}(${args}){
+            totalCount
+            nodes{
+              id
+              firebaseId
+              isAdmin
+              isActive
+              isAnonymous
+              username
+              createdAt
+              updatedAt
+            }
+            edges{
+                node{
+                    id
+                    firebaseId
+                    isAdmin
+                    isActive
+                    isAnonymous
+                    username
+                    createdAt
+                    updatedAt
+                }
+                cursor
+            }
+            pageInfo{
+                startCursor
+                endCursor
+                hasNextPage
+                hasPreviousPage
+            }
+          }
+        }`;
+
+        const {
+          status,
+          body: { data, errors },
+        } = await client(query);
+        const dbUsers: User[] = await prismaClient.user.findMany();
+        dbUsers.splice(0, 3);
+        const users_slice = prismaString(dbUsers);
+
+        expect(status).toBe(200);
+        expect(data[alias].totalCount).toBe(5);
+        expect(data[alias].nodes.length).toBe(2);
+        expect(data[alias].edges.length).toBe(2);
+        expect(data[alias].nodes).toEqual(users_slice);
+        expect(data[alias].edges[0].node).toEqual(users_slice[0]);
+        expect(data[alias].pageInfo.startCursor).not.toBe(users_slice[0].id);
+        expect(data[alias].pageInfo.endCursor).not.toBe(
+          users_slice[users_slice.length - 1].id
+        );
+        expect(data[alias].pageInfo.hasNextPage).toBeFalsy();
+        expect(data[alias].pageInfo.hasPreviousPage).toBeTruthy();
       });
     });
   });

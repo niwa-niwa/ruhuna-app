@@ -1,3 +1,5 @@
+scalar Base64
+
 interface Node {
   id: ID!
 }
@@ -5,28 +7,21 @@ interface Node {
 union EdgeTypes = User | Village | Message
 
 type PageInfo {
-  startCursor: String
-  endCursor: String
+  startCursor: Base64
+  endCursor: Base64
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
 }
 
 interface Edge {
   node: EdgeTypes
-  cursor: String!
+  cursor: Base64!
 }
 
 interface Connection {
   totalCount: Int!
   edges: [Edge!]!
   pageInfo:PageInfo!
-}
-
-input PaginationArgs {
-  first: Int
-  after: String
-  last: Int
-  before: String
 }
 
 type Query {

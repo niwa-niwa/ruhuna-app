@@ -1,4 +1,5 @@
 scalar Date
+scalar Base64
 
 type User implements Node {
   id:ID!
@@ -15,7 +16,7 @@ type User implements Node {
 
 type UserEdge implements Edge {
   node:User!
-  cursor: String!
+  cursor: Base64!
 }
 
 type UserConnection implements Connection {
@@ -30,8 +31,8 @@ type Query {
   getUsers:[User!]
   getMe:User
   users(
-    after:String,
-    before:String,
+    after:Base64,
+    before:Base64,
     first:Int,
     last:Int,
     query:String,

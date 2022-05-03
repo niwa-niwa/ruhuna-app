@@ -11,6 +11,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Base64: any;
   Date: any;
 };
 
@@ -21,7 +22,7 @@ export type Connection = {
 };
 
 export type Edge = {
-  cursor: Scalars['String'];
+  cursor: Scalars['Base64'];
   node?: Maybe<EdgeTypes>;
 };
 
@@ -118,17 +119,10 @@ export type Node = {
 
 export type PageInfo = {
   __typename?: 'PageInfo';
-  endCursor?: Maybe<Scalars['String']>;
+  endCursor?: Maybe<Scalars['Base64']>;
   hasNextPage: Scalars['Boolean'];
   hasPreviousPage: Scalars['Boolean'];
-  startCursor?: Maybe<Scalars['String']>;
-};
-
-export type PaginationArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
+  startCursor?: Maybe<Scalars['Base64']>;
 };
 
 export type Query = {
@@ -168,8 +162,8 @@ export type QueryUserArgs = {
 
 
 export type QueryUsersArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   query?: InputMaybe<Scalars['String']>;
@@ -201,7 +195,7 @@ export type UserConnection = Connection & {
 
 export type UserEdge = Edge & {
   __typename?: 'UserEdge';
-  cursor: Scalars['String'];
+  cursor: Scalars['Base64'];
   node: User;
 };
 
