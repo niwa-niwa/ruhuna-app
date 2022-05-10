@@ -8,8 +8,8 @@ type User implements Node {
   isActive:Boolean!
   isAnonymous:Boolean!
   username:String!
-  messages:[Message!]
-  villages:[Village!]
+  messages:MessageConnection!
+  villages:VillageConnection!
   createdAt:Date!
   updatedAt:Date
 }
@@ -27,9 +27,6 @@ type UserConnection implements Connection {
 }
 
 type Query {
-  getUserDetail(id:ID!):User
-  getUsers:[User!]
-  getMe:User
   users(
     after:Base64,
     before:Base64,

@@ -1,17 +1,38 @@
 scalar Date
+scalar Base64
 
-type Message {
+type Message implements Node {
   id:ID!
   content:String!
-  village:Village!
-  user:User
+  village:VillageConnection!
+  user:UserConnection
   createdAt:Date!
   updatedAt:Date
 }
 
+type MessageEdge implements Edge {
+  node:Message!
+  cursor:Base64!
+}
+
+type MessageConnection implements Connection {
+  totalCount: Int!
+  edges: [MessageEdge!]!
+  nodes: [Message!]!
+  pageInfo: PageInfo!
+}
+
 type Query {
-  getMessages:[Message!]
-  getMessageDetail(id:ID!):Message
+  messages(
+    after:Base64,
+    before:Base64,
+    first:Int,
+    last:Int,
+    query:String,
+    reverse:Boolean,
+    sortKey:String
+  ):MessageConnection!
+  message(id:ID!):Message!
 }
 
 type Mutation {

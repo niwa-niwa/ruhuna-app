@@ -6,8 +6,8 @@ type Village implements Node {
   name:String!
   description:String
   isPublic:Boolean!
-  users:[User!]
-  messages:[Message!]
+  users:UserConnection!
+  messages:MessageConnection!
   createdAt:Date!
   updatedAt:Date
 }
@@ -25,8 +25,16 @@ type VillageConnection implements Connection {
 }
 
 type Query {
-  getVillageDetail(villageId:ID!):Village
-  getVillages:[Village!]
+  villages(
+    after:Base64,
+    before:Base64,
+    first:Int,
+    last:Int,
+    query:String,
+    reverse:Boolean,
+    sortKey:String
+  ):VillageConnection!
+  village(id:ID!):Village!
 }
 
 type Mutation {

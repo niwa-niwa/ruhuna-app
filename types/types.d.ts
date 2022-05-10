@@ -27,14 +27,28 @@ export type Edge = {
   node?: Maybe<Node>;
 };
 
-export type Message = {
+export type Message = Node & {
   __typename?: 'Message';
   content: Scalars['String'];
   createdAt: Scalars['Date'];
   id: Scalars['ID'];
   updatedAt?: Maybe<Scalars['Date']>;
-  user?: Maybe<User>;
-  village: Village;
+  user?: Maybe<UserConnection>;
+  village: VillageConnection;
+};
+
+export type MessageConnection = Connection & {
+  __typename?: 'MessageConnection';
+  edges: Array<MessageEdge>;
+  nodes: Array<Message>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type MessageEdge = Edge & {
+  __typename?: 'MessageEdge';
+  cursor: Scalars['Base64'];
+  node: Message;
 };
 
 export type Mutation = {
@@ -138,31 +152,29 @@ export type PageInfo = {
 export type Query = {
   __typename?: 'Query';
   connect?: Maybe<Scalars['String']>;
-  getMe?: Maybe<User>;
-  getMessageDetail?: Maybe<Message>;
-  getMessages?: Maybe<Array<Message>>;
-  getUserDetail?: Maybe<User>;
-  getUsers?: Maybe<Array<User>>;
-  getVillageDetail?: Maybe<Village>;
-  getVillages?: Maybe<Array<Village>>;
   me: User;
+  message: Message;
+  messages: MessageConnection;
   user: User;
   users: UserConnection;
+  village: Village;
+  villages: VillageConnection;
 };
 
 
-export type QueryGetMessageDetailArgs = {
+export type QueryMessageArgs = {
   id: Scalars['ID'];
 };
 
 
-export type QueryGetUserDetailArgs = {
-  id: Scalars['ID'];
-};
-
-
-export type QueryGetVillageDetailArgs = {
-  villageId: Scalars['ID'];
+export type QueryMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -181,6 +193,22 @@ export type QueryUsersArgs = {
   sortKey?: InputMaybe<Scalars['String']>;
 };
 
+
+export type QueryVillageArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryVillagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
 export type User = Node & {
   __typename?: 'User';
   createdAt: Scalars['Date'];
@@ -189,10 +217,10 @@ export type User = Node & {
   isActive: Scalars['Boolean'];
   isAdmin: Scalars['Boolean'];
   isAnonymous: Scalars['Boolean'];
-  messages?: Maybe<Array<Message>>;
+  messages: MessageConnection;
   updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
-  villages?: Maybe<Array<Village>>;
+  villages: VillageConnection;
 };
 
 export type UserConnection = Connection & {
@@ -215,10 +243,10 @@ export type Village = Node & {
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   isPublic: Scalars['Boolean'];
-  messages?: Maybe<Array<Message>>;
+  messages: MessageConnection;
   name: Scalars['String'];
   updatedAt?: Maybe<Scalars['Date']>;
-  users?: Maybe<Array<User>>;
+  users: UserConnection;
 };
 
 export type VillageConnection = Connection & {
