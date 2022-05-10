@@ -5,14 +5,12 @@ import { UserInputError } from "apollo-server-express";
 import { CContext } from "../../types/gql.types";
 import {
   User,
-  Message,
-  Village,
-  QueryGetUserDetailArgs,
   MutationCreateUserArgs,
   MutationEditUserArgs,
   MutationDeleteUserArgs,
   Connection,
-  VillageConnection
+  VillageConnection,
+  MessageConnection,
 } from "../../types/types.d";
 import {
   QueryResolvers,
@@ -25,50 +23,36 @@ import {
 import { Pagination } from "../lib/classes/Pagination";
 import { ErrorObject } from "../../types/rest.types";
 
-async function getMe(
-  obj: any,
-  args: any,
-  { prisma, currentUser }: CContext,
-  info: any
-): Promise<User | null> {
-  const user: User | null = await prisma.user
-    .findUnique({
-      where: { id: currentUser.id },
-    })
-    .catch((e) => {
-      console.error(e);
-      throw new Error("Internal Server Error");
-    });
-  return user;
-}
-
-async function getUsers(
+async function users(
   parent: any,
-  args: any,
+  { after, before, first, last, query, reverse, sortKey }: QueryUsersArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<User[]> {
-  const users: User[] | null = await prisma.user.findMany().catch((e) => {
-    throw new Error("Internal Server Error");
+): Promise<UserConnection> {
+  const result: Connection = await new Pagination(
+    prismaClient.user
+  ).getConnection({
+    after,
+    before,
+    first,
+    last,
+    query,
+    reverse,
+    sortKey,
   });
 
-  return users;
+  return result as UserConnection;
 }
 
-async function getUserDetail(
+async function user(
   parent: any,
-  { id }: QueryGetUserDetailArgs,
+  { id }: QueryUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<User> {
-  const user = await prisma.user
-    .findUnique({
-      where: { id },
-    })
-    .catch((e) => {
-      console.error(e);
-      throw new Error("Internal Server Error");
-    });
+) {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
 
   // throw an error if user is null
   if (!user) {
@@ -78,12 +62,27 @@ async function getUserDetail(
   return user;
 }
 
+async function me(
+  parent: any,
+  {},
+  { prisma, currentUser }: CContext,
+  info: any
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+  });
+
+  if (!user) throw new Error("Internal Server Error");
+
+  return user;
+}
+
 async function createUser(
   parent: any,
   { firebaseToken }: MutationCreateUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<User> {
+) {
   // get firebase user from firebase
   const firebaseUser: DecodedIdToken | ErrorObject = await verifyToken(
     firebaseToken
@@ -112,7 +111,7 @@ async function editUser(
   { id, isAdmin, isActive, isAnonymous, username }: MutationEditUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<User> {
+) {
   // if the user who sent request is admin it would confirm params.userId
   if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
@@ -142,7 +141,7 @@ async function deleteUser(
   { id }: MutationDeleteUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<User> {
+) {
   // if the user who sent request is admin it would confirm params.userId
   if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
@@ -161,134 +160,34 @@ async function deleteUser(
   return deletedUser;
 }
 
-async function users(
-  parent: any,
-  { after, before, first, last, query, reverse, sortKey }: QueryUsersArgs,
-  { prisma, currentUser }: CContext,
-  info: any
-): Promise<UserConnection> {
-  const result: Connection = await new Pagination(
-    prismaClient.user
-  ).getConnection({
-    after,
-    before,
-    first,
-    last,
-    query,
-    reverse,
-    sortKey,
-  });
-
-  return result as UserConnection;
-}
-
-async function user(
-  parent: any,
-  { id }: QueryUserArgs,
-  { prisma, currentUser }: CContext,
-  info: any
-): Promise<User> {
-  const user = await prisma.user.findUnique({
-    where: { id },
-  });
-
-  // throw an error if user is null
-  if (!user) {
-    throw new UserInputError("bad parameter request");
-  }
-
-  return user;
-}
-
-async function me(
-  parent: any,
-  {},
-  { prisma, currentUser }: CContext,
-  info: any
-) {
-  const user: User | null = await prisma.user.findUnique({
-    where: { id: currentUser.id },
-  });
-
-  if (!user) throw new Error("Internal Server Error");
-
-  return user;
-}
-
 const User = {
   messages: async (
     user: any,
     args: any,
     { prisma, currentUser }: CContext
-  ): Promise<Message[]> => {
-    const messages = await prisma.message
-      .findMany({
-        where: { userId: user.id },
-        include: { village: true, user: true },
-      })
-      .catch((e) => {
-        console.error(e);
-        throw new Error("Internal Server Error");
-      });
-
-    return messages;
+  ): Promise<MessageConnection> => {
+    const result = await new Pagination(prismaClient.message).getConnection({});
+    // console.log("message = ", result);
+// TODO implement get message that the user has
+    return result as MessageConnection;
   },
 
-  // TODO comment out after implemented villageConnection & messageConnection
-  // villages: async (
-  //   user: any,
-  //   args: any,
-  //   { prisma, currentUser }: CContext
-  // ): Promise<VillageConnection> => {
-  //   const result = await new Pagination(prismaClient.village).getConnection({})
-  //     console.log("village = ",result)
-    
-  //   return result as VillageConnection
-  // },
   villages: async (
     user: any,
     args: any,
     { prisma, currentUser }: CContext
-  ): Promise<Village[]> => {
-    const villages = await prisma.village
-      .findMany({
-        where: {
-          users: {
-            some: {
-              id: user.id,
-            },
-          },
-        },
-      })
-      .catch((e) => {
-        console.error(e);
-        throw new Error("Internal Server Error");
-      });
-
-    return villages;
+  ): Promise<VillageConnection> => {
+    console.log('user = ',user)
+    console.log('args = ',args)
+    const result = await new Pagination(prismaClient.village).getConnection({});
+    // console.log("village = ", result);
+// TODO implement get villages that the user belong to 
+    return result as VillageConnection;
   },
-};
+}
 
-const userResolvers: {
+const userResolvers = {
   Query: {
-    getMe: QueryResolvers["getMe"];
-    getUsers: QueryResolvers["getUsers"];
-    getUserDetail: QueryResolvers["getUserDetail"];
-    users: QueryResolvers["users"];
-    user: QueryResolvers["user"];
-    me: QueryResolvers["me"];
-  };
-  Mutation: {
-    createUser: MutationResolvers["createUser"];
-    editUser: MutationResolvers["editUser"];
-    deleteUser: MutationResolvers["deleteUser"];
-  };
-  User: Pick<UserResolvers, "messages" | "villages">;
-} = {
-  Query: {
-    getMe,
-    getUsers,
-    getUserDetail,
     users,
     user,
     me,

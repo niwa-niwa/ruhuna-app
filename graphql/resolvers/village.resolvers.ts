@@ -1,52 +1,55 @@
-import { MutationDeleteVillageArgs, MutationEditVillageArgs } from "../../types/types.d";
+import {
+  Connection,
+  MutationDeleteVillageArgs,
+  MutationEditVillageArgs,
+  QueryVillageArgs,
+  QueryVillagesArgs,
+  VillageConnection,
+} from "../../types/types.d";
 import {
   QueryResolvers,
   MutationResolvers,
   MutationCreateVillageArgs,
 } from "../../types/resolvers-types.d";
-import { Message, Prisma, User, Village } from "@prisma/client";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { ErrorObj } from "../../types/error.types";
-import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
 import { CContext } from "../../types/gql.types";
-import { VillageIncludeRelations } from "../../types/prisma.types";
+import { Pagination } from "../lib/classes/Pagination";
 
-async function getVillages(
+async function villages(
   parent: any,
-  args: any,
+  { after, before, first, last, query, reverse, sortKey }: QueryVillagesArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<Village[]> {
-  const villages: VillageIncludeRelations[] = await prisma.village
-    .findMany({
-      include: { users: true, messages: true },
-    })
-    .catch((e) => {
-      console.error(e)
-      throw new Error("Internal Server Error");
-    });
+): Promise<VillageConnection> {
+  const result: Connection = await new Pagination(prisma.village).getConnection(
+    {
+      after,
+      before,
+      first,
+      last,
+      query,
+      reverse,
+      sortKey,
+    }
+  );
 
-  return villages;
+  return result as VillageConnection;
 }
 
-async function getVillageDetail(
+async function village(
   parent: any,
-  args: { villageId: Village["id"] },
-  context: CContext,
+  { id }: QueryVillageArgs,
+  { prisma, currentUser }: CContext,
   info: any
-): Promise<Village> {
-  const village: VillageIncludeRelations | null = await context.prisma.village
-    .findUnique({
-      where: { id: args.villageId },
-      include: { users: true, messages: true },
-    })
-    .catch((e) => {
-      console.error(e)
-      throw new Error("Internal Server Error");
-    });
+) {
+  const village = await prisma.village.findUnique({
+    where: { id },
+  });
 
-  if (!village) throw new UserInputError("bad parameter request");
+  // throw an error if village is null
+  if (!village) {
+    throw new UserInputError("bad parameter request");
+  }
 
   return village;
 }
@@ -56,8 +59,8 @@ async function createVillage(
   { name, description, isPublic }: MutationCreateVillageArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<Village> {
-  const village: Village = await prisma.village
+) {
+  const village = await prisma.village
     .create({
       data: {
         name,
@@ -69,7 +72,7 @@ async function createVillage(
       include: { users: true, messages: true },
     })
     .catch((e) => {
-      console.error(e)
+      console.error(e);
       throw new Error("Internal Server Error");
     });
 
@@ -81,8 +84,8 @@ async function editVillage(
   { villageId, description, isPublic, name }: MutationEditVillageArgs,
   { prisma, currentUser }: CContext,
   info: any
-): Promise<Village> {
-  const village: Village = await prisma.village
+) {
+  const village = await prisma.village
     .update({
       where: { id: villageId },
       data: {
@@ -93,7 +96,7 @@ async function editVillage(
       include: { users: true, messages: true },
     })
     .catch((e) => {
-      console.error(e)
+      console.error(e);
       throw new Error("Internal Server Error");
     });
 
@@ -105,46 +108,40 @@ async function deleteVillage(
   { villageId }: MutationDeleteVillageArgs,
   { prisma, currentUser }: CContext,
   info: any
-):Promise<Village> {
-  const village: Village = await prisma.village.delete({
-    where: { id:villageId  },
-  })
-  .catch((e) => {
-    console.error(e)
-    throw new Error("Internal Server Error");
-  });
+) {
+  const village = await prisma.village
+    .delete({
+      where: { id: villageId },
+    })
+    .catch((e) => {
+      console.error(e);
+      throw new Error("Internal Server Error");
+    });
 
-  return village
+  return village;
 }
 
-async function leaveVillage(
-  parent: any,
-  { villageId }: { villageId: Village["id"] },
-  context: CContext,
-  info: any
-) {}
-
-const villageResolvers: {
+// const villageResolvers: {
+//   Query: {
+//     getVillages: QueryResolvers["getVillages"];
+//     getVillageDetail: QueryResolvers["getVillageDetail"];
+//   };
+//   Mutation: {
+//     createVillage: MutationResolvers["createVillage"];
+//     editVillage: MutationResolvers["editVillage"];
+//     deleteVillage:MutationResolvers["deleteVillage"]
+//     // leaveVillage:MutationResolvers["leaveVillage"]
+//   };
+// }
+const villageResolvers = {
   Query: {
-    getVillages: QueryResolvers["getVillages"];
-    getVillageDetail: QueryResolvers["getVillageDetail"];
-  };
-  Mutation: {
-    createVillage: MutationResolvers["createVillage"];
-    editVillage: MutationResolvers["editVillage"];
-    deleteVillage:MutationResolvers["deleteVillage"]
-    // leaveVillage:MutationResolvers["leaveVillage"]
-  };
-} = {
-  Query: {
-    getVillages,
-    getVillageDetail,
+    village,
+    villages,
   },
   Mutation: {
     createVillage,
     editVillage,
     deleteVillage,
-    // leaveVillage,
   },
 };
 

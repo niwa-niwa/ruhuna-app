@@ -223,6 +223,17 @@ export type User = Node & {
   villages: VillageConnection;
 };
 
+
+export type UserVillagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
 export type UserConnection = Connection & {
   __typename?: 'UserConnection';
   edges: Array<UserEdge>;

@@ -27,7 +27,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     const users: () => PrismaPromise<User[]> = () =>
       prismaClient.user.findMany();
 
-    test("OK Pagination : first:10 all users", async () => {      
+    test("OK Pagination : first:10 all users", async () => {
       const db_users = await users();
       const { totalCount, nodes, edges, pageInfo } =
         await user_pgn.getConnection({
@@ -369,6 +369,74 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
       });
 
+      test("OK users with relations", async () => {
+        const args = `first:3`;
+
+        const query = `
+        {
+          ${alias}:${func}(${args}){
+            totalCount
+            nodes{
+              id
+              firebaseId
+              isAdmin
+              isActive
+              isAnonymous
+              villages(first:3){
+                totalCount
+              }
+              messages{
+                totalCount
+              }
+              username
+              createdAt
+              updatedAt
+            }
+            edges{
+                node{
+                    id
+                    firebaseId
+                    isAdmin
+                    isActive
+                    isAnonymous
+                    username
+                    createdAt
+                    updatedAt
+                }
+                cursor
+            }
+            pageInfo{
+                startCursor
+                endCursor
+                hasNextPage
+                hasPreviousPage
+            }
+          }
+        }`;
+
+        const {
+          status,
+          body,
+        } = await client(query);
+console.log(body)
+        const dbUsers: User[] = await prismaClient.user.findMany();
+
+        const users_slice = prismaString(dbUsers.slice(0, 3));
+
+        expect(status).toBe(200);
+        // expect(data.result.totalCount).toBe(5);
+        // expect(data.result.nodes.length).toBe(3);
+        // expect(data.result.edges.length).toBe(3);
+        // expect(data[alias].nodes).toEqual(users_slice);
+        // expect(data[alias].edges[0].node).toEqual(users_slice[0]);
+        // expect(data[alias].pageInfo.startCursor).not.toBe(users_slice[0].id);
+        // expect(data[alias].pageInfo.endCursor).not.toBe(
+        //   users_slice[users_slice.length - 1].id
+        // );
+        // expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
+        // expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
+      });
+
       test("OK users with after variable", async () => {
         let args = `first:3`;
 
@@ -452,233 +520,8 @@ describe("TEST User of resolvers in GraphQL cases", () => {
     });
   });
 
-  describe("test old user", () => {
+  describe("User Mutations", () => {
     beforeEach(async () => await initDB());
-
-    test("TEST failed getMe and authentication failed ", async () => {
-      const { status, body } = await request(app)
-        .post(gql_endpoint)
-        .set("Authorization", `Bearer aaaaa`)
-        .send({
-          query: `{
-        getMe{
-          id
-        }
-      }`,
-        });
-
-      expect(status).toBe(400);
-      expect(body).not.toHaveProperty("data");
-      expect(body).toHaveProperty("errors");
-      expect(body.errors[0].message).toEqual(
-        expect.stringContaining("Context creation failed:")
-      );
-    });
-
-    test("TEST Query getMe", async () => {
-      const func = "getMe";
-      const args = "";
-      const query = `{
-      result:${func}${args}{
-        id
-        firebaseId
-        isAdmin
-        isActive
-        isAnonymous
-        username
-        messages{
-          id
-          content
-          createdAt
-          updatedAt
-        }
-        villages{
-          id
-          name
-          description
-          isPublic
-          createdAt
-          updatedAt
-        }
-        createdAt
-        updatedAt
-      }
-    }`;
-
-      const {
-        status,
-        body: {
-          data: { result, errors },
-        },
-      } = await request(app)
-        .post(gql_endpoint)
-        .set("Authorization", `Bearer ${testTokens.admin_user}`)
-        .send({ query });
-
-      const dbUser:
-        | (User & { messages: Message[]; villages: Village[] })
-        | null = await prismaClient.user.findFirst({
-        where: { id: result.id },
-        include: { messages: true, villages: true },
-      });
-
-      expect(status).toBe(200);
-      expect(result).not.toBeNull();
-      expect(errors).toBeUndefined();
-      expect(result.id).toBe(dbUser?.id);
-      expect(result.firebaseId).toBe(dbUser?.firebaseId);
-      expect(result.isAdmin).toBe(dbUser?.isAdmin);
-      expect(result.isActive).toBe(dbUser?.isActive);
-      expect(result.isAnonymous).toBe(dbUser?.isAnonymous);
-      expect(result.username).toBe(dbUser?.username);
-      expect(result).toHaveProperty("createdAt");
-      expect(result).toHaveProperty("updatedAt");
-      expect(result.messages.length).toBe(dbUser?.messages.length);
-      expect(result.messages[0]).toHaveProperty("id");
-      expect(result.messages[0]).toHaveProperty("content");
-      expect(result.messages[0]).toHaveProperty("createdAt");
-      expect(result.messages[0]).toHaveProperty("updatedAt");
-      expect(result.villages.length).toBe(dbUser?.villages.length);
-      expect(result.villages[0]).toHaveProperty("id");
-      expect(result.villages[0]).toHaveProperty("name");
-      expect(result.villages[0]).toHaveProperty("description");
-      expect(result.villages[0]).toHaveProperty("isPublic");
-      expect(result.villages[0]).toHaveProperty("createdAt");
-      expect(result.villages[0]).toHaveProperty("updatedAt");
-    });
-
-    test("TEST Query getUsers ", async () => {
-      const dbUsers: User[] & { messages: Message[]; villages: Village[] }[] =
-        await prismaClient.user.findMany({
-          include: { messages: true, villages: true },
-        });
-
-      const {
-        status,
-        body: {
-          data: { getUsers },
-        },
-      } = await request(app)
-        .post(gql_endpoint)
-        .set("Authorization", `Bearer ${testTokens.admin_user}`)
-        .send({
-          query: `{
-          getUsers{
-            id
-            firebaseId
-            isAdmin
-            isActive
-            isAnonymous
-            username
-            messages{
-              id
-              content
-              createdAt
-              updatedAt
-            }
-            villages{
-              id
-              name
-              description
-              isPublic
-              createdAt
-              updatedAt
-            }
-            createdAt
-            updatedAt
-          }
-        }`,
-        });
-
-      expect(status).toBe(200);
-      expect(getUsers.length).toBe(dbUsers.length);
-      expect(getUsers[0].id).toBe(dbUsers[0]?.id);
-      expect(getUsers[0].firebaseId).toBe(dbUsers[0]?.firebaseId);
-      expect(getUsers[0].isAdmin).toBe(dbUsers[0]?.isAdmin);
-      expect(getUsers[0].isActive).toBe(dbUsers[0]?.isActive);
-      expect(getUsers[0].isAnonymous).toBe(dbUsers[0]?.isAnonymous);
-      expect(getUsers[0].username).toBe(dbUsers[0]?.username);
-      expect(getUsers[0]).toHaveProperty("createdAt");
-      expect(getUsers[0]).toHaveProperty("updatedAt");
-      expect(getUsers[0].messages.length).toBe(dbUsers[0]?.messages.length);
-      expect(getUsers[0].messages[0]).toHaveProperty("id");
-      expect(getUsers[0].messages[0]).toHaveProperty("content");
-      expect(getUsers[0].messages[0]).toHaveProperty("createdAt");
-      expect(getUsers[0].messages[0]).toHaveProperty("updatedAt");
-      expect(getUsers[0].villages.length).toBe(dbUsers[0]?.villages.length);
-      expect(getUsers[0].villages[0]).toHaveProperty("id");
-      expect(getUsers[0].villages[0]).toHaveProperty("name");
-      expect(getUsers[0].villages[0]).toHaveProperty("description");
-      expect(getUsers[0].villages[0]).toHaveProperty("isPublic");
-      expect(getUsers[0].villages[0]).toHaveProperty("createdAt");
-      expect(getUsers[0].villages[0]).toHaveProperty("updatedAt");
-    });
-
-    test("TEST Query getUserDetail ", async () => {
-      const dbUser:
-        | (User & { messages: Message[]; villages: Village[] })
-        | null = await prismaClient.user.findFirst({
-        include: { messages: true, villages: true },
-      });
-
-      const {
-        status,
-        body: {
-          data: { getUserDetail },
-        },
-      } = await request(app)
-        .post(gql_endpoint)
-        .set("Authorization", `Bearer ${testTokens.admin_user}`)
-        .send({
-          query: `{
-          getUserDetail(id:"${dbUser?.id}"){
-            id
-            firebaseId
-            isAdmin
-            isActive
-            isAnonymous
-            username
-            messages{
-              id
-              content
-              createdAt
-              updatedAt
-            }
-            villages{
-              id
-              name
-              description
-              isPublic
-              createdAt
-              updatedAt
-            }
-            createdAt
-            updatedAt
-          }
-        }`,
-        });
-      expect(status).toBe(200);
-      expect(getUserDetail.id).toBe(dbUser?.id);
-      expect(getUserDetail.firebaseId).toBe(dbUser?.firebaseId);
-      expect(getUserDetail.isAdmin).toBe(dbUser?.isAdmin);
-      expect(getUserDetail.isActive).toBe(dbUser?.isActive);
-      expect(getUserDetail.isAnonymous).toBe(dbUser?.isAnonymous);
-      expect(getUserDetail.username).toBe(dbUser?.username);
-      expect(getUserDetail).toHaveProperty("createdAt");
-      expect(getUserDetail).toHaveProperty("updatedAt");
-      expect(getUserDetail.messages.length).toBe(dbUser?.messages.length);
-      expect(getUserDetail.messages[0]).toHaveProperty("id");
-      expect(getUserDetail.messages[0]).toHaveProperty("content");
-      expect(getUserDetail.messages[0]).toHaveProperty("createdAt");
-      expect(getUserDetail.messages[0]).toHaveProperty("updatedAt");
-      expect(getUserDetail.villages.length).toBe(dbUser?.villages.length);
-      expect(getUserDetail.villages[0]).toHaveProperty("id");
-      expect(getUserDetail.villages[0]).toHaveProperty("name");
-      expect(getUserDetail.villages[0]).toHaveProperty("description");
-      expect(getUserDetail.villages[0]).toHaveProperty("isPublic");
-      expect(getUserDetail.villages[0]).toHaveProperty("createdAt");
-      expect(getUserDetail.villages[0]).toHaveProperty("updatedAt");
-    });
 
     test("TEST Mutation createUser", async () => {
       const {

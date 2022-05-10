@@ -224,6 +224,17 @@ export type User = Node & {
   villages: VillageConnection;
 };
 
+
+export type UserVillagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
 export type UserConnection = Connection & {
   __typename?: 'UserConnection';
   edges: Array<UserEdge>;
@@ -488,7 +499,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  villages?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType>;
+  villages?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType, Partial<UserVillagesArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
