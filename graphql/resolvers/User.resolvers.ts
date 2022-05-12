@@ -167,8 +167,7 @@ const User = {
     { prisma, currentUser }: CContext
   ): Promise<MessageConnection> => {
     const result = await new Pagination(prismaClient.message).getConnection({});
-    // console.log("message = ", result);
-// TODO implement get message that the user has
+    // TODO implement get message that the user has
     return result as MessageConnection;
   },
 
@@ -177,29 +176,38 @@ const User = {
     args: any,
     { prisma, currentUser }: CContext
   ): Promise<VillageConnection> => {
-    console.log('user = ',user)
-    console.log('args = ',args)
+    // added user.id because villages that the user belong to
+    args.query = ((): string => {
+      let result: object = {};
 
-    args.query = (()=>{
-      if(args.query){
+      if (args.query) {
+        let query_obj = JSON.parse(args.query);
 
-        if(args.query.AND){}
+        if (query_obj.AND) {
+          query_obj.AND[0].userId = user.id;
 
-        let q = JSON.parse(args.query)
-        q = {AND:[q, {userId:user.id}]}
-        
-        return JSON.stringify(q)
+          result = query_obj;
+        }
+
+        if (!query_obj.AND) {
+          query_obj = { AND: [query_obj, { userId: user.id }] };
+
+          result = query_obj;
+        }
       }
-      return JSON.stringify({userId:user.id})
-    })();
-    console.log(args)
 
-    const result = await new Pagination(prismaClient.village).getConnection(args);
-    // console.log("village = ", result);
-// TODO implement get villages that the user belong to 
+      if (!args.query) result = { userId: user.id };
+
+      return JSON.stringify(result);
+    })();
+
+    const result = await new Pagination(prismaClient.village).getConnection(
+      args
+    );
+
     return result as VillageConnection;
   },
-}
+};
 
 const userResolvers = {
   Query: {
