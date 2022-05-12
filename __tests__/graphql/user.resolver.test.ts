@@ -370,6 +370,12 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       });
 
       test("OK users with relations", async () => {
+        const query_str = JSON.stringify({
+          name: {
+            contains: "village_A",
+          },
+        }).replace(/\"/g, '\\"');
+
         const args = `first:3`;
 
         const query = `
@@ -382,8 +388,91 @@ describe("TEST User of resolvers in GraphQL cases", () => {
               isAdmin
               isActive
               isAnonymous
-              villages(first:3){
+              villages(first:3 query:"${query_str}"){
                 totalCount
+                nodes{
+                  id
+                  name
+                }
+              }
+              messages{
+                totalCount
+              }
+              username
+              createdAt
+              updatedAt
+            }
+            edges{
+                node{
+                    id
+                    firebaseId
+                    isAdmin
+                    isActive
+                    isAnonymous
+                    username
+                    createdAt
+                    updatedAt
+                }
+                cursor
+            }
+            pageInfo{
+                startCursor
+                endCursor
+                hasNextPage
+                hasPreviousPage
+            }
+          }
+        }`;
+
+        const {
+          status,
+          body: { data },
+        } = await client(query);
+
+        const dbUsers: User[] = await prismaClient.user.findMany();
+
+        const users_slice = prismaString(dbUsers.slice(0, 3));
+
+        expect(status).toBe(200);
+        expect(data.result.totalCount).toBe(5);
+        expect(data.result.nodes.length).toBe(3);
+        expect(data.result.edges.length).toBe(3);
+        expect(data[alias].edges[0].node).toEqual(users_slice[0]);
+        expect(data[alias].pageInfo.startCursor).not.toBe(users_slice[0].id);
+        expect(data[alias].pageInfo.endCursor).not.toBe(
+          users_slice[users_slice.length - 1].id
+        );
+        expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
+        expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
+        expect(data[alias].nodes[0].villages.totalCount).toBe(1);
+        expect(data[alias].nodes[0].villages.nodes[0].name).toBe("village_A");
+      });
+
+      test("OK users with relations + AND", async () => {
+        const query_str = JSON.stringify({
+          name: {
+            contains: "village_A",
+          },
+        }).replace(/\"/g, '\\"');
+        // console.log("query_str = ",query_str)
+        const args = `first:3`;
+        // console.log("args = ", args)
+        const query = `
+        {
+          ${alias}:${func}(${args}){
+            totalCount
+            nodes{
+              id
+              firebaseId
+              isAdmin
+              isActive
+              isAnonymous
+              villages(first:3 query:"${query_str}"){
+                totalCount
+                nodes{
+                  id
+                  name
+                }
               }
               messages{
                 totalCount
@@ -418,16 +507,16 @@ describe("TEST User of resolvers in GraphQL cases", () => {
           status,
           body,
         } = await client(query);
-console.log(body)
+        // console.log("result = ",body)
+        // console.log("result = ", data.result.nodes[0].villages);
         const dbUsers: User[] = await prismaClient.user.findMany();
 
-        const users_slice = prismaString(dbUsers.slice(0, 3));
+        // const users_slice = prismaString(dbUsers.slice(0, 3));
 
         expect(status).toBe(200);
         // expect(data.result.totalCount).toBe(5);
         // expect(data.result.nodes.length).toBe(3);
         // expect(data.result.edges.length).toBe(3);
-        // expect(data[alias].nodes).toEqual(users_slice);
         // expect(data[alias].edges[0].node).toEqual(users_slice[0]);
         // expect(data[alias].pageInfo.startCursor).not.toBe(users_slice[0].id);
         // expect(data[alias].pageInfo.endCursor).not.toBe(
@@ -435,6 +524,8 @@ console.log(body)
         // );
         // expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
         // expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
+        // expect(data[alias].nodes[0].villages.totalCount).toBe(1);
+        // expect(data[alias].nodes[0].villages.nodes[0].name).toBe("village_A");
       });
 
       test("OK users with after variable", async () => {

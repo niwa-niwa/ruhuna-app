@@ -179,7 +179,22 @@ const User = {
   ): Promise<VillageConnection> => {
     console.log('user = ',user)
     console.log('args = ',args)
-    const result = await new Pagination(prismaClient.village).getConnection({});
+
+    args.query = (()=>{
+      if(args.query){
+
+        if(args.query.AND){}
+
+        let q = JSON.parse(args.query)
+        q = {AND:[q, {userId:user.id}]}
+        
+        return JSON.stringify(q)
+      }
+      return JSON.stringify({userId:user.id})
+    })();
+    console.log(args)
+
+    const result = await new Pagination(prismaClient.village).getConnection(args);
     // console.log("village = ", result);
 // TODO implement get villages that the user belong to 
     return result as VillageConnection;
