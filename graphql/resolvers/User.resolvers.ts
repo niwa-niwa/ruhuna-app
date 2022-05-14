@@ -1,3 +1,4 @@
+import { User as PUser } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
@@ -8,16 +9,18 @@ import {
   MutationEditUserArgs,
   MutationDeleteUserArgs,
   Connection,
+  UserConnection,
   VillageConnection,
   MessageConnection,
+  UserVillagesArgs,
+  UserMessagesArgs,
+  QueryUsersArgs,
+  QueryUserArgs,
 } from "../../types/types";
 import {
   QueryResolvers,
   MutationResolvers,
   UserResolvers,
-  UserConnection,
-  QueryUsersArgs,
-  QueryUserArgs,
 } from "../../types/resolvers-types";
 import { Pagination } from "../lib/classes/Pagination";
 import { ErrorObject } from "../../types/rest.types";
@@ -46,8 +49,8 @@ async function user(
   { id }: QueryUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-) {
-  const user = await prisma.user.findUnique({
+): Promise<User> {
+  const user: PUser | null = await prisma.user.findUnique({
     where: { id },
   });
 
@@ -56,7 +59,7 @@ async function user(
     throw new UserInputError("bad parameter request");
   }
 
-  return user;
+  return user as User;
 }
 
 async function me(
@@ -64,14 +67,14 @@ async function me(
   {},
   { prisma, currentUser }: CContext,
   info: any
-) {
-  const user = await prisma.user.findUnique({
+): Promise<User> {
+  const user: PUser | null = await prisma.user.findUnique({
     where: { id: currentUser.id },
   });
 
   if (!user) throw new Error("Internal Server Error");
 
-  return user;
+  return user as User;
 }
 
 async function createUser(
@@ -79,7 +82,7 @@ async function createUser(
   { firebaseToken }: MutationCreateUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-) {
+): Promise<User> {
   // get firebase user from firebase
   const firebaseUser: DecodedIdToken | ErrorObject = await verifyToken(
     firebaseToken
@@ -88,7 +91,7 @@ async function createUser(
   if ("code" in firebaseUser) throw new UserInputError(firebaseUser.message);
 
   // create a user by firebase account
-  const createdUser = await prisma.user
+  const createdUser: PUser = await prisma.user
     .create({
       data: {
         firebaseId: firebaseUser.uid,
@@ -100,7 +103,7 @@ async function createUser(
       throw new Error("Internal Server Error");
     });
 
-  return createdUser;
+  return createdUser as User;
 }
 
 async function editUser(
@@ -108,16 +111,16 @@ async function editUser(
   { id, isAdmin, isActive, isAnonymous, username }: MutationEditUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-) {
+): Promise<User> {
   // if the user who sent request is admin it would confirm params.userId
   if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
   }
 
   // edit the user
-  const editedUser = await prisma.user
+  const editedUser: PUser = await prisma.user
     .update({
-      where: { id: id },
+      where: { id },
       data: {
         isAdmin: isAdmin!,
         isActive: isActive!,
@@ -130,7 +133,7 @@ async function editUser(
       throw new Error("Internal Server Error");
     });
 
-  return editedUser;
+  return editedUser as User;
 }
 
 async function deleteUser(
@@ -138,14 +141,14 @@ async function deleteUser(
   { id }: MutationDeleteUserArgs,
   { prisma, currentUser }: CContext,
   info: any
-) {
+): Promise<User> {
   // if the user who sent request is admin it would confirm params.userId
   if (!currentUser.isAdmin && currentUser.id !== id) {
     throw new Error("Not allowed to edit the user data");
   }
 
   // edit the user
-  const deletedUser = await prisma.user
+  const deletedUser: PUser = await prisma.user
     .delete({
       where: { id },
     })
@@ -154,13 +157,13 @@ async function deleteUser(
       throw new Error("Internal Server Error");
     });
 
-  return deletedUser;
+  return deletedUser as User;
 }
 
 const User = {
   messages: async (
-    user: any,
-    args: any,
+    user: User,
+    args: UserMessagesArgs,
     { prisma, currentUser }: CContext
   ): Promise<MessageConnection> => {
     args.query = ((): string => {
@@ -187,14 +190,16 @@ const User = {
       return JSON.stringify(result);
     })();
 
-    const result = await new Pagination(prisma.message).getConnection(args);
+    const result: Connection = await new Pagination(
+      prisma.message
+    ).getConnection(args);
 
     return result as MessageConnection;
   },
 
   villages: async (
-    user: any,
-    args: any,
+    user: User,
+    args: UserVillagesArgs,
     { prisma, currentUser }: CContext
   ): Promise<VillageConnection> => {
     // added user.id because villages that the user belong to
@@ -222,13 +227,29 @@ const User = {
       return JSON.stringify(result);
     })();
 
-    const result = await new Pagination(prisma.village).getConnection(args);
+    const result: Connection = await new Pagination(
+      prisma.village
+    ).getConnection(args);
 
     return result as VillageConnection;
   },
 };
 
-const userResolvers = {
+type CUserResolvers = {
+  Query: {
+    users: QueryResolvers["users"];
+    user: QueryResolvers["user"];
+    me: QueryResolvers["me"];
+  };
+  Mutation: {
+    createUser: MutationResolvers["createUser"];
+    editUser: MutationResolvers["editUser"];
+    deleteUser: MutationResolvers["deleteUser"];
+  };
+  User: UserResolvers;
+};
+
+const userResolvers: CUserResolvers = {
   Query: {
     users,
     user,

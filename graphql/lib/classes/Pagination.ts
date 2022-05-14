@@ -1,10 +1,14 @@
+import { PrismaPromise, User, Village, Message } from "@prisma/client";
 import { Connection, Edge, Node, NodesArgs } from "../../../types/types.d";
 
 export class Pagination {
   protected readonly MAX_ITEMS: number = 250;
 
   constructor(
-    protected readonly client: { findMany: Function; count: Function }
+    protected readonly client: {
+      findMany: ({}) => PrismaPromise<User[] | Village[] | Message[]>;
+      count: ({}) => PrismaPromise<number>;
+    }
   ) {}
 
   public async getConnection({
