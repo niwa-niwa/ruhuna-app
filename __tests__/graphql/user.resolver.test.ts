@@ -397,6 +397,18 @@ describe("TEST User of resolvers in GraphQL cases", () => {
               }
               messages{
                 totalCount
+                nodes{
+                  id
+                  content
+                  user{
+                    id
+                    username
+                  }
+                  village{
+                    id
+                    name
+                  }
+                }
               }
               username
               createdAt
@@ -428,9 +440,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
           status,
           body: { data },
         } = await client(query);
-
         const dbUsers: User[] = await prismaClient.user.findMany();
-
         const users_slice = prismaString(dbUsers.slice(0, 3));
 
         expect(status).toBe(200);
@@ -446,6 +456,13 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
         expect(data[alias].nodes[0].villages.totalCount).toBe(1);
         expect(data[alias].nodes[0].villages.nodes[0].name).toBe("village_A");
+        expect(data[alias].nodes[0].messages.nodes[0].content).toBe(
+          "message_1 content"
+        );
+        expect(data[alias].nodes[0].messages.nodes[0]).toHaveProperty("user");
+        expect(data[alias].nodes[0].messages.nodes[0]).toHaveProperty(
+          "village"
+        );
       });
 
       test("OK users with relations + AND", async () => {

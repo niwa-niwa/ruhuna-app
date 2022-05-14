@@ -33,8 +33,8 @@ export type Message = Node & {
   createdAt: Scalars['Date'];
   id: Scalars['ID'];
   updatedAt?: Maybe<Scalars['Date']>;
-  user?: Maybe<UserConnection>;
-  village: VillageConnection;
+  user?: Maybe<User>;
+  village: Village;
 };
 
 export type MessageConnection = Connection & {
@@ -224,6 +224,17 @@ export type User = Node & {
 };
 
 
+export type UserMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
 export type UserVillagesArgs = {
   after?: InputMaybe<Scalars['Base64']>;
   before?: InputMaybe<Scalars['Base64']>;
@@ -258,6 +269,28 @@ export type Village = Node & {
   name: Scalars['String'];
   updatedAt?: Maybe<Scalars['Date']>;
   users: UserConnection;
+};
+
+
+export type VillageMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
+export type VillageUsersArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
 };
 
 export type VillageConnection = Connection & {

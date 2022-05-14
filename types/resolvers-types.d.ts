@@ -34,8 +34,8 @@ export type Message = Node & {
   createdAt: Scalars['Date'];
   id: Scalars['ID'];
   updatedAt?: Maybe<Scalars['Date']>;
-  user?: Maybe<UserConnection>;
-  village: VillageConnection;
+  user?: Maybe<User>;
+  village: Village;
 };
 
 export type MessageConnection = Connection & {
@@ -225,6 +225,17 @@ export type User = Node & {
 };
 
 
+export type UserMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
 export type UserVillagesArgs = {
   after?: InputMaybe<Scalars['Base64']>;
   before?: InputMaybe<Scalars['Base64']>;
@@ -259,6 +270,28 @@ export type Village = Node & {
   name: Scalars['String'];
   updatedAt?: Maybe<Scalars['Date']>;
   users: UserConnection;
+};
+
+
+export type VillageMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
+export type VillageUsersArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
 };
 
 export type VillageConnection = Connection & {
@@ -422,8 +455,8 @@ export type MessageResolvers<ContextType = any, ParentType extends ResolversPare
   createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  user?: Resolver<Maybe<ResolversTypes['UserConnection']>, ParentType, ContextType>;
-  village?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  village?: Resolver<ResolversTypes['Village'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -496,7 +529,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isAdmin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isAnonymous?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType>;
+  messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType, Partial<UserMessagesArgs>>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   villages?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType, Partial<UserVillagesArgs>>;
@@ -522,10 +555,10 @@ export type VillageResolvers<ContextType = any, ParentType extends ResolversPare
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType>;
+  messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType, Partial<VillageMessagesArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  users?: Resolver<ResolversTypes['UserConnection'], ParentType, ContextType>;
+  users?: Resolver<ResolversTypes['UserConnection'], ParentType, ContextType, Partial<VillageUsersArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

@@ -4,8 +4,8 @@ scalar Base64
 type Message implements Node {
   id:ID!
   content:String!
-  village:VillageConnection!
-  user:UserConnection
+  village:Village!
+  user:User
   createdAt:Date!
   updatedAt:Date
 }

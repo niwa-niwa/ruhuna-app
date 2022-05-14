@@ -1,4 +1,3 @@
-import { prismaClient } from "./../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
@@ -11,7 +10,7 @@ import {
   Connection,
   VillageConnection,
   MessageConnection,
-} from "../../types/types.d";
+} from "../../types/types";
 import {
   QueryResolvers,
   MutationResolvers,
@@ -19,7 +18,7 @@ import {
   UserConnection,
   QueryUsersArgs,
   QueryUserArgs,
-} from "../../types/resolvers-types.d";
+} from "../../types/resolvers-types";
 import { Pagination } from "../lib/classes/Pagination";
 import { ErrorObject } from "../../types/rest.types";
 
@@ -29,9 +28,7 @@ async function users(
   { prisma, currentUser }: CContext,
   info: any
 ): Promise<UserConnection> {
-  const result: Connection = await new Pagination(
-    prismaClient.user
-  ).getConnection({
+  const result: Connection = await new Pagination(prisma.user).getConnection({
     after,
     before,
     first,
@@ -166,8 +163,32 @@ const User = {
     args: any,
     { prisma, currentUser }: CContext
   ): Promise<MessageConnection> => {
-    const result = await new Pagination(prismaClient.message).getConnection({});
-    // TODO implement get message that the user has
+    args.query = ((): string => {
+      let result: object = {};
+
+      if (args.query) {
+        let query_obj = JSON.parse(args.query);
+
+        if (query_obj.AND) {
+          query_obj.AND[0].userId = user.id;
+
+          result = query_obj;
+        }
+
+        if (!query_obj.AND) {
+          query_obj = { AND: [query_obj, { userId: user.id }] };
+
+          result = query_obj;
+        }
+      }
+
+      if (!args.query) result = { userId: user.id };
+
+      return JSON.stringify(result);
+    })();
+
+    const result = await new Pagination(prisma.message).getConnection(args);
+
     return result as MessageConnection;
   },
 
@@ -201,9 +222,7 @@ const User = {
       return JSON.stringify(result);
     })();
 
-    const result = await new Pagination(prismaClient.village).getConnection(
-      args
-    );
+    const result = await new Pagination(prisma.village).getConnection(args);
 
     return result as VillageConnection;
   },

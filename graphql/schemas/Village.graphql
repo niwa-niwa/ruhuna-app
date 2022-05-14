@@ -6,8 +6,24 @@ type Village implements Node {
   name:String!
   description:String
   isPublic:Boolean!
-  users:UserConnection!
-  messages:MessageConnection!
+  users(
+    after:Base64,
+    before:Base64,
+    first:Int,
+    last:Int,
+    query:String,
+    reverse:Boolean,
+    sortKey:String
+  ):UserConnection!
+  messages(
+    after:Base64,
+    before:Base64,
+    first:Int,
+    last:Int,
+    query:String,
+    reverse:Boolean,
+    sortKey:String
+  ):MessageConnection!
   createdAt:Date!
   updatedAt:Date
 }
