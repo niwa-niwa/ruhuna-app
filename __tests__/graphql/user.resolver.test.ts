@@ -7,6 +7,7 @@ import { testTokens } from "../test_config/testData";
 import initDB from "../test_config/initDB";
 import { PATH } from "../../consts/url";
 import { Pagination } from "../../graphql/lib/classes/Pagination";
+import { toJsonString } from "../../lib/utilities";
 
 const gql_endpoint: string = PATH.GQL;
 
@@ -370,11 +371,11 @@ describe("TEST User of resolvers in GraphQL cases", () => {
       });
 
       test("OK users with relations", async () => {
-        const query_str = JSON.stringify({
+        const query_str = toJsonString({
           name: {
             contains: "village_A",
           },
-        }).replace(/\"/g, '\\"');
+        });
 
         const args = `first:3`;
 

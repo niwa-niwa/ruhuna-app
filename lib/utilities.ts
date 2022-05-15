@@ -10,6 +10,18 @@ import { Message, User, Village } from "@prisma/client";
 import { CustomError } from "../classes/CustomError";
 
 /**
+ * for graphql request to send JSON-String
+ * ex) { name : { contains : "village_A" , } , } convert to "{ \"name\" : { \"contains\" : \"village_A\" , } , }
+ * @param obj 
+ * @returns 
+ */
+export function toJsonString(obj: { [key: string]: any }): string {
+  const j_str: string = JSON.stringify(obj).replace(/\"/g, '\\"');
+
+  return j_str;
+}
+
+/**
  * for response error message to frontend
  * @param code
  * @param message
