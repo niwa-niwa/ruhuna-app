@@ -389,7 +389,14 @@ describe("TEST User of resolvers in GraphQL cases", () => {
               isAdmin
               isActive
               isAnonymous
-              villages(first:3 query:"${query_str}"){
+              villages(first:3){
+                totalCount
+                nodes{
+                  id
+                  name
+                }
+              }
+              ownVillages(first:3 query:"${query_str}"){
                 totalCount
                 nodes{
                   id
@@ -441,6 +448,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
           status,
           body: { data },
         } = await client(query);
+
         const dbUsers: User[] = await prismaClient.user.findMany();
         const users_slice = prismaString(dbUsers.slice(0, 3));
 
@@ -455,8 +463,10 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         );
         expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
         expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
-        expect(data[alias].nodes[0].villages.totalCount).toBe(1);
-        expect(data[alias].nodes[0].villages.nodes[0].name).toBe("village_A");
+        expect(data[alias].nodes[0].ownVillages.totalCount).toBe(1);
+        expect(data[alias].nodes[0].ownVillages.nodes[0].name).toBe(
+          "village_A"
+        );
         expect(data[alias].nodes[0].messages.nodes[0].content).toBe(
           "message_1 content"
         );
@@ -492,7 +502,7 @@ describe("TEST User of resolvers in GraphQL cases", () => {
               isAdmin
               isActive
               isAnonymous
-              villages(first:3 query:"${query_str}"){
+              ownVillages(first:3 query:"${query_str}"){
                 totalCount
                 nodes{
                   id
@@ -549,9 +559,11 @@ describe("TEST User of resolvers in GraphQL cases", () => {
         );
         expect(data[alias].pageInfo.hasNextPage).toBeTruthy();
         expect(data[alias].pageInfo.hasPreviousPage).toBeFalsy();
-        expect(data[alias].nodes[0].villages.totalCount).toBe(1);
-        expect(data[alias].nodes[0].villages.nodes[0].name).toBe("village_A");
-        expect(data[alias].nodes[0].villages.nodes[0].description).toBe(
+        expect(data[alias].nodes[0].ownVillages.totalCount).toBe(1);
+        expect(data[alias].nodes[0].ownVillages.nodes[0].name).toBe(
+          "village_A"
+        );
+        expect(data[alias].nodes[0].ownVillages.nodes[0].description).toBe(
           "desc_village_A"
         );
       });

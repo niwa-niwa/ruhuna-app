@@ -44,7 +44,7 @@ async function users(
   return result as UserConnection;
 }
 
-async function user(
+export async function user(
   parent: any,
   { id }: QueryUserArgs,
   { prisma, currentUser }: CContext,
@@ -160,7 +160,7 @@ async function deleteUser(
   return deletedUser as User;
 }
 
-const User = {
+const User:UserResolvers = {
   messages: async (
     user: User,
     args: UserMessagesArgs,
@@ -210,6 +210,45 @@ const User = {
         let query_obj = JSON.parse(args.query);
 
         if (query_obj.AND) {
+          query_obj.AND[0].users = { id: { in: [user.id] } };
+
+          result = query_obj;
+        }
+
+        if (!query_obj.AND) {
+          query_obj = {
+            AND: [query_obj, { users: { id: { in: [user.id] } } }],
+          };
+
+          result = query_obj;
+        }
+      }
+
+      if (!args.query) result = { users: { id: { in: [user.id] } } };
+
+      return JSON.stringify(result);
+    })();
+
+    const result: Connection = await new Pagination(
+      prisma.village
+    ).getConnection(args);
+
+    return result as VillageConnection;
+  },
+
+  ownVillages: async (
+    user: User,
+    args: UserVillagesArgs,
+    { prisma, currentUser }: CContext
+  ): Promise<VillageConnection> => {
+    // added user.id because villages that the user belong to
+    args.query = ((): string => {
+      let result: object = {};
+
+      if (args.query) {
+        let query_obj = JSON.parse(args.query);
+
+        if (query_obj.AND) {
           query_obj.AND[0].userId = user.id;
 
           result = query_obj;
@@ -235,7 +274,7 @@ const User = {
   },
 };
 
-type CUserResolvers = {
+const userResolvers: {
   Query: {
     users: QueryResolvers["users"];
     user: QueryResolvers["user"];
@@ -247,9 +286,7 @@ type CUserResolvers = {
     deleteUser: MutationResolvers["deleteUser"];
   };
   User: UserResolvers;
-};
-
-const userResolvers: CUserResolvers = {
+} = {
   Query: {
     users,
     user,

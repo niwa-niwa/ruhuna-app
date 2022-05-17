@@ -219,6 +219,7 @@ export type User = Node & {
   isAdmin: Scalars['Boolean'];
   isAnonymous: Scalars['Boolean'];
   messages: MessageConnection;
+  ownVillages: VillageConnection;
   updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
   villages: VillageConnection;
@@ -226,6 +227,17 @@ export type User = Node & {
 
 
 export type UserMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
+export type UserOwnVillagesArgs = {
   after?: InputMaybe<Scalars['Base64']>;
   before?: InputMaybe<Scalars['Base64']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -268,6 +280,7 @@ export type Village = Node & {
   isPublic: Scalars['Boolean'];
   messages: MessageConnection;
   name: Scalars['String'];
+  owner: User;
   updatedAt?: Maybe<Scalars['Date']>;
   users: UserConnection;
 };
@@ -530,6 +543,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   isAdmin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isAnonymous?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType, Partial<UserMessagesArgs>>;
+  ownVillages?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType, Partial<UserOwnVillagesArgs>>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   villages?: Resolver<ResolversTypes['VillageConnection'], ParentType, ContextType, Partial<UserVillagesArgs>>;
@@ -557,6 +571,7 @@ export type VillageResolvers<ContextType = any, ParentType extends ResolversPare
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   messages?: Resolver<ResolversTypes['MessageConnection'], ParentType, ContextType, Partial<VillageMessagesArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  owner?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   users?: Resolver<ResolversTypes['UserConnection'], ParentType, ContextType, Partial<VillageUsersArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

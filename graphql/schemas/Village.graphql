@@ -24,6 +24,7 @@ type Village implements Node {
     reverse:Boolean,
     sortKey:String
   ):MessageConnection!
+  owner:User!
   createdAt:Date!
   updatedAt:Date
 }

@@ -218,6 +218,7 @@ export type User = Node & {
   isAdmin: Scalars['Boolean'];
   isAnonymous: Scalars['Boolean'];
   messages: MessageConnection;
+  ownVillages: VillageConnection;
   updatedAt?: Maybe<Scalars['Date']>;
   username: Scalars['String'];
   villages: VillageConnection;
@@ -225,6 +226,17 @@ export type User = Node & {
 
 
 export type UserMessagesArgs = {
+  after?: InputMaybe<Scalars['Base64']>;
+  before?: InputMaybe<Scalars['Base64']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  query?: InputMaybe<Scalars['String']>;
+  reverse?: InputMaybe<Scalars['Boolean']>;
+  sortKey?: InputMaybe<Scalars['String']>;
+};
+
+
+export type UserOwnVillagesArgs = {
   after?: InputMaybe<Scalars['Base64']>;
   before?: InputMaybe<Scalars['Base64']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -267,6 +279,7 @@ export type Village = Node & {
   isPublic: Scalars['Boolean'];
   messages: MessageConnection;
   name: Scalars['String'];
+  owner: User;
   updatedAt?: Maybe<Scalars['Date']>;
   users: UserConnection;
 };
