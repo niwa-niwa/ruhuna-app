@@ -6,7 +6,7 @@ import express, { Express, Request, Response } from "express";
 import { api } from "./rest";
 import { ioChatSocket } from "./sockets/chatSocket";
 import { NextServer, RequestHandler } from "next/dist/server/next";
-import { apolloServer } from "./graphql/app";
+// import { apolloServer } from "./graphql/app";
 
 const dev: boolean = process.env.NODE_ENV !== "production";
 const port: string = process.env.PORT || "3000";
@@ -21,10 +21,10 @@ async function main() {
     await frontApp.prepare();
 
     // ready graphql
-    await apolloServer.start();
+    // await apolloServer.start();
 
     // insert graphql to express
-    apolloServer.applyMiddleware({ app, path: "/graphql" });
+    // apolloServer.applyMiddleware({ app, path: "/graphql" });
 
     // insert web socket to http server
     ioChatSocket.attach(server);
