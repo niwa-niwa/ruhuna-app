@@ -23,7 +23,7 @@ import {
   UserResolvers,
 } from "../../types/resolvers-types";
 import { Pagination } from "../lib/classes/Pagination";
-import { ErrorObject } from "../../types/rest.types";
+import { ErrorObject } from "../../lib/utilities";
 
 async function users(
   parent: any,

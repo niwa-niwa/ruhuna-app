@@ -4,13 +4,7 @@ import { verifyToken } from "../../lib/firebaseAdmin";
 import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
-import {
-  CustomRequest,
-  ResponseHeader,
-  QArgs,
-  QArgsAndPage,
-  ErrorObject,
-} from "../../types/rest.types";
+import { CustomRequest } from "../";
 import {
   genErrorObj,
   sendError,
@@ -18,6 +12,10 @@ import {
   genResponseHeader,
   genLinksHeader,
   genQArgsAndPage,
+  ResponseHeader,
+  ErrorObject,
+  QArgs,
+  QArgsAndPage,
 } from "../../lib/utilities";
 
 /** path parameter of user id */

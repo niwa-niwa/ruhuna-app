@@ -1,8 +1,8 @@
-import { ErrorObject, CurrentUser } from "../../types/rest.types";
+import { CurrentUser } from "../";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
-import { genErrorObj } from "../../lib/utilities";
+import { genErrorObj, ErrorObject } from "../../lib/utilities";
 
 export async function validateToken(
   idToken: string | undefined

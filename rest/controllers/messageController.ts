@@ -1,13 +1,8 @@
 import { Response } from "express";
 import { Message, Prisma, User } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import {
-  CustomRequest,
-  QArgs,
-  QArgsAndPage,
-  ResponseHeader,
-} from "../../types/rest.types";
-import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
+import { CustomRequest } from "../";
+// import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 import {
   genErrorObj,
   genLinksHeader,
@@ -17,9 +12,12 @@ import {
   isVillager,
   parseFields,
   sendError,
+  QArgs,
+  QArgsAndPage,
 } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 import { CustomError } from "../../classes/CustomError";
+import { ResponseHeader } from "../../lib/utilities";
 
 export const messageId: string = "messageId";
 
@@ -184,9 +182,9 @@ async function createMessage(req: CustomRequest, res: Response): Promise<void> {
     });
 
     // send message in the village as room
-    ioChatSocket.sockets
-      .in(villageId)
-      .emit(EV_CHAT_SOCKET.MESSAGE, { message });
+    // ioChatSocket.sockets
+    //   .in(villageId)
+    //   .emit(EV_CHAT_SOCKET.MESSAGE, { message });
 
     // response created the message
     res.status(200).json({ message });

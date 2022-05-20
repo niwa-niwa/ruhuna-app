@@ -3,7 +3,6 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime";
-import { ErrorObject, QArgs, ResponseHeader } from "./../types/rest.types";
 import { PARAMS } from "../consts/url";
 import { config } from "../consts/config";
 import { Message, User, Village } from "@prisma/client";
@@ -12,14 +11,19 @@ import { CustomError } from "../classes/CustomError";
 /**
  * for graphql request to send JSON-String
  * ex) { name : { contains : "village_A" , } , } convert to "{ \"name\" : { \"contains\" : \"village_A\" , } , }
- * @param obj 
- * @returns 
+ * @param obj
+ * @returns
  */
 export function toJsonString(obj: { [key: string]: any }): string {
   const j_str: string = JSON.stringify(obj).replace(/\"/g, '\\"');
 
   return j_str;
 }
+
+export type ErrorObject = {
+  code: number;
+  message: string;
+};
 
 /**
  * for response error message to frontend
@@ -60,6 +64,8 @@ export function sendError(res: Response, e: unknown): void {
 
   res.status(500).json(genErrorObj(500, "Internal Server Error"));
 }
+
+export type ResponseHeader = { [key: string]: number };
 
 /**
  * generate record information
@@ -116,6 +122,13 @@ export function genLinksHeader(
 
   return { next, prev };
 }
+
+export type QArgs = {
+  select?: { [key: string]: boolean } | undefined;
+  orderBy?: { [key: string]: string }[] | undefined;
+  take?: number | undefined;
+  skip?: number | undefined;
+};
 
 /**
  * separate strings-field in a request PARAMS  with separator.
@@ -236,15 +249,17 @@ export function calcSkipRecords(
   return skip;
 }
 
+export type QArgsAndPage<T> = {
+  args: T;
+  page: number;
+};
+
 /**
  * generate arguments for Prisma.js and current page number
  * @param query
  * @returns
  */
-export function genQArgsAndPage(query: Request["query"]): {
-  args: QArgs;
-  page: ReturnType<typeof parsePage>;
-} {
+export function genQArgsAndPage(query: Request["query"]): QArgsAndPage<QArgs> {
   let args: QArgs = {};
 
   // extract columns

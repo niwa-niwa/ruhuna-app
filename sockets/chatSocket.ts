@@ -4,9 +4,7 @@ import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User, Village } from "@prisma/client";
 import { prismaClient } from "../lib/prismaClient";
 import { verifyToken } from "../lib/firebaseAdmin";
-import { ErrorObj } from "../types/error.types";
-import { generateErrorObj } from "../lib/generateErrorObj";
-import { ErrorObject } from "../types/rest.types";
+import { ErrorObject, genErrorObj } from "../lib/utilities";
 
 /**
  * Custom socket object for io socket
@@ -31,7 +29,7 @@ const EV_CHAT_SOCKET: {
   SUBSCRIBE: "subscribe_village",
   CONNECTION: "connection",
   CONNECT_ERROR: "connect_error",
-  MESSAGE:"message",
+  MESSAGE: "message",
 };
 
 // an instance for socket server
@@ -61,7 +59,7 @@ ioChatSocket.use(
     // throw an error if token undefined
     if (token_data === undefined) {
       const err: CustomError = new Error();
-      err.data = { errorObj: generateErrorObj(400, "token is nothing") };
+      err.data = { errorObj: genErrorObj(400, "token is nothing") };
       next(err);
       return;
     }
@@ -78,7 +76,7 @@ ioChatSocket.use(
     if ("code" in firebaseUser) {
       const err: CustomError = new Error();
       err.data = {
-        errorObj: generateErrorObj(
+        errorObj: genErrorObj(
           404,
           "token is expired or firebase user is not found"
         ),
@@ -95,7 +93,7 @@ ioChatSocket.use(
     // throw an error if currentUser is null
     if (!currentUser) {
       const err: CustomError = new Error();
-      err.data = { errorObj: generateErrorObj(404, "the user is not found") };
+      err.data = { errorObj: genErrorObj(404, "the user is not found") };
       next(err);
       return;
     }
@@ -114,7 +112,7 @@ ioChatSocket.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     // throw an error if socket doesn't have currentUser
     if (socket.currentUser === undefined) {
       const err: CustomError = new Error();
-      err.data = { errorObj: generateErrorObj(414, "the user is not found") };
+      err.data = { errorObj: genErrorObj(414, "the user is not found") };
       socket.emit(EV_CHAT_SOCKET.CONNECT_ERROR, { ...err });
       return;
     }
@@ -132,7 +130,7 @@ ioChatSocket.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     if (!village) {
       // village is null then response emit error
       ioChatSocket.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(
+        errorObj: genErrorObj(
           404,
           `The Village is not found : ${data.villageId}`
         ),
@@ -149,7 +147,7 @@ ioChatSocket.on(EV_CHAT_SOCKET.CONNECTION, (socket: CustomSocket) => {
     if (!village.isPublic && !isMember) {
       // village is private and currentUser is not invited
       ioChatSocket.to(socket.id).emit(EV_CHAT_SOCKET.SUBSCRIBE, {
-        errorObj: generateErrorObj(
+        errorObj: genErrorObj(
           404,
           `The Village is not found : ${data.villageId}`
         ),

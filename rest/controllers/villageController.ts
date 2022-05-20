@@ -1,13 +1,7 @@
 import { Response } from "express";
 import { Prisma, User, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import {
-  CurrentUser,
-  CustomRequest,
-  QArgs,
-  QArgsAndPage,
-  ResponseHeader,
-} from "../../types/rest.types";
+import { CurrentUser, CustomRequest } from "../";
 import {
   genErrorObj,
   genLinksHeader,
@@ -17,6 +11,9 @@ import {
   isVillager,
   parseFields,
   sendError,
+  ResponseHeader,
+  QArgs,
+  QArgsAndPage,
 } from "../../lib/utilities";
 import { PARAMS } from "../../consts/url";
 

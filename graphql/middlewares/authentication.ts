@@ -4,7 +4,7 @@ import { AuthenticationError } from "apollo-server-express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { prismaClient } from "../../lib/prismaClient";
-import { ErrorObject } from "../../types/rest.types";
+import { ErrorObject } from "../../lib/utilities";
 
 export async function authentication(
   req: Request
@@ -21,8 +21,7 @@ export async function authentication(
   );
 
   // if the token is fraud
-  if ("code" in firebaseUser)
-    throw new AuthenticationError("You are wrong.");
+  if ("code" in firebaseUser) throw new AuthenticationError("You are wrong.");
 
   // get user
   const currentUser: CContext["currentUser"] | null =

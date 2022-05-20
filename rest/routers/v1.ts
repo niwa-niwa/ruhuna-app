@@ -4,7 +4,7 @@ import { authorization } from "../middlewares/authorization";
 import userController, { userId } from "../controllers/userController";
 import villageController, { villageId } from "../controllers/villageController";
 import messageController, { messageId } from "../controllers/messageController";
-import { CurrentUser, CustomRequest } from "../../types/rest.types";
+import { CurrentUser, CustomRequest } from "../";
 import { PATH } from "../../consts/url";
 import path from "path";
 

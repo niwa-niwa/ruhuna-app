@@ -1,8 +1,5 @@
-import {
-  CurrentUser,
-  CustomRequest,
-  ErrorObject,
-} from "../../types/rest.types";
+import { CurrentUser, CustomRequest } from "../";
+import { ErrorObject } from "../../lib/utilities";
 import { Response, NextFunction } from "express";
 import { validateToken } from "./validateToken";
 

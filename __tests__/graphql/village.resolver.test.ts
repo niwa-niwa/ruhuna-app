@@ -5,12 +5,16 @@ import { prismaClient } from "../../lib/prismaClient";
 import { User, Message, Village } from "@prisma/client";
 import { apolloServer } from "../../graphql/app";
 import { testTokens } from "../test_config/testData";
-import { VillageIncludeRelations } from "../../types/prisma.types";
 import {
   MutationDeleteVillageArgs,
   MutationEditVillageArgs,
 } from "../../types/types.d";
 import initDB from "../test_config/initDB";
+
+type VillageIncludeRelations = Village & {
+  messages: Message[];
+  users: User[];
+};
 
 beforeEach(async () => await initDB());
 
