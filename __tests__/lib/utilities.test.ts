@@ -1,4 +1,4 @@
-import { prismaClient } from "../../lib/prismaClient";
+import { prismaClient } from "../../backend/lib/prismaClient";
 import { PARAMS } from "../../consts/url";
 import {
   calcSkipRecords,
@@ -12,7 +12,7 @@ import {
   parsePage,
   parseParPage,
   parseSort,
-} from "../../lib/utilities";
+} from "../../backend/lib/utilities";
 import { config } from "../../consts/config";
 
 describe("utilities.ts", () => {

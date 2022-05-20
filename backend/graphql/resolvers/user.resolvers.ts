@@ -1,8 +1,8 @@
 import { User as PUser } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { verifyToken } from "../../lib/firebaseAdmin";
+import { verifyToken } from "../../../backend/lib/firebaseAdmin";
 import { UserInputError } from "apollo-server-express";
-import { CContext } from "../../types/gql.types";
+import { CContext } from "../types/gql.types";
 import {
   User,
   MutationCreateUserArgs,
@@ -16,14 +16,14 @@ import {
   UserMessagesArgs,
   QueryUsersArgs,
   QueryUserArgs,
-} from "../../types/types";
+} from "../types/types";
 import {
   QueryResolvers,
   MutationResolvers,
   UserResolvers,
-} from "../../types/resolvers-types";
+} from "../types/resolvers-types";
 import { Pagination } from "../lib/classes/Pagination";
-import { ErrorObject } from "../../lib/utilities";
+import { ErrorObject } from "../../../backend/lib/utilities";
 
 async function users(
   parent: any,
@@ -98,7 +98,7 @@ async function createUser(
         username: firebaseUser.name,
       },
     })
-    .catch((e) => {
+    .catch((e:any) => {
       console.error(e);
       throw new Error("Internal Server Error");
     });
@@ -128,7 +128,7 @@ async function editUser(
         username: username || undefined,
       },
     })
-    .catch((e) => {
+    .catch((e:any) => {
       console.error(e);
       throw new Error("Internal Server Error");
     });
@@ -152,7 +152,7 @@ async function deleteUser(
     .delete({
       where: { id },
     })
-    .catch((e) => {
+    .catch((e:any) => {
       console.error(e);
       throw new Error("Internal Server Error");
     });

@@ -3,10 +3,10 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime";
-import { PARAMS } from "../consts/url";
-import { config } from "../consts/config";
+import { PARAMS } from "../../consts/url";
+import { config } from "../../consts/config";
 import { Message, User, Village } from "@prisma/client";
-import { CustomError } from "../classes/CustomError";
+import { CustomError } from "../../backend/classes/CustomError";
 
 /**
  * for graphql request to send JSON-String

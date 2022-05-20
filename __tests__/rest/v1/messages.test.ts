@@ -1,11 +1,11 @@
-import { userId } from "./../../../rest/controllers/userController";
+import { userId } from "../../../backend/rest/controllers/userController";
 import { join } from "path";
 import { PARAMS, V1, PATH } from "./../../../consts/url";
 import { Message, Village } from "@prisma/client";
-import { prismaClient } from "../../../lib/prismaClient";
+import { prismaClient } from "../../../backend/lib/prismaClient";
 import { User } from "@prisma/client";
 import request from "supertest";
-import { api } from "../../../rest";
+import { api } from "../../../backend/rest";
 import { testTokens } from "../../test_config/testData";
 import initDB from "../../test_config/initDB";
 

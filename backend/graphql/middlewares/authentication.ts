@@ -1,10 +1,10 @@
-import { CContext } from "./../../types/gql.types";
+import { CContext } from "./../types/gql.types";
 import { Request } from "express";
 import { AuthenticationError } from "apollo-server-express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { verifyToken } from "../../lib/firebaseAdmin";
-import { prismaClient } from "../../lib/prismaClient";
-import { ErrorObject } from "../../lib/utilities";
+import { verifyToken } from "../../../backend/lib/firebaseAdmin";
+import { prismaClient } from "../../../backend/lib/prismaClient";
+import { ErrorObject } from "../../../backend/lib/utilities";
 
 export async function authentication(
   req: Request

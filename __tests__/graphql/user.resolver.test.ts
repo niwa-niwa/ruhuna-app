@@ -1,13 +1,13 @@
 import request from "supertest";
 import express, { Express } from "express";
-import { prismaClient } from "../../lib/prismaClient";
+import { prismaClient } from "../../backend/lib/prismaClient";
 import { User, Message, Village, PrismaPromise } from "@prisma/client";
-import { apolloServer } from "../../graphql/app";
+import { apolloServer } from "../../backend/graphql/app";
 import { testTokens } from "../test_config/testData";
 import initDB from "../test_config/initDB";
 import { PATH } from "../../consts/url";
-import { Pagination } from "../../graphql/lib/classes/Pagination";
-import { toJsonString } from "../../lib/utilities";
+import { Pagination } from "../../backend/graphql/lib/classes/Pagination";
+import { toJsonString } from "../../backend/lib/utilities";
 
 const gql_endpoint: string = PATH.GQL;
 

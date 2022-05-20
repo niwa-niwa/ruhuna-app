@@ -1,4 +1,4 @@
-import "../../lib/firebaseApp";
+import "../../frontend/lib/firebaseApp";
 import {
   Auth,
   getAuth,

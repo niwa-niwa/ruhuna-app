@@ -2,7 +2,7 @@ import { loadFilesSync } from "@graphql-tools/load-files";
 import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 import { ApolloServer } from "apollo-server-express";
 import { ExpressContext } from "apollo-server-express";
-import { context } from "./context/";
+import { context } from "./context";
 import { join } from "path";
 
 // merge types

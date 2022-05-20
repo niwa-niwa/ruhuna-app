@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { Prisma, User, Village } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import { CurrentUser, CustomRequest } from "../";
+import { CurrentUser, CustomRequest } from "..";
 import {
   genErrorObj,
   genLinksHeader,
@@ -15,7 +15,7 @@ import {
   QArgs,
   QArgsAndPage,
 } from "../../lib/utilities";
-import { PARAMS } from "../../consts/url";
+import { PARAMS } from "../../../consts/url";
 
 /** path parameter of village id */
 export const villageId: string = "villageId";

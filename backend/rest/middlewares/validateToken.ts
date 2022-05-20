@@ -1,4 +1,4 @@
-import { CurrentUser } from "../";
+import { CurrentUser } from "..";
 import { prismaClient } from "../../lib/prismaClient";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { verifyToken } from "../../lib/firebaseAdmin";

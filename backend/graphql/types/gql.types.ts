@@ -1,5 +1,5 @@
 import { Message, User, Village } from "@prisma/client";
-import { PClient } from "../../lib/prismaClient";
+import { PClient } from "../../../backend/lib/prismaClient";
 
 export type UserIncludeRelations = User & {
   messages?: Message[];

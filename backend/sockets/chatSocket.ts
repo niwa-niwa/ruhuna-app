@@ -2,9 +2,9 @@ import { Server, Socket } from "socket.io";
 import { ExtendedError } from "socket.io/dist/namespace";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { User, Village } from "@prisma/client";
-import { prismaClient } from "../lib/prismaClient";
-import { verifyToken } from "../lib/firebaseAdmin";
-import { ErrorObject, genErrorObj } from "../lib/utilities";
+import { prismaClient } from "../../backend/lib/prismaClient";
+import { verifyToken } from "../../backend/lib/firebaseAdmin";
+import { ErrorObject, genErrorObj } from "../../backend/lib/utilities";
 
 /**
  * Custom socket object for io socket

@@ -1,14 +1,20 @@
-import { CurrentUser, CustomRequest } from "../";
+import { CurrentUser, CustomRequest } from "..";
 import { ErrorObject } from "../../lib/utilities";
 import { Response, NextFunction } from "express";
-import { genErrorObj } from "../../lib/utilities";
 import { validateToken } from "./validateToken";
 
-export async function authorization(
+/**
+ * validate firebase token
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
+export async function authentication(
   req: CustomRequest,
   res: Response,
   next: NextFunction
-) {
+): Promise<void> {
   if (!req.currentUser) {
     const currentUser: CurrentUser | ErrorObject = await validateToken(
       req.header("Authorization")
@@ -23,11 +29,5 @@ export async function authorization(
     req.currentUser = currentUser;
   }
 
-  // send an error if currentUser were not admin
-  if (!req.currentUser.isAdmin) {
-    res.status(403).json(genErrorObj(403, "You are not allowed the request"));
-    return;
-  }
-
-  next();
+  return next();
 }

@@ -1,6 +1,6 @@
 import express, { Express, Request } from "express";
 import { router } from "./routers/router";
-import { PATH } from "../consts/url";
+import { PATH } from "../../consts/url";
 import { Message, User, Village } from "@prisma/client";
 
 export type CurrentUser = User & {

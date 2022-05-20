@@ -4,6 +4,6 @@
     "outDir": "./dist",
     "sourceMap": true
   },
-  "include": ["./server.ts", "rest", "graphql", "sockets"],
-  "exclude": ["pages"]
+  "include": ["./server.ts", "backend",],
+  "exclude": ["pages", "frontend", "graphql"]
 }

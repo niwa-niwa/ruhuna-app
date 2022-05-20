@@ -1,6 +1,6 @@
-import { prismaClient } from "../../../lib/prismaClient";
+import { prismaClient } from "../../../backend/lib/prismaClient";
 import request from "supertest";
-import { api } from "../../../rest";
+import { api } from "../../../backend/rest";
 import { testTokens} from "../../test_config/testData";
 import { PARAMS, PATH, V1 } from "../../../consts/url";
 import { join } from "path";

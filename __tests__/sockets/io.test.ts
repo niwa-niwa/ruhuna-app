@@ -1,11 +1,11 @@
 import { createServer, Server } from "http";
 import { io as client, Socket } from "socket.io-client";
-import { ioChatSocket, EV_CHAT_SOCKET, PATH_CHAT_SOCKET } from "../../sockets/chatSocket";
+import { ioChatSocket, EV_CHAT_SOCKET, PATH_CHAT_SOCKET } from "../../backend/sockets/chatSocket";
 import { testTokens, admin_user } from "../test_config/testData";
-import { prismaClient } from "../../lib/prismaClient";
+import { prismaClient } from "../../backend/lib/prismaClient";
 import { User, Village } from "@prisma/client";
 import request from "supertest";
-import { api } from "../../rest";
+import { api } from "../../backend/rest";
 import initDB from "../test_config/initDB";
 
 beforeEach(async () => await initDB());

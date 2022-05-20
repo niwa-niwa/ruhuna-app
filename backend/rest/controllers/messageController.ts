@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { Message, Prisma, User } from "@prisma/client";
 import { prismaClient } from "../../lib/prismaClient";
-import { CustomRequest } from "../";
+import { CustomRequest } from "..";
 // import { ioChatSocket, EV_CHAT_SOCKET } from "../../sockets/chatSocket";
 import {
   genErrorObj,
@@ -15,7 +15,7 @@ import {
   QArgs,
   QArgsAndPage,
 } from "../../lib/utilities";
-import { PARAMS } from "../../consts/url";
+import { PARAMS } from "../../../consts/url";
 import { CustomError } from "../../classes/CustomError";
 import { ResponseHeader } from "../../lib/utilities";
 

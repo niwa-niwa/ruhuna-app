@@ -1,5 +1,5 @@
 import { PrismaPromise, User, Village, Message } from "@prisma/client";
-import { Connection, Edge, Node, NodesArgs } from "../../../types/types.d";
+import { Connection, Edge, Node, NodesArgs } from "../../types/types.d";
 
 export class Pagination {
   protected readonly MAX_ITEMS: number = 250;

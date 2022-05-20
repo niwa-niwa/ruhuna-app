@@ -1,14 +1,14 @@
 import { users } from "./../../prisma/seeds";
 import request from "supertest";
 import express, { Express } from "express";
-import { prismaClient } from "../../lib/prismaClient";
+import { prismaClient } from "../../backend/lib/prismaClient";
 import { User, Message, Village } from "@prisma/client";
-import { apolloServer } from "../../graphql/app";
+import { apolloServer } from "../../backend/graphql/app";
 import { testTokens } from "../test_config/testData";
 import {
   MutationDeleteVillageArgs,
   MutationEditVillageArgs,
-} from "../../types/types.d";
+} from "../../backend/graphql/types/types.d";
 import initDB from "../test_config/initDB";
 
 type VillageIncludeRelations = Village & {

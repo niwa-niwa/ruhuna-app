@@ -1,11 +1,11 @@
 import request from "supertest";
-import { api } from "../../../rest";
-import { prismaClient } from "../../../lib/prismaClient";
+import { api } from "../../../backend/rest";
+import { prismaClient } from "../../../backend/lib/prismaClient";
 import { User } from "@prisma/client";
 import { sub_user } from "../../test_config/testData";
 import { testTokens } from "../../test_config/testData";
 import { PARAMS, PATH, V1 } from "../../../consts/url";
-import { userId } from "../../../rest/controllers/userController";
+import { userId } from "../../../backend/rest/controllers/userController";
 import initDB from "../../test_config/initDB";
 
 beforeEach(async () => await initDB());

@@ -6,13 +6,13 @@ import {
   nonactive_user,
   sub_user,
 } from "./testData";
-import { genErrorObj } from "../../lib/utilities";
+import { genErrorObj } from "../../backend/lib/utilities";
 import { testTokens } from "./testData";
 import initDB from "./initDB";
 
 beforeAll(async () => await initDB());
 
-jest.mock("../../lib/firebaseAdmin", () => ({
+jest.mock("../../backend/lib/firebaseAdmin", () => ({
   verifyToken: (token: string) => {
     if (token == testTokens.admin_user) {
       return admin_user;

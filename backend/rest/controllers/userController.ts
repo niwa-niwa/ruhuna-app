@@ -1,10 +1,10 @@
-import { PARAMS } from "./../../consts/url";
+import { PARAMS } from "../../../consts/url";
 import { Request, Response } from "express";
 import { verifyToken } from "../../lib/firebaseAdmin";
 import { Message, Prisma, User, Village } from "@prisma/client";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import { prismaClient } from "../../lib/prismaClient";
-import { CustomRequest } from "../";
+import { CustomRequest } from "..";
 import {
   genErrorObj,
   sendError,

@@ -1,4 +1,4 @@
-import { prismaClient } from "../../lib/prismaClient";
+import { prismaClient } from "../../backend/lib/prismaClient";
 import { users } from "../../prisma/seeds";
 
 export default async function initDB() {

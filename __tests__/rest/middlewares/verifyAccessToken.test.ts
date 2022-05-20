@@ -1,8 +1,8 @@
-import { prismaClient } from "./../../../lib/prismaClient";
+import { prismaClient } from "./../../../backend/lib/prismaClient";
 import { testTokens, sub_user } from "./../../test_config/testData";
 import { PARAMS, V1 } from "./../../../consts/url";
 import request from "supertest";
-import { api } from "../../../rest";
+import { api } from "../../../backend/rest";
 
 describe("TEST Middleware verifyAccessToken", () => {
   test("it should be success", async () => {

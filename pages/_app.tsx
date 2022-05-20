@@ -3,8 +3,8 @@ import type { AppProps } from "next/app";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
-import theme from "../mui-theme/theme";
-import createEmotionCache from "../mui-theme/createEmotionCache";
+import theme from "../frontend/mui-theme/theme";
+import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {

@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { PATH } from "../../consts/url";
+import { PATH } from "../../../consts/url";
 import { v1 } from "./v1";
 
 const router: Router = Router();
