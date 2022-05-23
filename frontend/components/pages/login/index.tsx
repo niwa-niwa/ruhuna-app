@@ -1,15 +1,17 @@
 import type { NextPage } from "next";
 import GuestHeader from "../../common/header/GuestHeader";
+import OneColumn from "../../common/layout/OneColumn";
 
-const login: NextPage = () => {
+// TODO implement a page of login
+const Login: NextPage = () => {
   return (
-    <>
+    <OneColumn>
       <GuestHeader />
-      
-      <main>this is login page</main>
+
+      <main>this is Login page</main>
 
       <footer></footer>
-    </>
+    </OneColumn>
   );
 };
-export default login;
+export default Login;
