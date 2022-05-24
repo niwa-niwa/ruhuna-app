@@ -1,3 +1,4 @@
+import { Button, TextField } from "@mui/material";
 import type { NextPage } from "next";
 import GuestHeader from "../../common/header/GuestHeader";
 import OneColumn from "../../common/layout/OneColumn";
@@ -8,7 +9,17 @@ const Login: NextPage = () => {
     <OneColumn>
       <GuestHeader />
 
-      <main>this is Login page</main>
+      <main>
+        <h2>Ruhunaにサインインする</h2>
+
+        <Button variant="outlined">Googleでサインイン</Button>
+
+        <span>または</span>
+
+        <TextField id="outlined-basic" label="メールアドレス" variant="outlined" />
+
+        <Button variant="contained">メールでサインイン</Button>
+      </main>
 
       <footer></footer>
     </OneColumn>

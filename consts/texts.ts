@@ -1,3 +1,4 @@
 export const JP = Object.freeze({
-  APP_NAME: "Ruhuna",
+  app_name: "Ruhuna",
+  st_create_account:"アカウントを作成する"
 });

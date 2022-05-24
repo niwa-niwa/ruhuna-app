@@ -7,8 +7,8 @@ const login: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Login | {JP.APP_NAME}</title>
-        <meta name="description" content={JP.APP_NAME+" login page"} />
+        <title>Login | {JP.app_name}</title>
+        <meta name="description" content={JP.app_name+" login page"} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
