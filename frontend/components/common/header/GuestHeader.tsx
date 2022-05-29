@@ -7,7 +7,10 @@ import { css } from "@emotion/react";
 import { JP } from "../../../../consts/texts";
 
 export default function GuestHeader() {
-  const pages = ["Sign In", "Sign Up"];
+  const pages: Array<{ text: string; link: string }> = [
+    { text: "Sign In", link: "signin" },
+    { text: "Sign Up", link: "signup" },
+  ];
 
   return (
     <AppBar position="static">
@@ -18,7 +21,7 @@ export default function GuestHeader() {
           align-items: center;
         `}
       >
-        <Container
+        <Box
           maxWidth="xl"
           css={css`
             display: contents;
@@ -44,9 +47,9 @@ export default function GuestHeader() {
           >
             {JP.app_name}
           </Typography>
-        </Container>
+        </Box>
 
-        <Container
+        <Box
           maxWidth="xl"
           color="secondary"
           css={css`
@@ -54,9 +57,9 @@ export default function GuestHeader() {
           `}
         >
           <Box sx={{ flexGrow: 1, display: { md: "flex" } }}>
-            {pages.map((page) => (
+            {pages.map((page, index) => (
               <Button
-                key={page}
+                key={index}
                 sx={{
                   my: 0,
                   mx: 5,
@@ -64,12 +67,13 @@ export default function GuestHeader() {
                   display: "inline",
                   fontSize: 16,
                 }}
+                href={page.link}
               >
-                {page}
+                {page.text}
               </Button>
             ))}
           </Box>
-        </Container>
+        </Box>
       </Container>
     </AppBar>
   );
