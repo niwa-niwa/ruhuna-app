@@ -53,26 +53,24 @@ export default function GuestHeader() {
           maxWidth="xl"
           color="secondary"
           css={css`
-            display: contents;
+            display: flex;
           `}
         >
-          <Box sx={{ flexGrow: 1, display: { md: "flex" } }}>
-            {pages.map((page, index) => (
-              <Button
-                key={index}
-                sx={{
-                  my: 0,
-                  mx: 5,
-                  color: "white",
-                  display: "inline",
-                  fontSize: 16,
-                }}
-                href={page.link}
-              >
-                {page.text}
-              </Button>
-            ))}
-          </Box>
+          {pages.map((page, index) => (
+            <Button
+              key={index}
+              sx={{
+                my: 0,
+                mx: 5,
+                color: "white",
+                display: "inline",
+                fontSize: 16,
+              }}
+              href={page.link}
+            >
+              {page.text}
+            </Button>
+          ))}
         </Box>
       </Container>
     </AppBar>
