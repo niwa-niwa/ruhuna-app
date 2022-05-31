@@ -6,20 +6,14 @@ type OneColumnProps = {
   children: ReactNode;
 };
 
-const centering:SerializedStyles= css`
+const centering: SerializedStyles = css`
   flex: 1;
   align-items: center;
   justify-content: center;
+  height: 100vh;
 `;
 
-// TODO implement a column layout for single
 const OneColumn: NextPage<OneColumnProps> = ({ children }) => {
-  return (
-    <div
-      css={centering}
-    >
-      {children}
-    </div>
-  );
+  return <div css={centering}>{children}</div>;
 };
 export default OneColumn;
