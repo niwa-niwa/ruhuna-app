@@ -1,14 +1,7 @@
 import { css, SerializedStyles } from "@emotion/react";
-import styled from "@emotion/styled";
 
-export const centering: SerializedStyles = css`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const CenteringDiv = styled("div")`
+export const centering_vertical: SerializedStyles = css`
   display: flex;
+  flex-flow: column;
   align-items: center;
-  justify-content: center;
 `;

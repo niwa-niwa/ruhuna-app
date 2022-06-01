@@ -7,10 +7,13 @@ type OneColumnProps = {
 };
 
 const centering: SerializedStyles = css`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+  display: flex;
   height: 100vh;
+  flex-flow: column;
+  align-items: center;
+  /* flex: 1; */
+  /* justify-content: center; */
+  /* text-align:center; */
 `;
 
 const OneColumn: NextPage<OneColumnProps> = ({ children }) => {
