@@ -1,9 +1,9 @@
 import Head from "next/head";
 import { JP } from "../consts/texts";
-import Login from "../frontend/components/pages/login";
+import SignIn from "../frontend/components/pages/SignIn";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
-export default function Signin(): EmotionJSX.Element {
+export default function signin(): EmotionJSX.Element {
   return (
     <>
       <Head>
@@ -12,7 +12,7 @@ export default function Signin(): EmotionJSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Login />
+      <SignIn />
     </>
   );
 }
