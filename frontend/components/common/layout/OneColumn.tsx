@@ -2,10 +2,6 @@ import type { NextPage } from "next";
 import { ReactNode } from "react";
 import { css, SerializedStyles } from "@emotion/react";
 
-type OneColumnProps = {
-  children: ReactNode;
-};
-
 const centering: SerializedStyles = css`
   display: flex;
   height: 100vh;
@@ -13,7 +9,9 @@ const centering: SerializedStyles = css`
   align-items: center;
 `;
 
-const OneColumn: NextPage<OneColumnProps> = ({ children }) => {
+const OneColumn: NextPage<{
+  children: ReactNode;
+}> = ({ children }) => {
   return <div css={centering}>{children}</div>;
 };
 export default OneColumn;

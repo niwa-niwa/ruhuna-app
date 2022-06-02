@@ -12,8 +12,9 @@ import {
   Sign_Submit,
 } from "../../styles/sign-style";
 import { Locale, useLocale } from "../../hooks/useLocal";
+import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
-const SignIn: NextPage = () => {
+const SignIn: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: Locale } = useLocale();
 
   return (

@@ -12,6 +12,7 @@ export const useLocale = (): {
   };
   const { locale } = useRouter();
 
+  // english is default lang
   const txt: Locale = ((): Locale => {
     if (!locale) return langs["en"];
 
@@ -33,4 +34,5 @@ export type Locale = {
   email: string;
   password: string;
   signin: string;
+  signup: string;
 };

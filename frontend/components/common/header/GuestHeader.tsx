@@ -5,8 +5,9 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import { css } from "@emotion/react";
 import { useLocale, Locale } from "../../../hooks/useLocal";
+import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
-export default function GuestHeader() {
+export default function GuestHeader(): EmotionJSX.Element {
   const { txt }: { txt: Locale } = useLocale();
   const pages: Array<{ text: string; link: string }> = [
     { text: "Sign In", link: "signin" },

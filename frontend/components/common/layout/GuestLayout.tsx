@@ -1,12 +1,9 @@
 import type { NextPage } from "next";
 import { ReactNode } from "react";
 
-type GuestLayoutProps = {
+const GuestLayout: NextPage<{
   children: ReactNode;
-};
-
-// TODO implement a layout for guest
-const GuestLayout: NextPage<GuestLayoutProps> = ({ children }) => {
+}> = ({ children }) => {
   return <>{children}</>;
 };
 export default GuestLayout;

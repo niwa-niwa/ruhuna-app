@@ -1,9 +1,9 @@
 import { css } from "@emotion/react";
+import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import styled from "@emotion/styled";
 import { Box, Button, TextField } from "@mui/material";
 
 // TODO implement validation of fields
-
 
 const Custom_Border = styled("div")`
   border-bottom: 1px solid #c0c0c0;
@@ -11,7 +11,11 @@ const Custom_Border = styled("div")`
   margin: 0 12px;
 `;
 
-export const Border_Or = ({ text = "OR" }: { text?: string }) => (
+export const Border_Or = ({
+  text = "OR",
+}: {
+  text?: string;
+}): EmotionJSX.Element => (
   <Box
     css={css`
       display: flex;
@@ -25,7 +29,7 @@ export const Border_Or = ({ text = "OR" }: { text?: string }) => (
   </Box>
 );
 
-export const Sign_Title = ({ text }: { text: string }) => (
+export const Sign_Title = ({ text }: { text: string }): EmotionJSX.Element => (
   <h2
     css={css`
       margin: 32px 0 8px;
@@ -35,7 +39,11 @@ export const Sign_Title = ({ text }: { text: string }) => (
   </h2>
 );
 
-export const Google_Button = ({ text }: { text: string }) => (
+export const Google_Button = ({
+  text,
+}: {
+  text: string;
+}): EmotionJSX.Element => (
   <Button
     variant="outlined"
     css={css`
@@ -47,7 +55,7 @@ export const Google_Button = ({ text }: { text: string }) => (
   </Button>
 );
 
-export const Mail_Field = ({ text }: { text: string }) => (
+export const Mail_Field = ({ text }: { text: string }): EmotionJSX.Element => (
   <TextField
     id="outlined-basic"
     label={text}
@@ -59,7 +67,11 @@ export const Mail_Field = ({ text }: { text: string }) => (
   />
 );
 
-export const Password_Field = ({ text }: { text: string }) => (
+export const Password_Field = ({
+  text,
+}: {
+  text: string;
+}): EmotionJSX.Element => (
   <TextField
     id="outlined-basic"
     label={text}
@@ -71,7 +83,7 @@ export const Password_Field = ({ text }: { text: string }) => (
   />
 );
 
-export const Sign_Submit = ({ text }: { text: string }) => (
+export const Sign_Submit = ({ text }: { text: string }): EmotionJSX.Element => (
   <Button
     variant="contained"
     css={css`
