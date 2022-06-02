@@ -11,24 +11,27 @@ import {
   Password_Field,
   Sign_Submit,
 } from "../../styles/sign-style";
+import { Locale, useLocale } from "../../hooks/useLocal";
 
 const SignIn: NextPage = () => {
+  const { txt }: { txt: Locale } = useLocale();
+
   return (
     <OneColumn>
       <GuestHeader />
 
       <Container maxWidth="sm">
         <main css={centering_vertical}>
-          <Sign_Title text="Ruhunaにサインイン" />
+          <Sign_Title text={txt.signin_ruhuna} />
 
-          <Google_Button text="Googleでサインイン" />
+          <Google_Button text={txt.with_google} />
 
           <Border_Or />
 
-          <Mail_Field text="メールアドレス" />
-          <Password_Field text="パスワード" />
+          <Mail_Field text={txt.email} />
+          <Password_Field text={txt.password} />
 
-          <Sign_Submit text="サインイン" />
+          <Sign_Submit text={txt.signin} />
         </main>
       </Container>
 

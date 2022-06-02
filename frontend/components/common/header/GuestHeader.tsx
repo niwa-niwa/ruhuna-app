@@ -4,9 +4,10 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import { css } from "@emotion/react";
-import { JP } from "../../../../consts/texts";
+import { useLocale, Locale } from "../../../hooks/useLocal";
 
 export default function GuestHeader() {
+  const { txt }: { txt: Locale } = useLocale();
   const pages: Array<{ text: string; link: string }> = [
     { text: "Sign In", link: "signin" },
     { text: "Sign Up", link: "signup" },
@@ -45,7 +46,7 @@ export default function GuestHeader() {
               fontSize: 32,
             }}
           >
-            {JP.app_name}
+            {txt.app_name}
           </Typography>
         </Box>
 
