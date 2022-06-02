@@ -14,6 +14,8 @@ import {
 import { Locale, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
+// TODO implement validation of fields
+
 const SignIn: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: Locale } = useLocale();
 
@@ -23,16 +25,16 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
 
       <Container maxWidth="sm">
         <main css={centering_vertical}>
-          <Sign_Title text={txt.signin_ruhuna} />
+          <Sign_Title>{txt.signin_ruhuna}</Sign_Title>
 
-          <Google_Button text={txt.with_google} />
+          <Google_Button>{txt.with_google}</Google_Button>
 
           <Border_Or />
 
-          <Mail_Field text={txt.email} />
-          <Password_Field text={txt.password} />
+          <Mail_Field label={txt.email} />
+          <Password_Field label={txt.password} />
 
-          <Sign_Submit text={txt.signin} />
+          <Sign_Submit>{txt.signin}</Sign_Submit>
         </main>
       </Container>
 

@@ -1,9 +1,15 @@
 import { css } from "@emotion/react";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import styled from "@emotion/styled";
-import { Box, Button, TextField } from "@mui/material";
-
-// TODO implement validation of fields
+import {
+  Box,
+  Button,
+  ButtonProps,
+  TextField,
+  TextFieldProps,
+  Typography,
+  TypographyProps,
+} from "@mui/material";
 
 const Custom_Border = styled("div")`
   border-bottom: 1px solid #c0c0c0;
@@ -29,68 +35,75 @@ export const Border_Or = ({
   </Box>
 );
 
-export const Sign_Title = ({ text }: { text: string }): EmotionJSX.Element => (
-  <h2
+export const Sign_Title = ({
+  children,
+  ...props
+}: TypographyProps): EmotionJSX.Element => (
+  <Typography
+    variant="h2"
+    gutterBottom
     css={css`
+      font-size: 32px;
       margin: 32px 0 8px;
     `}
+    {...props}
   >
-    {text}
-  </h2>
+    {children}
+  </Typography>
 );
 
 export const Google_Button = ({
-  text,
-}: {
-  text: string;
-}): EmotionJSX.Element => (
+  children,
+  ...props
+}: ButtonProps): EmotionJSX.Element => (
   <Button
     variant="outlined"
     css={css`
       width: 100%;
       margin: 24px 0;
     `}
+    {...props}
   >
-    {text}
+    {children}
   </Button>
 );
 
-export const Mail_Field = ({ text }: { text: string }): EmotionJSX.Element => (
+export const Mail_Field = (props: TextFieldProps): EmotionJSX.Element => (
   <TextField
     id="outlined-basic"
-    label={text}
     variant="outlined"
     css={css`
       width: 100%;
       margin: 24px 0 0;
     `}
+    {...props}
   />
 );
 
-export const Password_Field = ({
-  text,
-}: {
-  text: string;
-}): EmotionJSX.Element => (
+export const Password_Field = (props: TextFieldProps): EmotionJSX.Element => (
   <TextField
     id="outlined-basic"
-    label={text}
     variant="outlined"
     css={css`
       width: 100%;
       margin: 24px 0 0;
     `}
+    {...props}
   />
 );
 
-export const Sign_Submit = ({ text }: { text: string }): EmotionJSX.Element => (
+export const Sign_Submit = ({
+  children,
+  ...props
+}: ButtonProps): EmotionJSX.Element => (
   <Button
     variant="contained"
     css={css`
       width: 100%;
       margin: 24px 0 0;
     `}
+    {...props}
   >
-    {text}
+    {children}
   </Button>
 );
