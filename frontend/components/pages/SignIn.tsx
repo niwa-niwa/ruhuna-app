@@ -13,12 +13,27 @@ import {
 } from "../../styles/sign-style";
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
+import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 
 // TODO implement validation of fields
+
+type FormValues = {
+  email: string;
+  password: string;
+};
 
 const SignIn: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: LocaleText } = useLocale();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>();
+
+  const onSubmit: SubmitHandler<FormValues> = (data) => console.log(data);
+
+  // TODO fix rendering error of useRef
   return (
     <OneColumn>
       <GuestHeader />
@@ -31,10 +46,34 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
 
           <Border_Or />
 
-          <Mail_Field label={txt.email} />
-          <Password_Field label={txt.password} />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            
+            <Mail_Field
+              required
+              type="email"
+              label={txt.email}
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register("email", 
+                {
+                  required:{
+                    value: true,
+                    message:"email is required"}, 
+                  maxLength:{
+                    value:20,
+                    message:'length is 20'
+                  }
+                }
+              )}
+            />
 
-          <Sign_Submit>{txt.signin}</Sign_Submit>
+            <Password_Field
+              label={txt.password}
+              {...(register("password"), { required: true, maxLength: 20 })}
+            />
+
+            <Sign_Submit type="submit">{txt.signin}</Sign_Submit>
+          </form>
         </main>
       </Container>
 
