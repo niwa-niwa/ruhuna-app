@@ -11,13 +11,13 @@ import {
   Password_Field,
   Sign_Submit,
 } from "../../styles/sign-style";
-import { Locale, useLocale } from "../../hooks/useLocal";
+import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
 // TODO implement validation of fields
 
 const SignIn: NextPage = (): EmotionJSX.Element => {
-  const { txt }: { txt: Locale } = useLocale();
+  const { txt }: { txt: LocaleText } = useLocale();
 
   return (
     <OneColumn>

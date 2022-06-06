@@ -1,10 +1,10 @@
 import Head from "next/head";
 import SignIn from "../frontend/components/pages/SignIn";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
-import { useLocale, Locale } from "../frontend/hooks/useLocal";
+import { useLocale, LocaleText } from "../frontend/hooks/useLocal";
 
 export default function Signin(): EmotionJSX.Element {
-  const { txt }: { txt: Locale } = useLocale();
+  const { txt }: { txt: LocaleText } = useLocale();
 
   return (
     <>

@@ -1,32 +1,32 @@
 import { useRouter } from "next/router";
+import { useMemo } from "react";
 import en from "../../locales/en";
 import ja from "../../locales/ja";
 
 export const useLocale = (): {
-  locale: string | undefined;
-  txt: Locale;
+  local: string;
+  txt: LocaleText;
 } => {
-  const langs: { [key: string]: Locale } = {
-    en,
-    ja,
-  };
   const { locale } = useRouter();
 
-  // english is default lang
-  const txt: Locale = ((): Locale => {
-    if (!locale) return langs["en"];
+  const txt: LocaleText = useMemo((): LocaleText => {
+    const langs: { [key: string]: LocaleText } = {
+      en,
+      ja,
+    };
 
-    const lang: Locale | undefined = langs[locale];
+    const lang: LocaleText | undefined = langs[locale || "en"];
 
     if (!lang) return langs["en"];
 
     return lang;
-  })();
+  }, [locale]);
 
-  return { locale, txt };
+  const local = locale || "en";
+  return { local, txt };
 };
 
-export type Locale = {
+export type LocaleText = {
   app_name: string;
   st_create_account: string;
   signin_ruhuna: string;

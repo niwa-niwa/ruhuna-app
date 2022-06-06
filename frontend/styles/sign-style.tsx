@@ -70,7 +70,6 @@ export const Google_Button = ({
 
 export const Mail_Field = (props: TextFieldProps): EmotionJSX.Element => (
   <TextField
-    id="outlined-basic"
     variant="outlined"
     css={css`
       width: 100%;
@@ -82,7 +81,6 @@ export const Mail_Field = (props: TextFieldProps): EmotionJSX.Element => (
 
 export const Password_Field = (props: TextFieldProps): EmotionJSX.Element => (
   <TextField
-    id="outlined-basic"
     variant="outlined"
     css={css`
       width: 100%;
