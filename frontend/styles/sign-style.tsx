@@ -70,11 +70,10 @@ export const Google_Button = ({
 
 export const Mail_Field = (props: TextFieldProps): EmotionJSX.Element => (
   <TextField
+    type="email"
     variant="outlined"
-    css={css`
-      width: 100%;
-      margin: 24px 0 0;
-    `}
+    margin="normal"
+    fullWidth
     {...props}
   />
 );
@@ -96,9 +95,9 @@ export const Sign_Submit = ({
 }: ButtonProps): EmotionJSX.Element => (
   <Button
     variant="contained"
+    fullWidth
     css={css`
-      width: 100%;
-      margin: 24px 0 0;
+      margin: 20px 0 0;
     `}
     {...props}
   >

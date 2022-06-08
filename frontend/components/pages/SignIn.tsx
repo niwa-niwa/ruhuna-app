@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Container, TextField } from "@mui/material";
 import type { NextPage } from "next";
 import GuestHeader from "../common/header/GuestHeader";
 import OneColumn from "../common/layout/OneColumn";
@@ -7,33 +7,31 @@ import {
   Sign_Title,
   Border_Or,
   Google_Button,
-  Mail_Field,
-  Password_Field,
   Sign_Submit,
 } from "../../styles/sign-style";
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
-import { Resolver, SubmitHandler, useForm } from "react-hook-form";
-
-// TODO implement validation of fields
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
 
 type FormValues = {
   email: string;
   password: string;
 };
 
+// TODO implement useState to request email & password
+// TODO refactor LocalText to add error messages 
 const SignIn: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: LocaleText } = useLocale();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormValues>();
 
   const onSubmit: SubmitHandler<FormValues> = (data) => console.log(data);
 
-  // TODO fix rendering error of useRef
   return (
     <OneColumn>
       <GuestHeader />
@@ -47,29 +45,61 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
           <Border_Or />
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            
-            <Mail_Field
-              required
-              type="email"
-              label={txt.email}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-              {...register("email", 
-                {
-                  required:{
-                    value: true,
-                    message:"email is required"}, 
-                  maxLength:{
-                    value:20,
-                    message:'length is 20'
-                  }
-                }
+            <Controller
+              name="email"
+              defaultValue=""
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  type="text"
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  label={txt.email}
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  {...register("email", {
+                    required: {
+                      value: true,
+                      message: "email is required",
+                    },
+                    maxLength: {
+                      value: 20,
+                      message: "length is 20",
+                    },
+                    pattern: {
+                      value:
+                        /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/,
+                      message: "include @ in the line",
+                    },
+                  })}
+                  {...field}
+                />
               )}
             />
 
-            <Password_Field
-              label={txt.password}
-              {...(register("password"), { required: true, maxLength: 20 })}
+            <Controller
+              name="password"
+              defaultValue=""
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  type="password"
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  label={txt.password}
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                  {...register("password", {
+                    required: {
+                      value: true,
+                      message: "password is required",
+                    },
+                  })}
+                  {...field}
+                />
+              )}
             />
 
             <Sign_Submit type="submit">{txt.signin}</Sign_Submit>
