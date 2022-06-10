@@ -18,8 +18,6 @@ type FormValues = {
   password: string;
 };
 
-// TODO implement useState to request email & password
-// TODO refactor LocalText to add error messages 
 const SignIn: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: LocaleText } = useLocale();
 
@@ -27,10 +25,13 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>();
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    console.log(data);
+  };
 
   return (
     <OneColumn>
@@ -61,16 +62,12 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
                   {...register("email", {
                     required: {
                       value: true,
-                      message: "email is required",
-                    },
-                    maxLength: {
-                      value: 20,
-                      message: "length is 20",
+                      message: txt.email_is_required,
                     },
                     pattern: {
                       value:
                         /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/,
-                      message: "include @ in the line",
+                      message: txt.enter_email_format,
                     },
                   })}
                   {...field}
@@ -94,7 +91,7 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
                   {...register("password", {
                     required: {
                       value: true,
-                      message: "password is required",
+                      message: txt.password_is_required,
                     },
                   })}
                   {...field}

@@ -1,6 +1,6 @@
-import { Locale } from "./../frontend/hooks/useLocal";
+import { LocaleText } from "./../frontend/hooks/useLocal";
 
-const en: Locale = {
+const en: Readonly<LocaleText> = {
   app_name: "Ruhuna",
   st_create_account: "create an account",
   signin_ruhuna: "Sign in Ruhuna",
@@ -9,5 +9,8 @@ const en: Locale = {
   password: "password",
   signin: "sign in",
   signup: "sign up",
+  email_is_required: "email is required",
+  enter_email_format: "enter email format",
+  password_is_required: "password is required",
 };
 export default Object.freeze(en);

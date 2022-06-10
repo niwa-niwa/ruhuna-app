@@ -35,4 +35,7 @@ export type LocaleText = {
   password: string;
   signin: string;
   signup: string;
+  email_is_required: string;
+  enter_email_format: string;
+  password_is_required: string;
 };
