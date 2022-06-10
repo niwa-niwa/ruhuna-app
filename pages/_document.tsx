@@ -1,6 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import createEmotionServer from "@emotion/server/create-instance";
-import theme from "../frontend/mui-theme/theme";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
 
 export default class MyDocument extends Document {
@@ -8,7 +7,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="ja">
         <Head>
-          <meta name="theme-color" content={theme.palette.primary.main} />
+          {/* <meta name="theme-color" content={theme.palette.primary.main} /> */}
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"

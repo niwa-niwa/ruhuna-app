@@ -1,7 +1,11 @@
+import { PaletteMode } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 
-const theme = createTheme({
-  // TODO:テーマ設定を行います
-});
+const theme = (mode: PaletteMode) =>(
+  createTheme({
+    palette: {
+      mode,
+    },
+  }));
 
 export default theme;
