@@ -5,7 +5,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import theme from "../frontend/mui-theme/theme";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useThemeMode } from "../frontend/hooks/ThemeModeContext";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -14,7 +15,10 @@ interface MyAppProps extends AppProps {
 
 function MyApp(props: MyAppProps) {
   // TODO implement useThemeContext for dark mode
-  const [mode, setMode] = useState<"light" | "dark">("dark");
+  // const local_mode:ThemeMode = localStorage.getItem("theme_mode") ?? default_context;
+
+  // const [mode, setMode] = useState<"light" | "dark">("dark");
+  const {mode, setMode} = useThemeMode()
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
