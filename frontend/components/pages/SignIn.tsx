@@ -12,6 +12,8 @@ import {
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import { useContext } from "react";
+import { ThemeModeContext } from "../../hooks/ThemeModeContext";
 
 type FormValues = {
   email: string;
@@ -19,6 +21,7 @@ type FormValues = {
 };
 
 const SignIn: NextPage = (): EmotionJSX.Element => {
+  const {mode, setMode} = useContext(ThemeModeContext)
   const { txt }: { txt: LocaleText } = useLocale();
 
   const {
@@ -31,6 +34,8 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log(data);
+    console.log("mode = ", mode)
+    setMode("dark")
   };
 
   return (

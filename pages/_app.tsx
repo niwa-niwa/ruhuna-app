@@ -6,7 +6,10 @@ import { CacheProvider, EmotionCache } from "@emotion/react";
 import theme from "../frontend/mui-theme/theme";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
 import { useMemo } from "react";
-import { useThemeMode } from "../frontend/hooks/ThemeModeContext";
+import {
+  ThemeModeProvider,
+  useThemeMode,
+} from "../frontend/hooks/ThemeModeContext";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -18,11 +21,11 @@ function MyApp(props: MyAppProps) {
   // const local_mode:ThemeMode = localStorage.getItem("theme_mode") ?? default_context;
 
   // const [mode, setMode] = useState<"light" | "dark">("dark");
-  const {mode, setMode} = useThemeMode()
+  const ctx = useThemeMode();
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
-  const customTheme: Theme = useMemo(() => theme(mode), [mode]);
+  const customTheme: Theme = useMemo(() => theme(ctx.mode), [ctx.mode]);
 
   return (
     <CacheProvider value={emotionCache}>
@@ -31,7 +34,9 @@ function MyApp(props: MyAppProps) {
       </Head>
       <ThemeProvider theme={customTheme}>
         <CssBaseline />
-        <Component {...pageProps} />
+        <ThemeModeProvider value={ctx}>
+          <Component {...pageProps} />
+        </ThemeModeProvider>
       </ThemeProvider>
     </CacheProvider>
   );
