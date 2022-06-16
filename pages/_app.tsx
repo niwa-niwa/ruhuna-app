@@ -5,11 +5,12 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import theme from "../frontend/mui-theme/theme";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   ThemeModeProvider,
-  useThemeMode,
+  useDarkMode,
 } from "../frontend/hooks/ThemeModeContext";
+import { VARS } from "../consts/vars";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -17,15 +18,29 @@ interface MyAppProps extends AppProps {
 }
 
 function MyApp(props: MyAppProps) {
-  // TODO implement useThemeContext for dark mode
-  // const local_mode:ThemeMode = localStorage.getItem("theme_mode") ?? default_context;
+  const [loading, setLoading] = useState<boolean>(true);
+  const { state, dispatch } = useDarkMode(false);
 
-  // const [mode, setMode] = useState<"light" | "dark">("dark");
-  const ctx = useThemeMode();
+  useEffect(() => {
+    // do that after mounting
+    if (typeof window !== "undefined") {
+      const local_mode: string =
+        localStorage.getItem(VARS.LOCAL_STORAGE_MODE) || "false";
+
+      if (local_mode === "true") dispatch(true);
+
+      setLoading(false);
+    }
+  }, [dispatch]);
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
-  const customTheme: Theme = useMemo(() => theme(ctx.mode), [ctx.mode]);
+  const customTheme: Theme = theme(state.mode);
+
+  // TODO implement loading view
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <CacheProvider value={emotionCache}>
@@ -34,7 +49,7 @@ function MyApp(props: MyAppProps) {
       </Head>
       <ThemeProvider theme={customTheme}>
         <CssBaseline />
-        <ThemeModeProvider value={ctx}>
+        <ThemeModeProvider value={{ state, dispatch }}>
           <Component {...pageProps} />
         </ThemeModeProvider>
       </ThemeProvider>

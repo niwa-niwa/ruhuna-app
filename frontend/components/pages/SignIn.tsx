@@ -21,7 +21,7 @@ type FormValues = {
 };
 
 const SignIn: NextPage = (): EmotionJSX.Element => {
-  const {mode, setMode} = useContext(ThemeModeContext)
+  const { state, dispatch } = useContext(ThemeModeContext);
   const { txt }: { txt: LocaleText } = useLocale();
 
   const {
@@ -34,8 +34,7 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log(data);
-    console.log("mode = ", mode)
-    setMode("dark")
+    dispatch(!state.isDarkMode);
   };
 
   return (

@@ -1,21 +1,45 @@
 import { PaletteMode } from "@mui/material";
-import { createContext, Dispatch, SetStateAction, useState } from "react";
+import { createContext, Dispatch, Reducer, useReducer } from "react";
+import { VARS } from "../../consts/vars";
 
-const default_context: PaletteMode = "light";
+type DarkMode = {
+  mode: PaletteMode;
+  isDarkMode: boolean;
+};
+
+const initialState: DarkMode = {
+  mode: "light",
+  isDarkMode: false,
+};
+
+const reducer: Reducer<DarkMode, boolean> = (
+  state: DarkMode,
+  action: boolean
+): DarkMode => {
+  localStorage.setItem(VARS.LOCAL_STORAGE_MODE, action.toString());
+  
+  if (action) {
+    return { isDarkMode: action, mode: "dark" };
+  }
+
+  return { isDarkMode: action, mode: "light" };
+};
 
 export const ThemeModeContext = createContext<{
-  mode: PaletteMode;
-  setMode: Dispatch<SetStateAction<PaletteMode>>;
+  state: DarkMode;
+  dispatch: Dispatch<boolean>;
 }>({
-  mode: default_context,
-  setMode: (default_context) => default_context,
+  state: initialState,
+  dispatch: () => {},
 });
 
 export const ThemeModeProvider = ThemeModeContext.Provider;
 
-export const useThemeMode = (type_mode: PaletteMode = default_context) => {
-  const [mode, setMode] = useState<PaletteMode>(type_mode);
-  return { mode, setMode };
-};
+export const useDarkMode = (is_dark: boolean = initialState.isDarkMode) => {
+  const [state, dispatch] = useReducer(reducer, {
+    mode: is_dark ? "dark" : "light",
+    isDarkMode: is_dark,
+  });
 
-// TODO implement toggle of mode with useReducer
+  return { state, dispatch };
+};
