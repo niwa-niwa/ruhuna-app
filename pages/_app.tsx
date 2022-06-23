@@ -11,6 +11,7 @@ import {
   useDarkMode,
 } from "../frontend/hooks/ThemeModeContext";
 import { VARS } from "../consts/vars";
+import ModalCircular from "../frontend/components/common/loading/ModalCircular";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -18,7 +19,7 @@ interface MyAppProps extends AppProps {
 }
 
 function MyApp(props: MyAppProps) {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { state, dispatch } = useDarkMode(false);
 
   useEffect(() => {
@@ -29,7 +30,7 @@ function MyApp(props: MyAppProps) {
 
       if (local_mode === "true") dispatch(true);
 
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [dispatch]);
 
@@ -37,9 +38,8 @@ function MyApp(props: MyAppProps) {
 
   const customTheme: Theme = theme(state.mode);
 
-  // TODO implement loading view
-  if (loading) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return <ModalCircular isOpen={isLoading} />;
   }
 
   return (
