@@ -30,7 +30,9 @@ export type LocaleText = {
   app_name: string;
   st_create_account: string;
   signin_ruhuna: string;
-  with_google: string;
+  signup_ruhuna: string;
+  signin_with_google: string;
+  signup_with_google: string;
   email: string;
   password: string;
   signin: string;

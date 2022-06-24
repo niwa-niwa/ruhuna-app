@@ -20,7 +20,10 @@ type FormValues = {
   password: string;
 };
 
-const SignIn: NextPage = (): EmotionJSX.Element => {
+  // TODO implement firebase to sign up
+  // TODO implement backend account process
+
+const SignUp: NextPage = (): EmotionJSX.Element => {
   const { state, dispatch } = useContext(ThemeModeContext);
   const { txt }: { txt: LocaleText } = useLocale();
 
@@ -43,9 +46,9 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
 
       <Container maxWidth="sm">
         <main css={centering_vertical}>
-          <Sign_Title>{txt.signin_ruhuna}</Sign_Title>
+          <Sign_Title>{txt.signup_ruhuna}</Sign_Title>
 
-          <Google_Button>{txt.signin_with_google}</Google_Button>
+          <Google_Button>{txt.signup_with_google}</Google_Button>
 
           <Border_Or />
 
@@ -103,7 +106,7 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
               )}
             />
 
-            <Sign_Submit type="submit">{txt.signin}</Sign_Submit>
+            <Sign_Submit type="submit">{txt.signup}</Sign_Submit>
           </form>
         </main>
       </Container>
@@ -112,4 +115,4 @@ const SignIn: NextPage = (): EmotionJSX.Element => {
     </OneColumn>
   );
 };
-export default SignIn;
+export default SignUp;
