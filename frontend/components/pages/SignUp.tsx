@@ -12,18 +12,12 @@ import {
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ThemeModeContext } from "../../hooks/ThemeModeContext";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { client_auth } from "../../lib/firebaseApp";
 
-type FormValues = {
-  email: string;
-  password: string;
-};
+import { SignupValue, signupWithEmail, signupWithGoogle } from "../../lib/firebaseApp";
 
-  // TODO implement firebase to sign up
-  // TODO implement backend account process
+// TODO implement firebase to sign up
 
 const SignUp: NextPage = (): EmotionJSX.Element => {
   const { state, dispatch } = useContext(ThemeModeContext);
@@ -35,18 +29,27 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     control,
     setValue,
     formState: { errors },
-  } = useForm<FormValues>();
+  } = useForm<SignupValue>();
 
-  useEffect(()=>{
-    createUserWithEmailAndPassword(client_auth, "pass_mail39-magazine@yahoo.co.jp","password").then((userCredential)=>{
-      console.log("created user = ", userCredential.user)
-    })
-  },[])
-
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
+  const onSubmit: SubmitHandler<SignupValue> = async (data:SignupValue) => {
     console.log(data);
-    dispatch(!state.isDarkMode);
+    // dispatch(!state.isDarkMode);
+    try{
+      await signupWithEmail(data)
+    }catch(e){
+      // TODO handling error
+      console.error(e)
+    }
   };
+
+  const onGoogle = async ()=>{
+    try{
+      await signupWithGoogle()
+    }catch(e){
+      // TODO handling error
+      console.error(e)
+    }
+  }
 
   return (
     <OneColumn>
@@ -56,7 +59,9 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
         <main css={centering_vertical}>
           <Sign_Title>{txt.signup_ruhuna}</Sign_Title>
 
-          <Google_Button>{txt.signup_with_google}</Google_Button>
+          <Google_Button onClick={onGoogle}>
+            {txt.signup_with_google}
+          </Google_Button>
 
           <Border_Or />
 
