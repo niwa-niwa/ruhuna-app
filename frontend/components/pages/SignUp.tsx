@@ -12,8 +12,10 @@ import {
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { ThemeModeContext } from "../../hooks/ThemeModeContext";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { client_auth } from "../../lib/firebaseApp";
 
 type FormValues = {
   email: string;
@@ -34,6 +36,12 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     setValue,
     formState: { errors },
   } = useForm<FormValues>();
+
+  useEffect(()=>{
+    createUserWithEmailAndPassword(client_auth, "pass_mail39-magazine@yahoo.co.jp","password").then((userCredential)=>{
+      console.log("created user = ", userCredential.user)
+    })
+  },[])
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log(data);
