@@ -14,7 +14,7 @@ import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { useContext } from "react";
 import { ThemeModeContext } from "../../hooks/ThemeModeContext";
-
+import {restClient} from '../../lib/axios'
 import { SignupValue, signupWithEmail, signupWithGoogle } from "../../lib/firebaseApp";
 
 // TODO implement firebase to sign up
@@ -35,7 +35,9 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     console.log(data);
     // dispatch(!state.isDarkMode);
     try{
-      await signupWithEmail(data)
+      // await signupWithEmail(data)
+      const result = await restClient.get('/v1/health')
+      console.log("axios result = ", result )
     }catch(e){
       // TODO handling error
       console.error(e)
