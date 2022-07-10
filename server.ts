@@ -4,7 +4,7 @@ import http from "http";
 import next from "next";
 import express, { Express, Request, Response } from "express";
 import { api } from "./backend/rest";
-import { ioChatSocket } from "./backend/sockets/chatSocket";
+// import { ioChatSocket } from "./backend/sockets/chatSocket";
 import { NextServer, RequestHandler } from "next/dist/server/next";
 // import { apolloServer } from "./graphql/app";
 
@@ -27,7 +27,7 @@ async function main() {
     // apolloServer.applyMiddleware({ app, path: "/graphql" });
 
     // insert web socket to http server
-    ioChatSocket.attach(server);
+    // ioChatSocket.attach(server);
 
     // insert REST API to express
     app.use(api);
