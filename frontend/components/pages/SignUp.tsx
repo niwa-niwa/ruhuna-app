@@ -14,10 +14,15 @@ import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { useContext } from "react";
 import { ThemeModeContext } from "../../hooks/ThemeModeContext";
-import {restClient} from '../../lib/axios'
-import { SignupValue, signupWithEmail, signupWithGoogle } from "../../lib/firebaseApp";
+import { restV1Client } from "../../lib/axios";
+import {
+  SignupValue,
+  signupWithEmail,
+  signupWithGoogle,
+} from "../../lib/firebaseApp";
 
 // TODO implement firebase to sign up
+// TODO implement save the currentUser with useUserContext that  to refer user information in any components
 
 const SignUp: NextPage = (): EmotionJSX.Element => {
   const { state, dispatch } = useContext(ThemeModeContext);
@@ -31,27 +36,27 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     formState: { errors },
   } = useForm<SignupValue>();
 
-  const onSubmit: SubmitHandler<SignupValue> = async (data:SignupValue) => {
+  const onSubmit: SubmitHandler<SignupValue> = async (data: SignupValue) => {
     console.log(data);
     // dispatch(!state.isDarkMode);
-    try{
+    try {
       // await signupWithEmail(data)
-      const result = await restClient.get('/v1/health')
-      console.log("axios result = ", result )
-    }catch(e){
+      const result = await restV1Client.get("/health");
+      console.log("axios result = ", result);
+    } catch (e) {
       // TODO handling error
-      console.error(e)
+      console.error(e);
     }
   };
 
-  const onGoogle = async ()=>{
-    try{
-      await signupWithGoogle()
-    }catch(e){
+  const onGoogle = async () => {
+    try {
+      const me = await signupWithGoogle();
+    } catch (e) {
       // TODO handling error
-      console.error(e)
+      console.error(e);
     }
-  }
+  };
 
   return (
     <OneColumn>

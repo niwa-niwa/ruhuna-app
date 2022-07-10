@@ -4,10 +4,10 @@ import {
   Auth,
   GoogleAuthProvider,
   signInWithPopup,
-  OAuthCredential,
   createUserWithEmailAndPassword,
   UserCredential,
 } from "firebase/auth";
+import { restV1Client } from "./axios";
 
 const firebaseConfig: object = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_APP_API_KEY,
@@ -24,21 +24,18 @@ export const firebaseApp: FirebaseApp = initializeApp(firebaseConfig);
 export const client_auth: Auth = getAuth();
 
 export async function signupWithGoogle() {
-  console.log("signupWithGoogle!");
+  const result: UserCredential = await signInWithPopup(
+    client_auth,
+    new GoogleAuthProvider()
+  );
 
-  const google_provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(client_auth, google_provider);
+  const token: string = await result.user.getIdToken();
 
-  // TODO register the tokenId to backend
-  const credential: OAuthCredential | null =
-    GoogleAuthProvider.credentialFromResult(result);
+  const me = await restV1Client.get("/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-  if (credential === null) throw new Error("credential is null !!");
-
-  console.log("credential =", credential);
-  console.log("idToken =", credential.idToken);
-  console.log("token = ", credential.accessToken);
-  console.log("user = ", result.user);
+  return me;
 }
 
 export type SignupValue = {
