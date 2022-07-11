@@ -50,6 +50,11 @@ export async function signupWithEmail({ email, password }: SignupValue) {
     password
   );
 
-  // TODO register the tokenId to backend
-  console.log("created user = ", result.user);
+  const token: string = await result.user.getIdToken();
+
+  const me = await restV1Client.get("/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return me;
 }

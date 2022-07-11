@@ -21,9 +21,6 @@ import {
   signupWithGoogle,
 } from "../../lib/firebaseApp";
 
-// TODO implement firebase to sign up
-// TODO implement save the currentUser with useUserContext that  to refer user information in any components
-
 const SignUp: NextPage = (): EmotionJSX.Element => {
   const { state, dispatch } = useContext(ThemeModeContext);
   const { txt }: { txt: LocaleText } = useLocale();
@@ -40,7 +37,7 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     console.log(data);
     // dispatch(!state.isDarkMode);
     try {
-      // await signupWithEmail(data)
+      await signupWithEmail(data);
       const result = await restV1Client.get("/health");
       console.log("axios result = ", result);
     } catch (e) {
@@ -70,8 +67,8 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
             {txt.signup_with_google}
           </Google_Button>
 
-          <Border_Or />
-
+          {/* <Border_Or /> */}
+          {/* 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="email"
@@ -127,7 +124,8 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
             />
 
             <Sign_Submit type="submit">{txt.signup}</Sign_Submit>
-          </form>
+          </form> 
+*/}
         </main>
       </Container>
 
