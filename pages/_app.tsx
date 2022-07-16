@@ -11,7 +11,7 @@ import {
   useDarkMode,
 } from "../frontend/hooks/ThemeModeContext";
 import { VARS } from "../consts/vars";
-import ModalCircular from "../frontend/components/common/loading/ModalCircular";
+import { ModalCircular } from "../frontend/components/common/loading/ModalCircular";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {

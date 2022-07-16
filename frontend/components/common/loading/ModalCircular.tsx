@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { css, SerializedStyles } from "@emotion/react";
 
+// TODO support for dark mode
 const modal_style: SerializedStyles = css`
   position: absolute;
   top: 50%;
@@ -20,7 +21,7 @@ const modal_style: SerializedStyles = css`
   justify-content: center;
 `;
 
-export default function ModalCircular({ isOpen = true }: { isOpen: boolean }) {
+export function ModalCircular({ isOpen = true }: { isOpen: boolean }) {
   return (
     <div>
       <Modal open={isOpen} aria-labelledby="modal0-circular-title">

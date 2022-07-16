@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import Router from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { client_auth } from "../../../lib/firebaseApp";
+import { ModalCircular } from "../loading/ModalCircular";
 
 const AuthLayout: NextPage<{
   children: ReactNode;
@@ -24,8 +25,7 @@ const AuthLayout: NextPage<{
   }, [isLoading]);
 
   if (isLoading) {
-    // TODO implement loading view
-    return <h1>Loading...</h1>;
+    return <ModalCircular isOpen={isLoading} />;
   }
 
   return <>{children}</>;
