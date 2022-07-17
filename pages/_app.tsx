@@ -1,25 +1,14 @@
 import Head from "next/head";
 import type { AppProps } from "next/app";
-import {
-  createTheme,
-  Theme,
-  ThemeProvider,
-  useTheme,
-} from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
-// import theme from "../frontend/mui-theme/theme";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
-import { createContext, useEffect, useMemo, useState } from "react";
-// import {
-//   ThemeModeProvider,
-//   useDarkMode,
-// } from "../frontend/hooks/ThemeModeContext";
+import { useEffect, useMemo, useState } from "react";
 import { VARS } from "../consts/vars";
 import { ModalCircular } from "../frontend/components/common/loading/ModalCircular";
 import { ThemeModeContext } from "../frontend/hooks/ThemeModeContext";
-
-// export const ColorModeContext = createContext({ toggleColorMode: () => {} });
+import { PaletteMode } from "@mui/material";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -28,14 +17,15 @@ interface MyAppProps extends AppProps {
 
 function MyApp(props: MyAppProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // const { state, dispatch } = useDarkMode(false);
 
-  const [mode, setMode] = useState<"light" | "dark">("light");
+  const [mode, setMode] = useState<PaletteMode>("light");
 
   const themeMode = useMemo(
     () => ({
       toggleThemeMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        setMode((prevMode: PaletteMode) =>
+          prevMode === "light" ? "dark" : "light"
+        );
       },
     }),
     []
@@ -52,20 +42,22 @@ function MyApp(props: MyAppProps) {
   );
 
   useEffect(() => {
+    localStorage.setItem(VARS.DARK_MODE, mode);
+  }, [mode]);
+
+  useEffect(() => {
     // do that after mounting
     if (typeof window !== "undefined") {
-      const local_mode: string =
-        localStorage.getItem(VARS.LOCAL_STORAGE_MODE) || "false";
+      const theme_mode: string =
+        localStorage.getItem(VARS.DARK_MODE) || "light";
 
-      if (local_mode === "true") setMode("dark")
+      if (theme_mode === "dark") setMode("dark");
 
-        setIsLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-
-  // const customTheme: Theme = theme(state.mode);
 
   if (isLoading) {
     return <ModalCircular isOpen={isLoading} />;
@@ -79,9 +71,7 @@ function MyApp(props: MyAppProps) {
       <ThemeModeContext.Provider value={themeMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {/* <ThemeModeProvider value={{ state, dispatch }}> */}
           <Component {...pageProps} />
-          {/* </ThemeModeProvider> */}
         </ThemeProvider>
       </ThemeModeContext.Provider>
     </CacheProvider>

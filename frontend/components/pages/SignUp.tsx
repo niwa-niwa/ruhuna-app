@@ -12,8 +12,6 @@ import {
 import { LocaleText, useLocale } from "../../hooks/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { useContext } from "react";
-import { ThemeModeContext } from "../../hooks/ThemeModeContext";
 import { restV1Client } from "../../lib/axios";
 import {
   SignupValue,
@@ -22,7 +20,6 @@ import {
 } from "../../lib/firebaseApp";
 
 const SignUp: NextPage = (): EmotionJSX.Element => {
-  const { state, dispatch } = useContext(ThemeModeContext);
   const { txt }: { txt: LocaleText } = useLocale();
 
   const {
