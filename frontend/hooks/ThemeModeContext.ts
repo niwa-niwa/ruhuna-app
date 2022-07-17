@@ -25,15 +25,15 @@ const reducer: Reducer<DarkMode, boolean> = (
   return { isDarkMode: action, mode: "light" };
 };
 
-export const ThemeModeContext = createContext<{
-  state: DarkMode;
-  dispatch: Dispatch<boolean>;
-}>({
-  state: initialState,
-  dispatch: () => {},
-});
+// export const ThemeModeContext = createContext<{
+//   state: DarkMode;
+//   dispatch: Dispatch<boolean>;
+// }>({
+//   state: initialState,
+//   dispatch: () => {},
+// });
 
-export const ThemeModeProvider = ThemeModeContext.Provider;
+// export const ThemeModeProvider = ThemeModeContext.Provider;
 
 export const useDarkMode = (is_dark: boolean = initialState.isDarkMode) => {
   const [state, dispatch] = useReducer(reducer, {
@@ -43,3 +43,5 @@ export const useDarkMode = (is_dark: boolean = initialState.isDarkMode) => {
 
   return { state, dispatch };
 };
+
+export const ThemeModeContext = createContext({ toggleThemeMode: () => {} });
