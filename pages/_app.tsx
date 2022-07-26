@@ -7,8 +7,9 @@ import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
 import { useEffect, useMemo, useState } from "react";
 import { VARS } from "../consts/vars";
 import { ModalCircular } from "../frontend/components/common/loading/ModalCircular";
-import { ThemeModeContext } from "../frontend/hooks/ThemeModeContext";
+import { ThemeModeContext } from "../frontend/hooks/ThemeMode/ThemeModeContext";
 import { PaletteMode } from "@mui/material";
+import { useThemeMode } from "../frontend/hooks/ThemeMode/useThemeMode";
 
 const clientSideEmotionCache = createEmotionCache();
 interface MyAppProps extends AppProps {
@@ -18,17 +19,13 @@ interface MyAppProps extends AppProps {
 function MyApp(props: MyAppProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [mode, setMode] = useState<PaletteMode>("light");
+  const { mode, setThemeMode, toggleThemeMode } = useThemeMode("light");
 
   const themeMode = useMemo(
     () => ({
-      toggleThemeMode: () => {
-        setMode((prevMode: PaletteMode) =>
-          prevMode === "light" ? "dark" : "light"
-        );
-      },
+      toggleThemeMode,
     }),
-    []
+    [toggleThemeMode]
   );
 
   const theme = useMemo(
@@ -42,20 +39,16 @@ function MyApp(props: MyAppProps) {
   );
 
   useEffect(() => {
-    localStorage.setItem(VARS.DARK_MODE, mode);
-  }, [mode]);
-
-  useEffect(() => {
     // do that after mounting
     if (typeof window !== "undefined") {
-      const theme_mode: string =
-        localStorage.getItem(VARS.DARK_MODE) || "light";
+      const theme_mode: PaletteMode =
+        localStorage.getItem(VARS.THEME_MODE) === "light" ? "light" : "dark";
 
-      if (theme_mode === "dark") setMode("dark");
+      setThemeMode(theme_mode);
 
       setIsLoading(false);
     }
-  }, []);
+  }, [setThemeMode]);
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
