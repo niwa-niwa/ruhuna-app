@@ -24,6 +24,7 @@ function MyApp(props: MyAppProps) {
   const themeMode = useMemo(
     () => ({
       toggleThemeMode,
+      mode
     }),
     [toggleThemeMode]
   );
