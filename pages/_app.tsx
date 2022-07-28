@@ -21,13 +21,12 @@ function MyApp(props: MyAppProps) {
 
   const { mode, setThemeMode, toggleThemeMode } = useThemeMode("light");
 
-  const themeMode = useMemo(
-    () => ({
-      toggleThemeMode,
-      mode
-    }),
-    [toggleThemeMode]
-  );
+  // const themeMode = useMemo(
+  //   () => ({
+  //     toggleThemeMode,
+  //   }),
+  //   [toggleThemeMode]
+  // );
 
   const theme = useMemo(
     () =>
@@ -62,7 +61,9 @@ function MyApp(props: MyAppProps) {
       <Head>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
-      <ThemeModeContext.Provider value={themeMode}>
+      <ThemeModeContext.Provider
+        value={{ mode, setThemeMode, toggleThemeMode }}
+      >
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Component {...pageProps} />

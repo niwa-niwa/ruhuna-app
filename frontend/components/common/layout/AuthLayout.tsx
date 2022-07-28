@@ -24,12 +24,11 @@ const AuthLayout: NextPage<{
     }
   }, [isLoading]);
 
-  // if (isLoading) {
-  //   return <ModalCircular isOpen={isLoading} />;
-  // }
+  if (isLoading) {
+    return <ModalCircular isOpen={isLoading} />;
+  }
 
-  // return <>{children}</>;
-  return <ModalCircular isOpen={true} />;
-
+  return <>{children}</>;
 };
+
 export default AuthLayout;
