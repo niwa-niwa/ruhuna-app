@@ -1,7 +1,7 @@
 import { Container, TextField } from "@mui/material";
 import type { NextPage } from "next";
-import GuestHeader from "../common/header/GuestHeader";
-import OneColumn from "../common/layout/OneColumn";
+import GuestHeader from "../common/headers/GuestHeader";
+import OneColumn from "../common/layouts/OneColumn";
 import { centering_vertical } from "../../styles/common";
 import {
   Sign_Title,
@@ -9,7 +9,7 @@ import {
   Google_Button,
   Sign_Submit,
 } from "../../styles/sign-style";
-import { LocaleText, useLocale } from "../../hooks/useLocal";
+import { LocaleText, useLocale } from "../../hooks/Local/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { restV1Client } from "../../lib/axios";
@@ -19,7 +19,7 @@ import {
   signupWithGoogle,
 } from "../../lib/firebaseApp";
 
-const SignUp: NextPage = (): EmotionJSX.Element => {
+const SignUpBody: NextPage = (): EmotionJSX.Element => {
   const { txt }: { txt: LocaleText } = useLocale();
 
   const {
@@ -130,4 +130,4 @@ const SignUp: NextPage = (): EmotionJSX.Element => {
     </OneColumn>
   );
 };
-export default SignUp;
+export default SignUpBody;

@@ -1,7 +1,7 @@
 import Head from "next/head";
-import SignIn from "../frontend/components/pages/SignIn";
+import SignInBody from "../frontend/components/bodies/SignInBody";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
-import { useLocale, LocaleText } from "../frontend/hooks/useLocal";
+import { useLocale, LocaleText } from "../frontend/hooks/Local/useLocal";
 
 export default function Signin(): EmotionJSX.Element {
   const { txt }: { txt: LocaleText } = useLocale();
@@ -16,7 +16,7 @@ export default function Signin(): EmotionJSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <SignIn />
+      <SignInBody />
     </>
   );
 }

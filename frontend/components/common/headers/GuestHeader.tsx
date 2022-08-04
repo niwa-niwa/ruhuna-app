@@ -4,8 +4,11 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import { css } from "@emotion/react";
-import { useLocale, LocaleText } from "../../../hooks/useLocal";
+import { useLocale, LocaleText } from "../../../hooks/Local/useLocal";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
+import { client_auth } from "../../../lib/firebaseApp";
+import { useContext } from "react";
+import { ThemeModeContext } from "../../../hooks/ThemeMode/ThemeModeContext";
 
 export default function GuestHeader(): EmotionJSX.Element {
   const { txt }: { txt: LocaleText } = useLocale();
@@ -13,6 +16,8 @@ export default function GuestHeader(): EmotionJSX.Element {
     { text: "Sign In", link: "signin" },
     { text: "Sign Up", link: "signup" },
   ];
+
+  const themeMode = useContext(ThemeModeContext);
 
   return (
     <AppBar position="static">
@@ -73,6 +78,36 @@ export default function GuestHeader(): EmotionJSX.Element {
               {page.text}
             </Button>
           ))}
+          {/* TODO for developing auth state */}
+          <Button
+            onClick={() => {
+              client_auth.signOut();
+            }}
+            sx={{
+              my: 0,
+              mx: 5,
+              color: "white",
+              display: "inline",
+              fontSize: 16,
+            }}
+          >
+            ログアウト
+          </Button>
+
+          <Button
+            onClick={() => {
+              themeMode.toggleThemeMode();
+            }}
+            sx={{
+              my: 0,
+              mx: 5,
+              color: "white",
+              display: "inline",
+              fontSize: 16,
+            }}
+          >
+            テーマチェンジ
+          </Button>
         </Box>
       </Container>
     </AppBar>

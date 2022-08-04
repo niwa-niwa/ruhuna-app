@@ -1,7 +1,7 @@
 import Head from "next/head";
-import AuthLayout from "../frontend/components/common/layout/AuthLayout";
-import HomeBody from "../frontend/components/pages/HomeBody";
-import { useLocale, LocaleText } from "../frontend/hooks/useLocal";
+import AuthLayout from "../frontend/components/common/layouts/AuthLayout";
+import HomeBody from "../frontend/components/bodies/HomeBody";
+import { useLocale, LocaleText } from "../frontend/hooks/Local/useLocal";
 
 const Home = () => {
   const { txt }: { txt: LocaleText } = useLocale();

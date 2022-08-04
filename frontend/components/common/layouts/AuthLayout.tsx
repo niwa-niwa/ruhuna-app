@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Router from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { client_auth } from "../../../lib/firebaseApp";
-import { ModalCircular } from "../loading/ModalCircular";
+import { ModalCircular } from "../loadings/ModalCircular";
 
 const AuthLayout: NextPage<{
   children: ReactNode;

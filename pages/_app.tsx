@@ -6,7 +6,7 @@ import { CacheProvider, EmotionCache } from "@emotion/react";
 import createEmotionCache from "../frontend/mui-theme/createEmotionCache";
 import { useEffect, useMemo, useState } from "react";
 import { VARS } from "../consts/vars";
-import { ModalCircular } from "../frontend/components/common/loading/ModalCircular";
+import { ModalCircular } from "../frontend/components/common/loadings/ModalCircular";
 import { ThemeModeContext } from "../frontend/hooks/ThemeMode/ThemeModeContext";
 import { PaletteMode } from "@mui/material";
 import { useThemeMode } from "../frontend/hooks/ThemeMode/useThemeMode";

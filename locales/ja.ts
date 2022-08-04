@@ -1,4 +1,4 @@
-import { LocaleText } from "./../frontend/hooks/useLocal";
+import { LocaleText } from "../frontend/hooks/Local/useLocal";
 
 const ja: Readonly<LocaleText> = {
   app_name: "Ruhuna",
