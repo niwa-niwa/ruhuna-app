@@ -27,6 +27,11 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 
+// TODO divide app header
+// TODO drawer should be able to slide  with toggle switch
+// TODO implement mode button in the menu of account
+// TODO responsive layout that closing drawer automatically when thin window
+
 const drawerWidth = 240;
 
 const Search = styled("div")(({ theme }) => ({
