@@ -1,10 +1,31 @@
 import type { NextPage } from "next";
-import { ReactNode } from "react";
+import Router from "next/router";
+import { ReactNode, useEffect, useState } from "react";
+import { client_auth } from "../../../lib/firebaseApp";
+import { ModalCircular } from "../loadings/ModalCircular";
 
 const GuestLayout: NextPage<{
   children: ReactNode;
 }> = ({ children }) => {
-  // TODO implement redirect home page , if users was signed in
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    console.log("signin useEffect");
+    // after render window
+    if (typeof window !== "undefined" && isLoading) {
+      client_auth.onAuthStateChanged((user) => {
+        if (!user) return setIsLoading(false);
+
+        //  auth user it should redirect /home
+        Router.push("/home");
+      });
+    }
+  }, [isLoading]);
+
+  if (isLoading) {
+    return <ModalCircular isOpen={isLoading} />;
+  }
+
   return <>{children}</>;
 };
 export default GuestLayout;

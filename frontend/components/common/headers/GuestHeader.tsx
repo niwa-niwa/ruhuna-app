@@ -78,36 +78,6 @@ export default function GuestHeader(): EmotionJSX.Element {
               {page.text}
             </Button>
           ))}
-          {/* TODO for developing auth state */}
-          <Button
-            onClick={() => {
-              client_auth.signOut();
-            }}
-            sx={{
-              my: 0,
-              mx: 5,
-              color: "white",
-              display: "inline",
-              fontSize: 16,
-            }}
-          >
-            ログアウト
-          </Button>
-
-          <Button
-            onClick={() => {
-              themeMode.toggleThemeMode();
-            }}
-            sx={{
-              my: 0,
-              mx: 5,
-              color: "white",
-              display: "inline",
-              fontSize: 16,
-            }}
-          >
-            テーマチェンジ
-          </Button>
         </Box>
       </Container>
     </AppBar>

@@ -16,8 +16,8 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useLocale, LocaleText } from "../../../hooks/Local/useLocal";
-
-// TODO implement mode button in the menu of account
+import { ThemeModeContext } from "../../../hooks/ThemeMode/ThemeModeContext";
+import { client_auth } from "../../../lib/firebaseApp";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -61,6 +61,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function AuthHeader() {
   const { txt }: { txt: LocaleText } = useLocale();
+  const themeMode = React.useContext(ThemeModeContext);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -88,6 +89,16 @@ export default function AuthHeader() {
     handleMobileMenuClose();
   };
 
+  const changeThemeMode = () => {
+    themeMode.toggleThemeMode();
+    handleMenuClose();
+  };
+
+  const onSignOut = () => {
+    client_auth.signOut();
+    handleMenuClose();
+  };
+
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -106,6 +117,8 @@ export default function AuthHeader() {
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={changeThemeMode}>Theme Mode</MenuItem>
+      <MenuItem onClick={onSignOut}>Sign Out</MenuItem>
     </Menu>
   );
 
