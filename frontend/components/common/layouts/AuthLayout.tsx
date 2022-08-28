@@ -14,6 +14,7 @@ const AuthLayout: NextPage<{
     if (typeof window !== "undefined" && isLoading) {
       if (client_auth.currentUser) return setIsLoading(false);
 
+      // TODO it should confirm an auth of backend server because a user can access to auth pages without backend server auth 
       // if currentUser was null it should confirm auth state
       client_auth.onAuthStateChanged((user) => {
         if (user) return setIsLoading(false);
